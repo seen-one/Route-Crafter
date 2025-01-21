@@ -9,8 +9,10 @@ Route Crafter lets you find and select areas where you want to cover every stree
 * Admin Level 9
 * Admin Level 8
 * Admin Level 7
+* Boundary: Neighborhood
 * Boundary: Political
 * Place: Suburb
+* Place: Quarter
 
 Click on multiple areas to generate a single route across a larger area. If the areas selected don't quite connect, increase the buffer to enlarge area selection. Once generated, a preview of the route will appear on the map. You can then play an animation of the route or download the GPX file for you runners, cyclists, DIY street viewer, postie etc.
 
