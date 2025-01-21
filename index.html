@@ -11,8 +11,15 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/gpx.min.js"></script>
 	<style>
+	
+	html,body {
+	  margin: 0;
+	  padding: 0;
+	  height: 100%;
+	}
+
 	#map {
-		height: 85vh;
+	  height: 100%; /* Make the map fill the entire viewport */
 	}
 
 	#controls {
@@ -25,10 +32,10 @@
 	}
 
 	button,
-	input[type="number"] {
-		margin: 0 10px;
-		padding: 10px 20px;
-		font-size: 16px;
+	input,select, label {
+		margin: 5px 5px;
+		padding: 10px 10px;
+		font-size: 15px;
 		cursor: pointer;
 	}
 
@@ -41,10 +48,6 @@
 
 	button:hover {
 		background-color: #0056b3;
-	}
-
-	input[type="number"] {
-		width: 100px;
 	}
 
 	/* Add this to your CSS section */
@@ -83,27 +86,6 @@
 
 <body>
 	<div id="map"></div>
-	<div id="controls">
-		<input type="text" id="searchBox" placeholder="Search map" />
-		<button id="searchButton">Search</button>
-		<select id="searchRules">
-			<option value="landuse=residential|landuse=retail|landuse=commercial|landuse=industrial">Landuse: Residential/Retail/Commercial/Industrial</option>
-			<option value="admin_level=10">Admin Level 10</option>
-			<option value="admin_level=9">Admin Level 9</option>
-			<option value="admin_level=8">Admin Level 8</option>
-			<option value="admin_level=7">Admin Level 7</option>
-			<option value="boundary=political">Boundary: Political</option>
-			<option value="place=suburb">Place: Suburb</option>
-		</select>
-		<button id="fetchButton">Find Areas</button>
-		<button id="previewGPXButton">Generate Route</button>
-		<button id="playRouteButton">Play Route</button>
-		<button id="downloadButton">Download GPX File</button>
-		<button id="clearButton">Reset</button>
-		<label for="bufferSize">Add buffer to selected areas (in meters): </label>
-		<input type="number" id="bufferSize" min="1" max="100" value="1">
-		<p id="routeLength"></p>
-	</div>
 	<script>
 	const highlightedPolygons = []; // To store highlighted polygons' Leaflet layers
 	let previewLayer = null; // To hold the preview layer for the combined polygon
@@ -117,6 +99,42 @@
 		maxZoom: 19,
 		attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 	}).addTo(map);
+	// Custom controls container
+  const controlsContainer = L.control({ position: 'bottomleft' });
+
+  controlsContainer.onAdd = function () {
+    const div = L.DomUtil.create('div', 'leaflet-bar');
+    div.innerHTML = `
+      <div style="padding: 5px; background: white;">
+        <input type="text" id="searchBox" placeholder="Search Map" />
+        <button id="searchButton">Search</button>
+		<br>
+        <select id="searchRules">
+          <option value="landuse=residential|landuse=retail|landuse=commercial|landuse=industrial">Landuse: Residential/Retail/Commercial/Industrial</option>
+          <option value="admin_level=10">Admin Level 10</option>
+          <option value="admin_level=9">Admin Level 9</option>
+          <option value="admin_level=8">Admin Level 8</option>
+          <option value="admin_level=7">Admin Level 7</option>
+          <option value="boundary=political">Boundary: Political</option>
+          <option value="place=suburb">Place: Suburb</option>
+        </select>
+        <button id="fetchButton">Find Areas</button>
+		<br>
+        <button id="previewGPXButton">Generate Route</button>
+        <button id="playRouteButton">Play Route</button>
+        <button id="downloadButton">Download GPX File</button>
+        <button id="clearButton">Reset</button>
+		<br>
+        <label for="bufferSize">Add buffer to selected areas (in meters): </label>
+        <input type="number" id="bufferSize" min="1" max="100" value="1">
+        <p id="routeLength"></p>
+      </div>
+    `;
+    L.DomEvent.disableClickPropagation(div); // Prevent map interactions when interacting with the controls
+    return div;
+  };
+
+  controlsContainer.addTo(map);
 	// Add the preview automatically when a polygon is clicked
 	function fetchDataByRule() {
 		const fetchButton = document.getElementById('fetchButton');
@@ -573,8 +591,17 @@
 	document.getElementById('previewGPXButton').addEventListener('click', previewGPXRoute);
 	// Add event listener for the Play Route button
 	document.getElementById("playRouteButton").addEventListener("click", playRouteAnimation);
-	document.getElementById('infoButton').addEventListener('click', function() {
-		window.location.href = 'https://your-url-here.com';
+	
+	const bufferInput = document.getElementById('bufferSize');
+
+	// Disable zooming when mouse hovers over the buffer input
+	bufferInput.addEventListener('mouseover', () => {
+	  map.scrollWheelZoom.disable();
+	});
+
+	// Enable zooming again when mouse leaves the buffer input
+	bufferInput.addEventListener('mouseout', () => {
+	  map.scrollWheelZoom.enable();
 	});
 	</script>
 </body>
