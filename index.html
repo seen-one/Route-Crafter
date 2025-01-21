@@ -2,608 +2,607 @@
 <html lang="en">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Route Crafter</title>
-	<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-	<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-	<script src="https://unpkg.com/osmtogeojson/osmtogeojson.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/gpx.min.js"></script>
-	<style>
-	
-	html,body {
-	  margin: 0;
-	  padding: 0;
-	  height: 100%;
-	}
-
-	#map {
-	  height: 100%; /* Make the map fill the entire viewport */
-	}
-
-	#controls {
-		height: 15vh;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		background: #f4f4f4;
-		border-top: 1px solid #ddd;
-	}
-
-	button,
-	input,select, label {
-		margin: 5px 5px;
-		padding: 10px 10px;
-		font-size: 15px;
-		cursor: pointer;
-	}
-
-	button {
-		background-color: #007bff;
-		color: white;
-		border: none;
-		border-radius: 4px;
-	}
-
-	button:hover {
-		background-color: #0056b3;
-	}
-
-	/* Add this to your CSS section */
-	.button-loading {
-		position: relative;
-		pointer-events: none;
-		/* Disable clicking while loading */
-		opacity: 0.7;
-	}
-
-	.button-loading .spinner {
-		position: absolute;
-		top: 50%;
-		right: 15px;
-		width: 16px;
-		height: 16px;
-		margin-top: -8px;
-		/* Half of spinner height to center vertically */
-		border: 2px solid transparent;
-		border-top-color: white;
-		border-radius: 50%;
-		animation: spin 0.8s linear infinite;
-	}
-
-	@keyframes spin {
-		from {
-			transform: rotate(0deg);
-		}
-
-		to {
-			transform: rotate(360deg);
-		}
-	}
-	</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Crafter</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/osmtogeojson/osmtogeojson.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/gpx.min.js"></script>
+    <style>
+        html,body {
+        	  margin: 0;
+        	  padding: 0;
+        	  height: 100%;
+        	}
+        
+        	#map {
+        	  height: 100%; /* Make the map fill the entire viewport */
+        	}
+        
+        	#controls {
+        		height: 15vh;
+        		display: flex;
+        		justify-content: center;
+        		align-items: center;
+        		background: #f4f4f4;
+        		border-top: 1px solid #ddd;
+        	}
+        
+        	button,
+        	input,select, label {
+        		margin: 5px 5px;
+        		padding: 10px 10px;
+        		font-size: 15px;
+        		cursor: pointer;
+        	}
+        
+        	button {
+        		background-color: #007bff;
+        		color: white;
+        		border: none;
+        		border-radius: 4px;
+        	}
+        
+        	button:hover {
+        		background-color: #0056b3;
+        	}
+        
+        	/* Add this to your CSS section */
+        	.button-loading {
+        		position: relative;
+        		pointer-events: none;
+        		/* Disable clicking while loading */
+        		opacity: 0.7;
+        	}
+        
+        	.button-loading .spinner {
+        		position: absolute;
+        		top: 50%;
+        		right: 15px;
+        		width: 16px;
+        		height: 16px;
+        		margin-top: -8px;
+        		/* Half of spinner height to center vertically */
+        		border: 2px solid transparent;
+        		border-top-color: white;
+        		border-radius: 50%;
+        		animation: spin 0.8s linear infinite;
+        	}
+        
+        	@keyframes spin {
+        		from {
+        			transform: rotate(0deg);
+        		}
+        
+        		to {
+        			transform: rotate(360deg);
+        		}
+        	}
+    </style>
 </head>
 
 <body>
-	<div id="map"></div>
-	<script>
-	const highlightedPolygons = []; // To store highlighted polygons' Leaflet layers
-	let previewLayer = null; // To hold the preview layer for the combined polygon
-	let geoJsonLayer = null; // Layer to hold the fetched residential areas
-	// Initialize the map with wraparound enabled
-	const map = L.map('map', {
-		worldCopyJump: true // Enable world wraparound
-	}).setView([51.505, -0.09], 13);
-	// Add OpenStreetMap tiles
-	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		maxZoom: 19,
-		attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-	}).addTo(map);
-	// Custom controls container
-  const controlsContainer = L.control({ position: 'bottomleft' });
-
-  controlsContainer.onAdd = function () {
-    const div = L.DomUtil.create('div', 'leaflet-bar');
-    div.innerHTML = `
-      <div style="padding: 5px; background: white;">
-        <input type="text" id="searchBox" placeholder="Search Map" />
-        <button id="searchButton">Search</button>
-		<br>
-        <select id="searchRules">
-          <option value="landuse=residential|landuse=retail|landuse=commercial|landuse=industrial">Landuse: Residential/Retail/Commercial/Industrial</option>
-          <option value="admin_level=10">Admin Level 10</option>
-          <option value="admin_level=9">Admin Level 9</option>
-          <option value="admin_level=8">Admin Level 8</option>
-          <option value="admin_level=7">Admin Level 7</option>
-          <option value="boundary=political">Boundary: Political</option>
-          <option value="place=suburb">Place: Suburb</option>
-        </select>
-        <button id="fetchButton">Find Areas</button>
-		<br>
-        <button id="previewGPXButton">Generate Route</button>
-        <button id="playRouteButton">Play Route</button>
-        <button id="downloadButton">Download GPX File</button>
-        <button id="clearButton">Reset</button>
-		<br>
-        <label for="bufferSize">Add buffer to selected areas (in meters): </label>
-        <input type="number" id="bufferSize" min="1" max="100" value="1">
-        <p id="routeLength"></p>
-      </div>
-    `;
-    L.DomEvent.disableClickPropagation(div); // Prevent map interactions when interacting with the controls
-    return div;
-  };
-
-  controlsContainer.addTo(map);
-	// Add the preview automatically when a polygon is clicked
-	function fetchDataByRule() {
-		const fetchButton = document.getElementById('fetchButton');
-		// Add loading spinner
-		fetchButton.classList.add('button-loading');
-		fetchButton.innerHTML = 'Finding Areas <span class="spinner"></span>';
-		const selectedRule = document.getElementById('searchRules').value;
-		if(geoJsonLayer) {
-			map.removeLayer(geoJsonLayer);
-		}
-		const bounds = map.getBounds();
-		const bbox = `${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()}`;
-		let overpassQuery;
-		if(selectedRule === "landuse=residential|landuse=retail|landuse=commercial|landuse=industrial") {
-			overpassQuery = `
-		  [out:json][timeout:5];
-		  (
-			nwr[landuse=residential](${bbox});
-			nwr[landuse=retail](${bbox});
-			nwr[landuse=commercial](${bbox});
-			nwr[landuse=industrial](${bbox});
-		  );
-		  (._;>;);
-		  out body;
-		`;
-		} else {
-			overpassQuery = `
-		  [out:json][timeout:5];
-		  (
-			relation[${selectedRule}](${bbox});
-		  );
-		  (._;>;);
-		  out body;
-		`;
-		}
-		const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
-		fetch(url).then(response => response.json()).then(data => {
-			if(data.remark && data.remark.includes('Query timed out')) {
-				throw new Error('Too many results. Please zoom into a smaller area. (Overpass query timed out after 5 seconds)');
-			}
-			const geoJsonData = osmtogeojson(data);
-			const filteredData = geoJsonData.features.filter(feature => {
-				return feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon';
-			});
-			if(filteredData.length === 0) {
-				alert('No results found. Please try another search rule.');
-			} else {
-				const processedData = filteredData.map(feature => {
-					if(feature.geometry.type === 'MultiPolygon') {
-						const outerPolygon = feature.geometry.coordinates[0];
-						feature.geometry.coordinates = [outerPolygon];
-					}
-					const area = turf.area(feature);
-					return {
-						feature,
-						area
-					};
-				}).sort((a, b) => b.area - a.area);
-				geoJsonLayer = L.geoJSON({
-					type: "FeatureCollection",
-					features: processedData.map(item => item.feature)
-				}, {
-					style: {
-						color: 'blue',
-						weight: 2
-					},
-					onEachFeature: (feature, layer) => {
-						layer.on('click', () => {
-							if(previewLayer) {
-								map.removeLayer(previewLayer);
-								previewLayer = null;
-							}
-							const index = highlightedPolygons.indexOf(layer);
-							if(index > -1) {
-								highlightedPolygons.splice(index, 1);
-								layer.setStyle({
-									color: 'blue',
-									weight: 2
-								});
-							} else {
-								highlightedPolygons.push(layer);
-								layer.setStyle({
-									color: 'red',
-									weight: 3
-								});
-							}
-							previewCombinedPolygon();
-						});
-					}
-				}).addTo(map);
-			}
-		}).catch(err => {
-			console.error('Error fetching data:', err);
-			alert(err.message || 'An error occurred while fetching data. Please try again.');
-		}).finally(() => {
-			// Remove loading spinner and reset button text
-			fetchButton.classList.remove('button-loading');
-			fetchButton.innerHTML = 'Find Areas';
-		});
-	}
-	// Function to preview the combined polygon with selected buffer size
-	function previewCombinedPolygon() {
-		if(highlightedPolygons.length === 0) {
-			// Handle the case when there are no selected polygons
-			if(previewLayer) {
-				// If there's an existing preview, remove it
-				map.removeLayer(previewLayer);
-				previewLayer = null; // Reset preview layer
-			}
-			return; // Exit function if no polygons are selected
-		}
-		// Get the buffer size from the input, defaulting to 0 if it's blank or invalid
-		let bufferSize = parseInt(document.getElementById('bufferSize').value, 10);
-		// If bufferSize is NaN (i.e., input was empty or invalid), set it to 0
-		if(isNaN(bufferSize)) {
-			bufferSize = 0;
-		}
-		// If the buffer size is 0, skip the preview and make the selected polygons light green
-		if(bufferSize === 0) {
-			highlightedPolygons.forEach(layer => {
-				// Change the color of the selected polygons to light green
-				layer.setStyle({
-					color: 'green',
-					weight: 3
-				});
-			});
-			// Remove the preview layer if it exists
-			if(previewLayer) {
-				map.removeLayer(previewLayer);
-				previewLayer = null;
-			}
-			return; // Exit function without creating the preview
-		}
-		try {
-			// Buffer each selected polygon using the buffer size (in meters)
-			const bufferedPolygons = highlightedPolygons.map(layer => {
-				const geoJson = layer.toGeoJSON(); // Convert Leaflet layer to GeoJSON
-				return turf.buffer(geoJson, bufferSize, {
-					units: 'meters'
-				});
-			});
-			// Combine all buffered polygons using Turf.js union
-			const combinedPolygon = bufferedPolygons.reduce((combined, feature, index) => {
-				if(index === 0) return feature; // Use the first polygon as the base
-				return turf.union(combined, feature);
-			});
-			// If a preview already exists, remove it before adding a new one
-			if(previewLayer) {
-				map.removeLayer(previewLayer);
-			}
-			// Add the preview layer (combined polygon) to the map
-			previewLayer = L.geoJSON(combinedPolygon, {
-				style: {
-					color: 'green',
-					weight: 3,
-					fillOpacity: 0.3
-				},
-				interactive: false // Disable interaction with the preview layer
-			}).addTo(map);
-			// Change the color of the selected polygons to light green
-			highlightedPolygons.forEach(layer => {
-				layer.setStyle({
-					color: 'green',
-					weight: 3
-				});
-			});
-			console.log('Preview Combined Polygon:', combinedPolygon);
-		} catch (err) {
-			console.error('Error previewing combined polygon:', err);
-			alert('Error previewing polygon. Please ensure the selected polygons are valid.');
-		}
-	}
-
-	function clearAllSelections() {
-		// Clear highlighted polygons
-		highlightedPolygons.forEach(layer => {
-			layer.setStyle({
-				color: 'blue',
-				weight: 2
-			}); // Reset style to blue
-		});
-		highlightedPolygons.length = 0; // Clear the array
-		// Remove preview layer if it exists
-		if(previewLayer) {
-			map.removeLayer(previewLayer);
-			previewLayer = null;
-		}
-		// Reset route index and stop animation
-		routeIndex = 0;
-		animationInProgress = false;
-		// Remove any existing route lines (polyline layers)
-		if(currentRoutePolyline) {
-			map.removeLayer(currentRoutePolyline);
-			currentRoutePolyline = null;
-		}
-		if(last5PointsPolyline) {
-			map.removeLayer(last5PointsPolyline);
-			last5PointsPolyline = null;
-		}
-	}
-	// Function to search for a location using Nominatim
-	function searchLocation() {
-		const searchButton = document.getElementById('searchButton');
-		const searchQuery = document.getElementById('searchBox').value;
-		if(!searchQuery) {
-			alert('Please enter a location to search.');
-			return;
-		}
-		// Add loading spinner
-		searchButton.classList.add('button-loading');
-		searchButton.innerHTML = 'Searching <span class="spinner"></span>';
-		const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`;
-		fetch(url).then(response => response.json()).then(data => {
-			if(data.length === 0) {
-				alert('No results found. Please try a different search term.');
-				return;
-			}
-			const {
-				lat,
-				lon,
-				display_name
-			} = data[0];
-			map.setView([parseFloat(lat), parseFloat(lon)], 14); // Center map on the search result
-			console.log('Search result:', display_name);
-		}).catch(err => console.error('Error searching location:', err)).finally(() => {
-			// Remove loading spinner
-			searchButton.classList.remove('button-loading');
-			searchButton.innerHTML = 'Search';
-		});
-	}
-	let gpxData = null; // Variable to store GPX data after route generation
-	function previewGPXRoute() {
-		const previewGPXButton = document.getElementById('previewGPXButton');
-		previewGPXButton.classList.add('button-loading');
-		previewGPXButton.innerHTML = 'Generating Route <span class="spinner"></span>';
-		if(highlightedPolygons.length === 0) {
-			alert('No areas have been selected.');
-			stopSpinner(previewGPXButton, 'Generate Route');
-			return;
-		}
-		const bufferSize = parseInt(document.getElementById('bufferSize').value, 10);
-		try {
-			const bufferedPolygons = highlightedPolygons.map(layer => {
-				const geoJson = layer.toGeoJSON();
-				return turf.buffer(geoJson, bufferSize, {
-					units: 'meters'
-				});
-			});
-			const combinedPolygon = bufferedPolygons.reduce((combined, feature, index) => {
-				if(index === 0) return feature;
-				return turf.union(combined, feature);
-			});
-			if(combinedPolygon.geometry.type === 'MultiPolygon') {
-				alert('Error: One or more selected areas are too far apart. You can increase the buffer to merge adjacent areas.');
-				stopSpinner(previewGPXButton, 'Generate Route');
-				return;
-			}
-			const combinedCoords = combinedPolygon.geometry.coordinates;
-			fetch('/generate-gpx/', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					polygon_coords: combinedCoords[0]
-				})
-			}).then(response => response.json()).then(data => {
-				if(data.gpx) {
-					gpxData = data.gpx;
-					const parser = new DOMParser();
-					const xmlDoc = parser.parseFromString(data.gpx, 'application/xml');
-					const trackpoints = xmlDoc.getElementsByTagName('trkpt');
-					routePoints = Array.from(trackpoints).map(pt => {
-						const lat = parseFloat(pt.getAttribute('lat'));
-						const lon = parseFloat(pt.getAttribute('lon'));
-						return [lat, lon];
-					});
-					// Calculate the total distance using Turf.js
-					const line = turf.lineString(routePoints.map(([lat, lon]) => [lon, lat])); // Convert to GeoJSON format
-					const distanceKm = turf.length(line, {
-						units: 'kilometers'
-					});
-					const distanceMi = turf.length(line, {
-						units: 'miles'
-					});
-					// Update the routeLength paragraph
-					document.getElementById('routeLength').innerHTML = `Route Length: ${distanceKm.toFixed(2)} km (${distanceMi.toFixed(2)} mi)`;
-					if(previewLayer) {
-						map.removeLayer(previewLayer);
-					}
-					previewLayer = L.polyline(routePoints, {
-						color: 'red',
-						weight: 4,
-						opacity: 0.7
-					}).addTo(map);
-					map.fitBounds(previewLayer.getBounds());
-				} else {
-					alert('Error generating GPX: ' + data.error);
-				}
-			}).catch(err => {
-				console.error('Error:', err);
-				alert('Error generating GPX.');
-			}).finally(() => {
-				stopSpinner(previewGPXButton, 'Generate Route');
-			});
-		} catch (err) {
-			console.error('Error combining polygons:', err);
-			alert('Error combining polygons.');
-			stopSpinner(previewGPXButton, 'Generate Route');
-		}
-	}
-
-	function combineAndDownloadGPX() {
-		if(!gpxData) {
-			alert('No GPX data available. Please generate the route first.');
-			return;
-		}
-		const blob = new Blob([gpxData], {
-			type: 'application/gpx+xml'
-		});
-		const link = document.createElement('a');
-		link.href = URL.createObjectURL(blob);
-		link.download = 'route.gpx';
-		link.click();
-	}
-
-	function stopSpinner(button, defaultText) {
-		button.classList.remove('button-loading');
-		button.innerHTML = defaultText;
-	}
-	let routePolyline = null; // To hold the polyline layer
-	let routeIndex = 0; // To track the current point in the route animation
-	let routePoints = []; // To store the GPX points
-	let last5PointsPolyline = null; // To hold the yellow polyline of the last 5 points
-	let currentRoutePolyline = null; // To hold the red polyline for the route
-	let animationInProgress = false; // Track if animation is in progress
-	// Function to animate the route
-	function playRouteAnimation() {
-		if(routePoints.length === 0) {
-			alert('No route to animate. Please generate the route first.');
-			return;
-		}
-		// If animation is already in progress or finished, stop and reset it
-		if(animationInProgress || routeIndex >= routePoints.length) {
-			if(last5PointsPolyline) {
-				map.removeLayer(last5PointsPolyline); // Hide the yellow polyline
-			}
-			if(currentRoutePolyline) {
-				map.removeLayer(currentRoutePolyline); // Remove the red polyline
-			}
-			// Reset route index and start from the beginning
-			routeIndex = 0;
-			animationInProgress = false;
-		}
-		// Start the animation
-		animationInProgress = true;
-		// Remove the existing preview line before starting the animation
-		if(previewLayer) {
-			map.removeLayer(previewLayer);
-			previewLayer = null;
-		}
-		// Function to continue the animation
-		function continueAnimation() {
-			if(routeIndex >= routePoints.length) {
-				// Stop the animation when the route is completed
-				animationInProgress = false;
-				if(last5PointsPolyline) {
-					map.removeLayer(last5PointsPolyline); // Hide the yellow polyline
-				}
-				return; // End the animation
-			}
-			// Track the last 5 points for the yellow polyline
-			const last5Points = routePoints.slice(Math.max(routeIndex - 4, 0), routeIndex + 1); // Get the last 5 points
-			// Remove the old yellow polyline if it exists
-			if(last5PointsPolyline) {
-				map.removeLayer(last5PointsPolyline);
-			}
-			// Create a new yellow polyline for the last 5 points
-			last5PointsPolyline = L.polyline(last5Points, {
-				color: 'yellow',
-				weight: 4,
-				opacity: 0.7
-			}).addTo(map);
-			// Create or update the red polyline for the full route up to the current point
-			const routeUntilCurrent = routePoints.slice(0, routeIndex + 1); // Get the route up to the current point
-			// Remove the old red polyline if it exists
-			if(currentRoutePolyline) {
-				map.removeLayer(currentRoutePolyline);
-			}
-			// Create a new red polyline for the current route
-			currentRoutePolyline = L.polyline(routeUntilCurrent, {
-				color: 'red',
-				weight: 4,
-				opacity: 0.7
-			}).addTo(map);
-			// Increment the route index for the next animation step
-			routeIndex++;
-			// Repeat the animation at a fixed interval (30ms)
-			setTimeout(continueAnimation, 30); // Adjust the interval to 30ms
-		}
-		// Start the animation
-		continueAnimation();
-	}
-	// Event listeners for the buttons
-	document.getElementById('downloadButton').addEventListener('click', combineAndDownloadGPX);
-	document.getElementById('clearButton').addEventListener('click', function() {
-		clearAllSelections();
-		// Ensure animation is fully cleared
-		if(animationInProgress) {
-			if(last5PointsPolyline) {
-				map.removeLayer(last5PointsPolyline); // Hide the yellow polyline
-			}
-			if(currentRoutePolyline) {
-				map.removeLayer(currentRoutePolyline); // Remove the red polyline
-			}
-			// Reset route index and animation state
-			routeIndex = 0;
-			animationInProgress = false;
-		}
-	});
-	// Event listener for the search button
-	document.getElementById('searchButton').addEventListener('click', searchLocation);
-	// Event listener for the Fetch button
-	document.getElementById('fetchButton').addEventListener('click', fetchDataByRule);
-	// Event listener for the buffer size input to automatically trigger preview update
-	document.getElementById('bufferSize').addEventListener('input', (event) => {
-		const bufferSize = event.target.value;
-		// Automatically trigger the preview when buffer size changes
-		previewCombinedPolygon();
-	});
-	document.getElementById('bufferSize').addEventListener('wheel', function(event) {
-		// Prevent the page from scrolling when using the scroll wheel on the input field
-		event.preventDefault();
-		let currentValue = parseInt(this.value, 10);
-		if(isNaN(currentValue)) currentValue = 1; // If the value is NaN (e.g., empty), default to 1
-		const step = 1; // The amount to change when scrolling (in meters)
-		if(event.deltaY < 0) {
-			// Scroll up (increase the value)
-			this.value = Math.min(currentValue + step, 100); // Cap at 100
-		} else if(event.deltaY > 0) {
-			// Scroll down (decrease the value)
-			this.value = Math.max(currentValue - step, 1); // Cap at 1
-		}
-		// Trigger the input event to automatically update the preview when the value changes
-		previewCombinedPolygon();
-	});
-	document.getElementById('searchBox').addEventListener('keydown', function(event) {
-		// Check if the pressed key is Enter (key code 13)
-		if(event.key === 'Enter') {
-			searchLocation(); // Trigger the searchLocation function
-		}
-	});
-	// Event listener for the Preview GPX button
-	document.getElementById('previewGPXButton').addEventListener('click', previewGPXRoute);
-	// Add event listener for the Play Route button
-	document.getElementById("playRouteButton").addEventListener("click", playRouteAnimation);
-	
-	const bufferInput = document.getElementById('bufferSize');
-
-	// Disable zooming when mouse hovers over the buffer input
-	bufferInput.addEventListener('mouseover', () => {
-	  map.scrollWheelZoom.disable();
-	});
-
-	// Enable zooming again when mouse leaves the buffer input
-	bufferInput.addEventListener('mouseout', () => {
-	  map.scrollWheelZoom.enable();
-	});
-	</script>
+    <div id="map"></div>
+    <script>
+        const highlightedPolygons = []; // To store highlighted polygons' Leaflet layers
+        	let previewLayer = null; // To hold the preview layer for the combined polygon
+        	let geoJsonLayer = null; // Layer to hold the fetched residential areas
+        	// Initialize the map with wraparound enabled
+        	const map = L.map('map', {
+        		worldCopyJump: true // Enable world wraparound
+        	}).setView([51.505, -0.09], 13);
+        	// Add OpenStreetMap tiles
+        	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        		maxZoom: 19,
+        		attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        	}).addTo(map);
+        	// Custom controls container
+          const controlsContainer = L.control({ position: 'bottomleft' });
+        
+          controlsContainer.onAdd = function () {
+            const div = L.DomUtil.create('div', 'leaflet-bar');
+            div.innerHTML = `
+              <div style="padding: 5px; background: white;">
+                <input type="text" id="searchBox" placeholder="Search Map" />
+                <button id="searchButton">Search</button>
+        		<br>
+                <select id="searchRules">
+                  <option value="landuse=residential|landuse=retail|landuse=commercial|landuse=industrial">Landuse: Residential/Retail/Commercial/Industrial</option>
+                  <option value="admin_level=10">Admin Level 10</option>
+                  <option value="admin_level=9">Admin Level 9</option>
+                  <option value="admin_level=8">Admin Level 8</option>
+                  <option value="admin_level=7">Admin Level 7</option>
+                  <option value="boundary=political">Boundary: Political</option>
+                  <option value="place=suburb">Place: Suburb</option>
+                </select>
+                <button id="fetchButton">Find Areas</button>
+        		<br>
+                <button id="previewGPXButton">Generate Route</button>
+                <button id="playRouteButton">Play Route</button>
+                <button id="downloadButton">Download GPX File</button>
+                <button id="clearButton">Reset</button>
+        		<br>
+                <label for="bufferSize">Add buffer to selected areas (in meters): </label>
+                <input type="number" id="bufferSize" min="1" max="100" value="1">
+                <p id="routeLength"></p>
+              </div>
+            `;
+            L.DomEvent.disableClickPropagation(div); // Prevent map interactions when interacting with the controls
+            return div;
+          };
+        
+          controlsContainer.addTo(map);
+        	// Add the preview automatically when a polygon is clicked
+        	function fetchDataByRule() {
+        		const fetchButton = document.getElementById('fetchButton');
+        		// Add loading spinner
+        		fetchButton.classList.add('button-loading');
+        		fetchButton.innerHTML = 'Finding Areas <span class="spinner"></span>';
+        		const selectedRule = document.getElementById('searchRules').value;
+        		if(geoJsonLayer) {
+        			map.removeLayer(geoJsonLayer);
+        		}
+        		const bounds = map.getBounds();
+        		const bbox = `${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()}`;
+        		let overpassQuery;
+        		if(selectedRule === "landuse=residential|landuse=retail|landuse=commercial|landuse=industrial") {
+        			overpassQuery = `
+        		  [out:json][timeout:5];
+        		  (
+        			nwr[landuse=residential](${bbox});
+        			nwr[landuse=retail](${bbox});
+        			nwr[landuse=commercial](${bbox});
+        			nwr[landuse=industrial](${bbox});
+        		  );
+        		  (._;>;);
+        		  out body;
+        		`;
+        		} else {
+        			overpassQuery = `
+        		  [out:json][timeout:5];
+        		  (
+        			relation[${selectedRule}](${bbox});
+        		  );
+        		  (._;>;);
+        		  out body;
+        		`;
+        		}
+        		const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
+        		fetch(url).then(response => response.json()).then(data => {
+        			if(data.remark && data.remark.includes('Query timed out')) {
+        				throw new Error('Too many results. Please zoom into a smaller area. (Overpass query timed out after 5 seconds)');
+        			}
+        			const geoJsonData = osmtogeojson(data);
+        			const filteredData = geoJsonData.features.filter(feature => {
+        				return feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon';
+        			});
+        			if(filteredData.length === 0) {
+        				alert('No results found. Please try another search rule.');
+        			} else {
+        				const processedData = filteredData.map(feature => {
+        					if(feature.geometry.type === 'MultiPolygon') {
+        						const outerPolygon = feature.geometry.coordinates[0];
+        						feature.geometry.coordinates = [outerPolygon];
+        					}
+        					const area = turf.area(feature);
+        					return {
+        						feature,
+        						area
+        					};
+        				}).sort((a, b) => b.area - a.area);
+        				geoJsonLayer = L.geoJSON({
+        					type: "FeatureCollection",
+        					features: processedData.map(item => item.feature)
+        				}, {
+        					style: {
+        						color: 'blue',
+        						weight: 2
+        					},
+        					onEachFeature: (feature, layer) => {
+        						layer.on('click', () => {
+        							if(previewLayer) {
+        								map.removeLayer(previewLayer);
+        								previewLayer = null;
+        							}
+        							const index = highlightedPolygons.indexOf(layer);
+        							if(index > -1) {
+        								highlightedPolygons.splice(index, 1);
+        								layer.setStyle({
+        									color: 'blue',
+        									weight: 2
+        								});
+        							} else {
+        								highlightedPolygons.push(layer);
+        								layer.setStyle({
+        									color: 'red',
+        									weight: 3
+        								});
+        							}
+        							previewCombinedPolygon();
+        						});
+        					}
+        				}).addTo(map);
+        			}
+        		}).catch(err => {
+        			console.error('Error fetching data:', err);
+        			alert(err.message || 'An error occurred while fetching data. Please try again.');
+        		}).finally(() => {
+        			// Remove loading spinner and reset button text
+        			fetchButton.classList.remove('button-loading');
+        			fetchButton.innerHTML = 'Find Areas';
+        		});
+        	}
+        	// Function to preview the combined polygon with selected buffer size
+        	function previewCombinedPolygon() {
+        		if(highlightedPolygons.length === 0) {
+        			// Handle the case when there are no selected polygons
+        			if(previewLayer) {
+        				// If there's an existing preview, remove it
+        				map.removeLayer(previewLayer);
+        				previewLayer = null; // Reset preview layer
+        			}
+        			return; // Exit function if no polygons are selected
+        		}
+        		// Get the buffer size from the input, defaulting to 0 if it's blank or invalid
+        		let bufferSize = parseInt(document.getElementById('bufferSize').value, 10);
+        		// If bufferSize is NaN (i.e., input was empty or invalid), set it to 0
+        		if(isNaN(bufferSize)) {
+        			bufferSize = 0;
+        		}
+        		// If the buffer size is 0, skip the preview and make the selected polygons light green
+        		if(bufferSize === 0) {
+        			highlightedPolygons.forEach(layer => {
+        				// Change the color of the selected polygons to light green
+        				layer.setStyle({
+        					color: 'green',
+        					weight: 3
+        				});
+        			});
+        			// Remove the preview layer if it exists
+        			if(previewLayer) {
+        				map.removeLayer(previewLayer);
+        				previewLayer = null;
+        			}
+        			return; // Exit function without creating the preview
+        		}
+        		try {
+        			// Buffer each selected polygon using the buffer size (in meters)
+        			const bufferedPolygons = highlightedPolygons.map(layer => {
+        				const geoJson = layer.toGeoJSON(); // Convert Leaflet layer to GeoJSON
+        				return turf.buffer(geoJson, bufferSize, {
+        					units: 'meters'
+        				});
+        			});
+        			// Combine all buffered polygons using Turf.js union
+        			const combinedPolygon = bufferedPolygons.reduce((combined, feature, index) => {
+        				if(index === 0) return feature; // Use the first polygon as the base
+        				return turf.union(combined, feature);
+        			});
+        			// If a preview already exists, remove it before adding a new one
+        			if(previewLayer) {
+        				map.removeLayer(previewLayer);
+        			}
+        			// Add the preview layer (combined polygon) to the map
+        			previewLayer = L.geoJSON(combinedPolygon, {
+        				style: {
+        					color: 'green',
+        					weight: 3,
+        					fillOpacity: 0.3
+        				},
+        				interactive: false // Disable interaction with the preview layer
+        			}).addTo(map);
+        			// Change the color of the selected polygons to light green
+        			highlightedPolygons.forEach(layer => {
+        				layer.setStyle({
+        					color: 'green',
+        					weight: 3
+        				});
+        			});
+        			console.log('Preview Combined Polygon:', combinedPolygon);
+        		} catch (err) {
+        			console.error('Error previewing combined polygon:', err);
+        			alert('Error previewing polygon. Please ensure the selected polygons are valid.');
+        		}
+        	}
+        
+        	function clearAllSelections() {
+        		// Clear highlighted polygons
+        		highlightedPolygons.forEach(layer => {
+        			layer.setStyle({
+        				color: 'blue',
+        				weight: 2
+        			}); // Reset style to blue
+        		});
+        		highlightedPolygons.length = 0; // Clear the array
+        		// Remove preview layer if it exists
+        		if(previewLayer) {
+        			map.removeLayer(previewLayer);
+        			previewLayer = null;
+        		}
+        		// Reset route index and stop animation
+        		routeIndex = 0;
+        		animationInProgress = false;
+        		// Remove any existing route lines (polyline layers)
+        		if(currentRoutePolyline) {
+        			map.removeLayer(currentRoutePolyline);
+        			currentRoutePolyline = null;
+        		}
+        		if(last5PointsPolyline) {
+        			map.removeLayer(last5PointsPolyline);
+        			last5PointsPolyline = null;
+        		}
+        	}
+        	// Function to search for a location using Nominatim
+        	function searchLocation() {
+        		const searchButton = document.getElementById('searchButton');
+        		const searchQuery = document.getElementById('searchBox').value;
+        		if(!searchQuery) {
+        			alert('Please enter a location to search.');
+        			return;
+        		}
+        		// Add loading spinner
+        		searchButton.classList.add('button-loading');
+        		searchButton.innerHTML = 'Searching <span class="spinner"></span>';
+        		const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`;
+        		fetch(url).then(response => response.json()).then(data => {
+        			if(data.length === 0) {
+        				alert('No results found. Please try a different search term.');
+        				return;
+        			}
+        			const {
+        				lat,
+        				lon,
+        				display_name
+        			} = data[0];
+        			map.setView([parseFloat(lat), parseFloat(lon)], 14); // Center map on the search result
+        			console.log('Search result:', display_name);
+        		}).catch(err => console.error('Error searching location:', err)).finally(() => {
+        			// Remove loading spinner
+        			searchButton.classList.remove('button-loading');
+        			searchButton.innerHTML = 'Search';
+        		});
+        	}
+        	let gpxData = null; // Variable to store GPX data after route generation
+        	function previewGPXRoute() {
+        		const previewGPXButton = document.getElementById('previewGPXButton');
+        		previewGPXButton.classList.add('button-loading');
+        		previewGPXButton.innerHTML = 'Generating Route <span class="spinner"></span>';
+        		if(highlightedPolygons.length === 0) {
+        			alert('No areas have been selected.');
+        			stopSpinner(previewGPXButton, 'Generate Route');
+        			return;
+        		}
+        		const bufferSize = parseInt(document.getElementById('bufferSize').value, 10);
+        		try {
+        			const bufferedPolygons = highlightedPolygons.map(layer => {
+        				const geoJson = layer.toGeoJSON();
+        				return turf.buffer(geoJson, bufferSize, {
+        					units: 'meters'
+        				});
+        			});
+        			const combinedPolygon = bufferedPolygons.reduce((combined, feature, index) => {
+        				if(index === 0) return feature;
+        				return turf.union(combined, feature);
+        			});
+        			if(combinedPolygon.geometry.type === 'MultiPolygon') {
+        				alert('Error: One or more selected areas are too far apart. You can increase the buffer to merge adjacent areas.');
+        				stopSpinner(previewGPXButton, 'Generate Route');
+        				return;
+        			}
+        			const combinedCoords = combinedPolygon.geometry.coordinates;
+        			fetch('/generate-gpx/', {
+        				method: 'POST',
+        				headers: {
+        					'Content-Type': 'application/json'
+        				},
+        				body: JSON.stringify({
+        					polygon_coords: combinedCoords[0]
+        				})
+        			}).then(response => response.json()).then(data => {
+        				if(data.gpx) {
+        					gpxData = data.gpx;
+        					const parser = new DOMParser();
+        					const xmlDoc = parser.parseFromString(data.gpx, 'application/xml');
+        					const trackpoints = xmlDoc.getElementsByTagName('trkpt');
+        					routePoints = Array.from(trackpoints).map(pt => {
+        						const lat = parseFloat(pt.getAttribute('lat'));
+        						const lon = parseFloat(pt.getAttribute('lon'));
+        						return [lat, lon];
+        					});
+        					// Calculate the total distance using Turf.js
+        					const line = turf.lineString(routePoints.map(([lat, lon]) => [lon, lat])); // Convert to GeoJSON format
+        					const distanceKm = turf.length(line, {
+        						units: 'kilometers'
+        					});
+        					const distanceMi = turf.length(line, {
+        						units: 'miles'
+        					});
+        					// Update the routeLength paragraph
+        					document.getElementById('routeLength').innerHTML = `Route Length: ${distanceKm.toFixed(2)} km (${distanceMi.toFixed(2)} mi)`;
+        					if(previewLayer) {
+        						map.removeLayer(previewLayer);
+        					}
+        					previewLayer = L.polyline(routePoints, {
+        						color: 'red',
+        						weight: 4,
+        						opacity: 0.7
+        					}).addTo(map);
+        					map.fitBounds(previewLayer.getBounds());
+        				} else {
+        					alert('Error generating GPX: ' + data.error);
+        				}
+        			}).catch(err => {
+        				console.error('Error:', err);
+        				alert('Error generating GPX.');
+        			}).finally(() => {
+        				stopSpinner(previewGPXButton, 'Generate Route');
+        			});
+        		} catch (err) {
+        			console.error('Error combining polygons:', err);
+        			alert('Error combining polygons.');
+        			stopSpinner(previewGPXButton, 'Generate Route');
+        		}
+        	}
+        
+        	function combineAndDownloadGPX() {
+        		if(!gpxData) {
+        			alert('No GPX data available. Please generate the route first.');
+        			return;
+        		}
+        		const blob = new Blob([gpxData], {
+        			type: 'application/gpx+xml'
+        		});
+        		const link = document.createElement('a');
+        		link.href = URL.createObjectURL(blob);
+        		link.download = 'route.gpx';
+        		link.click();
+        	}
+        
+        	function stopSpinner(button, defaultText) {
+        		button.classList.remove('button-loading');
+        		button.innerHTML = defaultText;
+        	}
+        	let routePolyline = null; // To hold the polyline layer
+        	let routeIndex = 0; // To track the current point in the route animation
+        	let routePoints = []; // To store the GPX points
+        	let last5PointsPolyline = null; // To hold the yellow polyline of the last 5 points
+        	let currentRoutePolyline = null; // To hold the red polyline for the route
+        	let animationInProgress = false; // Track if animation is in progress
+        	// Function to animate the route
+        	function playRouteAnimation() {
+        		if(routePoints.length === 0) {
+        			alert('No route to animate. Please generate the route first.');
+        			return;
+        		}
+        		// If animation is already in progress or finished, stop and reset it
+        		if(animationInProgress || routeIndex >= routePoints.length) {
+        			if(last5PointsPolyline) {
+        				map.removeLayer(last5PointsPolyline); // Hide the yellow polyline
+        			}
+        			if(currentRoutePolyline) {
+        				map.removeLayer(currentRoutePolyline); // Remove the red polyline
+        			}
+        			// Reset route index and start from the beginning
+        			routeIndex = 0;
+        			animationInProgress = false;
+        		}
+        		// Start the animation
+        		animationInProgress = true;
+        		// Remove the existing preview line before starting the animation
+        		if(previewLayer) {
+        			map.removeLayer(previewLayer);
+        			previewLayer = null;
+        		}
+        		// Function to continue the animation
+        		function continueAnimation() {
+        			if(routeIndex >= routePoints.length) {
+        				// Stop the animation when the route is completed
+        				animationInProgress = false;
+        				if(last5PointsPolyline) {
+        					map.removeLayer(last5PointsPolyline); // Hide the yellow polyline
+        				}
+        				return; // End the animation
+        			}
+        			// Track the last 5 points for the yellow polyline
+        			const last5Points = routePoints.slice(Math.max(routeIndex - 4, 0), routeIndex + 1); // Get the last 5 points
+        			// Remove the old yellow polyline if it exists
+        			if(last5PointsPolyline) {
+        				map.removeLayer(last5PointsPolyline);
+        			}
+        			// Create a new yellow polyline for the last 5 points
+        			last5PointsPolyline = L.polyline(last5Points, {
+        				color: 'yellow',
+        				weight: 4,
+        				opacity: 0.7
+        			}).addTo(map);
+        			// Create or update the red polyline for the full route up to the current point
+        			const routeUntilCurrent = routePoints.slice(0, routeIndex + 1); // Get the route up to the current point
+        			// Remove the old red polyline if it exists
+        			if(currentRoutePolyline) {
+        				map.removeLayer(currentRoutePolyline);
+        			}
+        			// Create a new red polyline for the current route
+        			currentRoutePolyline = L.polyline(routeUntilCurrent, {
+        				color: 'red',
+        				weight: 4,
+        				opacity: 0.7
+        			}).addTo(map);
+        			// Increment the route index for the next animation step
+        			routeIndex++;
+        			// Repeat the animation at a fixed interval (30ms)
+        			setTimeout(continueAnimation, 30); // Adjust the interval to 30ms
+        		}
+        		// Start the animation
+        		continueAnimation();
+        	}
+        	// Event listeners for the buttons
+        	document.getElementById('downloadButton').addEventListener('click', combineAndDownloadGPX);
+        	document.getElementById('clearButton').addEventListener('click', function() {
+        		clearAllSelections();
+        		// Ensure animation is fully cleared
+        		if(animationInProgress) {
+        			if(last5PointsPolyline) {
+        				map.removeLayer(last5PointsPolyline); // Hide the yellow polyline
+        			}
+        			if(currentRoutePolyline) {
+        				map.removeLayer(currentRoutePolyline); // Remove the red polyline
+        			}
+        			// Reset route index and animation state
+        			routeIndex = 0;
+        			animationInProgress = false;
+        		}
+        	});
+        	// Event listener for the search button
+        	document.getElementById('searchButton').addEventListener('click', searchLocation);
+        	// Event listener for the Fetch button
+        	document.getElementById('fetchButton').addEventListener('click', fetchDataByRule);
+        	// Event listener for the buffer size input to automatically trigger preview update
+        	document.getElementById('bufferSize').addEventListener('input', (event) => {
+        		const bufferSize = event.target.value;
+        		// Automatically trigger the preview when buffer size changes
+        		previewCombinedPolygon();
+        	});
+        	document.getElementById('bufferSize').addEventListener('wheel', function(event) {
+        		// Prevent the page from scrolling when using the scroll wheel on the input field
+        		event.preventDefault();
+        		let currentValue = parseInt(this.value, 10);
+        		if(isNaN(currentValue)) currentValue = 1; // If the value is NaN (e.g., empty), default to 1
+        		const step = 1; // The amount to change when scrolling (in meters)
+        		if(event.deltaY < 0) {
+        			// Scroll up (increase the value)
+        			this.value = Math.min(currentValue + step, 100); // Cap at 100
+        		} else if(event.deltaY > 0) {
+        			// Scroll down (decrease the value)
+        			this.value = Math.max(currentValue - step, 1); // Cap at 1
+        		}
+        		// Trigger the input event to automatically update the preview when the value changes
+        		previewCombinedPolygon();
+        	});
+        	document.getElementById('searchBox').addEventListener('keydown', function(event) {
+        		// Check if the pressed key is Enter (key code 13)
+        		if(event.key === 'Enter') {
+        			searchLocation(); // Trigger the searchLocation function
+        		}
+        	});
+        	// Event listener for the Preview GPX button
+        	document.getElementById('previewGPXButton').addEventListener('click', previewGPXRoute);
+        	// Add event listener for the Play Route button
+        	document.getElementById("playRouteButton").addEventListener("click", playRouteAnimation);
+        	
+        	const bufferInput = document.getElementById('bufferSize');
+        
+        	// Disable zooming when mouse hovers over the buffer input
+        	bufferInput.addEventListener('mouseover', () => {
+        	  map.scrollWheelZoom.disable();
+        	});
+        
+        	// Enable zooming again when mouse leaves the buffer input
+        	bufferInput.addEventListener('mouseout', () => {
+        	  map.scrollWheelZoom.enable();
+        	});
+    </script>
 </body>
 
 </html>
