@@ -21,8 +21,13 @@ CUSTOM_FILTER = (
 def generate_gpx(polygon_coords):
     try:
         polygon = Polygon(polygon_coords)
-        org_graph = ox.graph_from_polygon(polygon, custom_filter=CUSTOM_FILTER)
-        graph = ox.convert.to_undirected(org_graph)
+        org_graph = ox.graph_from_polygon(polygon, custom_filter=CUSTOM_FILTER, truncate_by_edge=True)
+        
+        graph = ox.project_graph(org_graph)
+        graph = ox.consolidate_intersections(graph, rebuild_graph=True, tolerance=15, dead_ends=True)
+        graph = ox.project_graph(graph, to_latlong=True)
+        org_graph = graph
+        graph = ox.convert.to_undirected(graph)
 
         odd_degree_nodes = get_odd_degree_nodes(graph)
         pair_weights = get_shortest_distance_for_odd_degrees(graph, odd_degree_nodes)
