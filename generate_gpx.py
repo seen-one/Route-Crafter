@@ -48,11 +48,12 @@ def generate_gpx(polygon_coords):
         eccentricity = nx.eccentricity(graph)
         center = nx.center(graph)
         center_node = graph.nodes[center[0]]
+        
+        trace_point_template = '<trkpt lat="{lat}" lon="{lon}" />'
 
-        trace_points = "\n\t\t\t".join([ 
-            TRACE_POINT.format(
-                lat=lat, lon=lon, id=i, timestamp=datetime.now().isoformat()
-            ) for i, (lat, lon) in enumerate(coordinates_path)
+        trace_points = "\n\t\t\t".join([
+            trace_point_template.format(lat=lat, lon=lon)
+            for lat, lon in coordinates_path
         ])
 
         gpx_payload = TEMPLATE.format(
