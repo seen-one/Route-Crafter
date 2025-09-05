@@ -27,7 +27,11 @@ def generate_gpx(polygon_coords):
         graph = ox.consolidate_intersections(graph, rebuild_graph=True, tolerance=15, dead_ends=True)
         graph = ox.project_graph(graph, to_latlong=True)
         org_graph = graph
-        graph = ox.convert.to_undirected(graph)
+        #graph = ox.convert.to_undirected(graph)
+        
+        # Get strongly connected component (SCC) as subgraph
+        largest_scc = max(nx.strongly_connected_components(org_graph), key=len)
+        graph = org_graph.subgraph(largest_scc).copy()
 
         odd_degree_nodes = get_odd_degree_nodes(graph)
         pair_weights = get_shortest_distance_for_odd_degrees(graph, odd_degree_nodes)
