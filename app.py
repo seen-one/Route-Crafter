@@ -40,10 +40,16 @@ def generate_gpx_route():
 
         if not polygon_coords or not isinstance(polygon_coords, list):
             return jsonify({'error': 'Invalid polygon coordinates provided'}), 400
+            
+        venv_python = os.path.join(sys.prefix, 'Scripts' if os.name == 'nt' else 'bin', 'python')
+
+        env = os.environ.copy()
+        # Set PYTHONPATH to project root (adjust if needed)
+        env['PYTHONPATH'] = os.getcwd()
 
         # Run subprocess to generate GPX with timeout using stdin and stdout
         process = subprocess.Popen(
-            ['python', 'generate_gpx.py'],
+            ['venv_python', 'generate_gpx.py'],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
