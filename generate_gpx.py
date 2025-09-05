@@ -43,8 +43,8 @@ def generate_gpx(polygon_coords):
         edges = map_osmnx_edges2integers(graph, single_edges + added_edges)
 
         network = Network(len(graph.nodes), edges, weighted=True)
-        eulerian_path = hierholzer(network)
-        #eulerian_path = hierholzer_forward_prefer(network)
+        #eulerian_path = hierholzer(network)
+        eulerian_path = hierholzer_forward_prefer(network)
         converted_eulerian_path = convert_integer_path2osmnx_nodes(eulerian_path, graph.nodes())
         double_edge_heap = get_double_edge_heap(org_graph)
 
