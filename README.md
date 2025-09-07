@@ -104,7 +104,9 @@ The list `CUSTOM_FILTER` can be modified in `generate_gpx.py`. [More info](https
 You can modify the `app.py` file `TIMEOUT_DURATION` to increase the default timeout of 120 seconds if you really want to try a larger area or if you are running a slower server.
 
 #### Best app for navigating the generated .gpx route with many overlapping paths?
-So far, I have found [Locus Map](https://www.locusmap.app/) with BRouter Offline to be the least confusing navigation when glancing with overlapping paths due to it highlighting only the immediate path ahead. A downside is the offline maps are not free. Feel free to suggest other navigation apps that is suitable for .gpx routes with overlapping paths.
+I have found [Locus Map](https://www.locusmap.app/) with BRouter Offline to be the least confusing navigation when glancing with overlapping paths due to it highlighting only the immediate path ahead. A downside is the offline maps are not free. Feel free to suggest other navigation apps that is suitable for .gpx routes with overlapping paths.
 
-#### Features like manually defining a polygon, deselecting roads
+[Related OsmAnd issue](https://github.com/osmandapp/OsmAnd/issues/9975)
+
+#### Features like manually defining a polygon, deselecting roads, other map overlays (e.g. Mapillary/Panoramax)
 Maybe, let me know if you would like them added!
