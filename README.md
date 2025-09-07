@@ -2,7 +2,7 @@
 
 ![Screenshot](https://github.com/user-attachments/assets/8563137e-301b-443b-9da1-5693049e9651)
 
-Route Crafter lets you generate the most efficient .gpx route covering every street within OpenStreetMap areas:
+Route Crafter lets you generate the most efficient .gpx route covering every street within OpenStreetMap area tags:
 * Landuse: Residential/Retail/Commercial/Industrial
 * Admin Level 10
 * Admin Level 9
@@ -10,10 +10,14 @@ Route Crafter lets you generate the most efficient .gpx route covering every str
 * Admin Level 7
 * Boundary: Neighborhood
 * Boundary: Political
+* Boundary: Census
 * Place: Suburb
 * Place: Quarter
+* Place: Postal code
+* Place: Discrict
+* Place: Subdistrict
 
-Click on multiple areas to generate a single route for a larger area. If the areas selected don't quite connect, increase the buffer length to enlarge the selected area. Once generated, a preview of the route will appear on the map. You can then play an animation of the route or download the GPX file. 
+Click on multiple areas to generate a single route for a larger area. If the areas selected don't quite connect, you can expand the surrounding area by increasing the buffer. Once generated, a preview of the route will appear on the map. You can then play an animation of the route or download the GPX file. 
 
 Use this if want to generate a route to collect your own street-view/360 imagery for [Google Street View, Mapillary, Panoramax etc.](https://wiki.openstreetmap.org/wiki/Street-level_imagery_services) or if you just want to visit every street in your area!
 
@@ -91,7 +95,7 @@ graph = org_graph.subgraph(largest_scc).copy()
 ```
 
 #### I want to cover an area but there is no suitable OpenStreetMap area to select
-On openstreetmap.org, right click on your area and choose 'query features' to see if it is in an area where the area key is not listed here. Feel free to modify the `index.html` and add the missing area key. Let me know so I can update the list for everyone. Otherwise, you might be able to help OpenStreetMap by defining potentially missing administrative boundaries!
+On openstreetmap.org, right click on your area and choose 'query features' to see if it is in an area where the area tag is not listed here. Feel free to modify the `index.html` and add the missing area tag. Let me know so I can update the list for everyone. Otherwise, you might be able to help OpenStreetMap by defining potentially missing administrative boundaries!
 
 #### Include/Exclude certain types of roads/paths
 The list `CUSTOM_FILTER` can be modified in `generate_gpx.py`. [More info](https://osmnx.readthedocs.io/en/stable/user-reference.html#osmnx.graph.graph_from_polygon)

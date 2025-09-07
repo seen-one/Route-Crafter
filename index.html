@@ -116,8 +116,13 @@
                   <option value="admin_level=7">Admin Level 7</option>
                   <option value="boundary=neighborhood">Boundary: Neighborhood</option>
                   <option value="boundary=political">Boundary: Political</option>
+				  <option value="boundary=place">Boundary: Place</option>
+				  <option value="boundary=census">Boundary: Census</option>
                   <option value="place=suburb">Place: Suburb</option>
                   <option value="place=quarter">Place: Quarter</option>
+				  <option value="place=postal_code">Place: Postal Code</option>
+				  <option value="place=district">Place: District</option>
+				  <option value="place=subdistrict">Place: Subdistrict</option>
                 </select>
                 <button id="fetchButton">Find Areas</button>
         		<br>
@@ -151,7 +156,7 @@
         		let overpassQuery;
         		if(selectedRule === "landuse=residential|landuse=retail|landuse=commercial|landuse=industrial") {
         			overpassQuery = `
-        		  [out:json][timeout:5];
+        		  [out:json][timeout:10];
         		  (
         			nwr[landuse=residential](${bbox});
         			nwr[landuse=retail](${bbox});
@@ -163,7 +168,7 @@
         		`;
         		} else {
         			overpassQuery = `
-        		  [out:json][timeout:5];
+        		  [out:json][timeout:10];
         		  (
         			relation[${selectedRule}](${bbox});
         		  );
@@ -174,7 +179,7 @@
         		const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
         		fetch(url).then(response => response.json()).then(data => {
         			if(data.remark && data.remark.includes('Query timed out')) {
-        				throw new Error('Too many results. Please zoom into a smaller area. (Overpass query timed out after 5 seconds)');
+        				throw new Error('Too many results. Please zoom into a smaller area. (Overpass query timed out after 10 seconds)');
         			}
         			const geoJsonData = osmtogeojson(data);
         			const filteredData = geoJsonData.features.filter(feature => {
