@@ -123,6 +123,7 @@
 				  <option value="place=postal_code">Place: Postal Code</option>
 				  <option value="place=district">Place: District</option>
 				  <option value="place=subdistrict">Place: Subdistrict</option>
+				  <option value="grid500">500m Grid</option>
                 </select>
                 <button id="fetchButton">Find Areas</button>
         		<br>
@@ -142,40 +143,96 @@
         
           controlsContainer.addTo(map);
         	// Add the preview automatically when a polygon is clicked
-        	function fetchDataByRule() {
-        		const fetchButton = document.getElementById('fetchButton');
-        		// Add loading spinner
-        		fetchButton.classList.add('button-loading');
-        		fetchButton.innerHTML = 'Finding Areas <span class="spinner"></span>';
-        		const selectedRule = document.getElementById('searchRules').value;
-        		if(geoJsonLayer) {
-        			map.removeLayer(geoJsonLayer);
-        		}
-        		const bounds = map.getBounds();
-        		const bbox = `${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()}`;
-        		let overpassQuery;
-        		if(selectedRule === "landuse=residential|landuse=retail|landuse=commercial|landuse=industrial") {
-        			overpassQuery = `
-        		  [out:json][timeout:10];
-        		  (
-        			nwr[landuse=residential](${bbox});
-        			nwr[landuse=retail](${bbox});
-        			nwr[landuse=commercial](${bbox});
-        			nwr[landuse=industrial](${bbox});
-        		  );
-        		  (._;>;);
-        		  out body;
-        		`;
-        		} else {
-        			overpassQuery = `
-        		  [out:json][timeout:10];
-        		  (
-        			relation[${selectedRule}](${bbox});
-        		  );
-        		  (._;>;);
-        		  out body;
-        		`;
-        		}
+			function fetchDataByRule() {
+				const fetchButton = document.getElementById('fetchButton');
+				fetchButton.classList.add('button-loading');
+				fetchButton.innerHTML = 'Finding Areas <span class="spinner"></span>';
+
+				const selectedRule = document.getElementById('searchRules').value;
+
+				if (geoJsonLayer) {
+					map.removeLayer(geoJsonLayer);
+				}
+
+				if (selectedRule === "grid500") {
+					const bounds = map.getBounds();
+					const bbox = [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()];
+
+					// Grid size in km
+					const cellSize = 0.5; // 500m = 0.5 km
+
+					// Snap bbox to a fixed global grid aligned at (0,0)
+					function snapToGrid(coord, size) {
+						return Math.floor(coord / size) * size;
+					}
+
+					const snappedBbox = [
+						snapToGrid(bbox[0], cellSize), // west
+						snapToGrid(bbox[1], cellSize), // south
+						snapToGrid(bbox[2], cellSize) + cellSize, // east
+						snapToGrid(bbox[3], cellSize) + cellSize  // north
+					];
+
+					// Generate the snapped grid
+					const grid = turf.squareGrid(snappedBbox, cellSize, { units: 'kilometers' });
+
+					geoJsonLayer = L.geoJSON(grid, {
+						style: {
+							color: 'blue',
+							weight: 1
+						},
+						onEachFeature: (feature, layer) => {
+							layer.on('click', () => {
+								if (previewLayer) {
+									map.removeLayer(previewLayer);
+									previewLayer = null;
+								}
+								const index = highlightedPolygons.indexOf(layer);
+								if (index > -1) {
+									highlightedPolygons.splice(index, 1);
+									layer.setStyle({ color: 'blue', weight: 1 });
+								} else {
+									highlightedPolygons.push(layer);
+									layer.setStyle({ color: 'red', weight: 2 });
+								}
+								previewCombinedPolygon();
+							});
+						}
+					}).addTo(map);
+
+					fetchButton.classList.remove('button-loading');
+					fetchButton.innerHTML = 'Find Areas';
+					return; // ✅ stop here so Overpass query doesn’t run
+				}
+
+				// --- existing Overpass query code below ---
+				const bounds = map.getBounds();
+				const bbox = `${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()}`;
+				let overpassQuery;
+
+				if (selectedRule === "landuse=residential|landuse=retail|landuse=commercial|landuse=industrial") {
+					overpassQuery = `
+					[out:json][timeout:10];
+					(
+						nwr[landuse=residential](${bbox});
+						nwr[landuse=retail](${bbox});
+						nwr[landuse=commercial](${bbox});
+						nwr[landuse=industrial](${bbox});
+					);
+					(._;>;);
+					out body;
+					`;
+				} else {
+					overpassQuery = `
+					[out:json][timeout:10];
+					(
+						relation[${selectedRule}](${bbox});
+					);
+					(._;>;);
+					out body;
+					`;
+				}
+				
         		const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
         		fetch(url).then(response => response.json()).then(data => {
         			if(data.remark && data.remark.includes('Query timed out')) {
