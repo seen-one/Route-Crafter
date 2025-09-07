@@ -94,7 +94,7 @@ graph = org_graph.subgraph(largest_scc).copy()
 On openstreetmap.org, right click on your area and choose 'query features' to see if it is in an area where the area key is not listed here. Feel free to modify the `index.html` and add the missing area key. Let me know so I can update the list for everyone. Otherwise, you might be able to help OpenStreetMap by defining potentially missing administrative boundaries!
 
 #### Include/Exclude certain types of roads/paths
-The filter list is defined in `generate_gpx.py`. Feel free to modify the `CUSTOM_FILTER` there.
+The list `CUSTOM_FILTER` can be modified in `generate_gpx.py`. [More info](https://osmnx.readthedocs.io/en/stable/user-reference.html#osmnx.graph.graph_from_polygon)
 
 #### Error generating GPX: Took too long to generate. Please try again with a smaller area.
 You can modify the `app.py` file `TIMEOUT_DURATION` to increase the default timeout of 120 seconds if you really want to try a larger area or if you are running a slower server.
@@ -103,4 +103,4 @@ You can modify the `app.py` file `TIMEOUT_DURATION` to increase the default time
 So far, I have found [Locus Map](https://www.locusmap.app/) with BRouter Offline to be the least confusing navigation when glancing with overlapping paths due to it highlighting only the immediate path ahead. A downside is the offline maps are not free. Feel free to suggest other navigation apps that is suitable for .gpx routes with overlapping paths.
 
 #### Features like manually defining a polygon, deselecting roads
-Maybe, if I have time or there is demand.
+Maybe, let me know if you would like them added!
