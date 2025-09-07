@@ -69,18 +69,26 @@ To run subsequently
 
 #### Routing behaviour
 The routing algorithm has been modified to avoid U-turns/backtracking unless necessary. This reduces undesirable U-turns especially at T-intersections. The route length will increase slightly. To disable this modification, adjust these lines in generate_gpx.py:
-`#eulerian_path = hierholzer(network)`
-`eulerian_path = hierholzer_forward_prefer(network)`
+```python
+#eulerian_path = hierholzer(network)
+eulerian_path = hierholzer_forward_prefer(network)
+```
 to
-`eulerian_path = hierholzer(network)`
-`#eulerian_path = hierholzer_forward_prefer(network)`
+```python
+eulerian_path = hierholzer(network)
+#eulerian_path = hierholzer_forward_prefer(network)
+```
 
 One-way road rules are ignored. To enforce one-way rules, uncomment these lines in generate_gpx.py. The routing is not currently optimal and the route length will increase significantly, even in areas without one-way roads.
-`#largest_scc = max(nx.strongly_connected_components(org_graph), key=len)`
-`#graph = org_graph.subgraph(largest_scc).copy()`
+```python
+#largest_scc = max(nx.strongly_connected_components(org_graph), key=len)`
+#graph = org_graph.subgraph(largest_scc).copy()
+```
 to
-`largest_scc = max(nx.strongly_connected_components(org_graph), key=len)`
-`graph = org_graph.subgraph(largest_scc).copy()`
+```python
+largest_scc = max(nx.strongly_connected_components(org_graph), key=len)
+graph = org_graph.subgraph(largest_scc).copy()
+```
 
 #### I want to cover an area but there is no suitable OpenStreetMap area to select
 On openstreetmap.org, right click on your area and choose 'query features' to see if it is in an area where the area key is not listed here. Feel free to modify the `index.html` and add the missing area key. Let me know so I can update the list for everyone. Otherwise, you might be able to help OpenStreetMap by defining potentially missing administrative boundaries!
