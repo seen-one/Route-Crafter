@@ -5,6 +5,7 @@ from flask_cors import CORS
 from threading import Semaphore
 from collections import defaultdict
 import os
+import platform
 
 app = Flask(__name__, static_folder=None)
 CORS(app)
@@ -41,15 +42,21 @@ def generate_gpx_route():
         if not polygon_coords or not isinstance(polygon_coords, list):
             return jsonify({'error': 'Invalid polygon coordinates provided'}), 400
             
-        venv_python = os.path.join(sys.prefix, 'Scripts' if os.name == 'nt' else 'bin', 'python')
+        def get_venv_python():
+            if platform.system() == 'Windows':
+                venv_python = os.path.join('env', 'Scripts', 'python.exe')
+            else:
+                venv_python = os.path.join('env', 'bin', 'python')
+            if os.path.exists(venv_python):
+                return venv_python
+            return 'python'  # fallback to system python if venv not found
 
-        env = os.environ.copy()
-        # Set PYTHONPATH to project root (adjust if needed)
-        env['PYTHONPATH'] = os.getcwd()
+        python_executable = get_venv_python()
+        generate_gpx_path = os.path.join(os.getcwd(), 'generate_gpx.py')
 
         # Run subprocess to generate GPX with timeout using stdin and stdout
         process = subprocess.Popen(
-            ['venv_python', 'generate_gpx.py'],
+            [python_executable, generate_gpx_path],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
