@@ -14,7 +14,7 @@ Route Crafter lets you generate the most efficient .gpx route covering every str
 * Place: Suburb
 * Place: Quarter
 * Place: Postal code
-* Place: Discrict
+* Place: District
 * Place: Subdistrict
 
 Click on multiple areas to generate a single route for a larger area. If the areas selected don't quite connect, you can expand the surrounding area by increasing the buffer. Once generated, a preview of the route will appear on the map. You can then play an animation of the route or download the GPX file. 
