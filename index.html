@@ -123,6 +123,55 @@
             margin-bottom: 8px;
             font-style: italic;
         }
+		
+        /* Combined Media query for smaller screens (portrait and landscape mobile) */
+        @media (max-width: 600px), /* For portrait phones and small tablets */
+               (max-height: 450px) and (orientation: landscape) { /* For landscape phones where height is constrained */
+            .leaflet-control-filters {
+                max-width: 95%; /* Adjust max-width to a percentage of the screen */
+                max-height: 70vh; /* Limit height to prevent overflow on very short screens */
+                overflow-y: auto; /* Allow scrolling if content overflows max-height */
+                padding: 5px; /* Reduce padding */
+                font-size: 12px; /* Smaller font size */
+                top: 5px !important; /* Adjust top position for closer to edge */
+                right: 5px !important; /* Adjust right position for closer to edge */
+            }
+
+            .leaflet-control-filters label {
+                margin-bottom: 3px; /* Further reduce margin between labels */
+                font-size: 11px; /* Even smaller label font size */
+            }
+
+            .leaflet-control-filters input[type="date"],
+            .leaflet-control-filters input[type="text"] {
+                padding: 3px; /* Further reduce input padding */
+                font-size: 11px; /* Even smaller input font size */
+            }
+
+            .leaflet-control-filters button {
+                padding: 4px 6px; /* Further reduce button padding */
+                font-size: 11px; /* Even smaller button font size */
+            }
+
+            .leaflet-control-filters .zoom-tip {
+                font-size: 10px; /* Smaller tip font size */
+            }
+
+            /* Adjust the toggle button styles for better appearance on mobile */
+            #toggleFilterBtn {
+                padding: 5px 8px; /* Slightly larger padding for better touch target */
+                font-size: 12px; /* Keep it readable */
+                margin-top: 5px; /* Add margin to separate from other controls */
+                margin-right: 5px; /* Keep it consistent with filter menu right margin */
+                /* Do NOT set top/right !important here, let Leaflet handle stacking */
+            }
+
+            /* Ensure all controls in the top-right have some padding/margin to not stick to the corner */
+            .leaflet-top.leaflet-right .leaflet-control {
+                margin-top: 5px;
+                margin-right: 5px;
+            }
+        }
     </style>
 </head>
 
@@ -893,8 +942,8 @@
                     <label>Start Date: <input type="date" id="startDate"></label>
                     <label>End Date: <input type="date" id="endDate"></label>
                     <label>360° Only: <input type="checkbox" id="panoramaOnly"></label>
-                    <label>Mapillary User ID: <input type="text" id="mapillaryUserId" placeholder="Numbers only"></label>
-                    <label>Panoramax Account ID: <input type="text" id="panoramaxUsername" placeholder="GUID"></label>
+                    <label><input type="text" id="mapillaryUserId" placeholder="Mapillary User ID"></label>
+                    <label><input type="text" id="panoramaxUsername" placeholder="Panoramax Account ID"></label>
                     <button id="applyFiltersBtn">Apply Filters</button>
                 `;
                 L.DomEvent.disableClickPropagation(container);
