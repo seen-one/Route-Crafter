@@ -710,7 +710,7 @@
 
         // Global variables for Mapillary, Panoramax, and Kartaview
         var accessToken = 'MLY|31706646702259607|13ea77823b67451ce0704c521dcbf67f';
-        var mapillaryLayer, panoramaxLayer, kartaviewLayer;
+        var mapillaryLayer, panoramaxLayer, kartaviewLayer, mapilioLayer;
 
         // Helper function to parse Panoramax date
         function parsePanoramaxDate(dateStr) {
@@ -856,12 +856,87 @@
             minZoom: 13,
             attribution: '<a href="https://kartaview.org">KartaView</a>'
         });
+		
+		/**
+		 * Helper function to check if a Mapilio feature passes the current filters.
+		 * This is a placeholder that you can expand with your own logic based on feature properties.
+		 * @param {object} properties - The properties of the vector tile feature.
+		 * @param {object} filters - The filter values from the UI.
+		 * @returns {boolean} - True if the feature should be displayed.
+		 */
+		function passesMapilioFilters(properties, filters) {
+			// Example: filter for 360-degree panorama images only
+			if (filters.panoramaOnly && properties.fov < 360) {
+				return false;
+			}
+
+			// Example: filter by capture date
+			if (filters.startDate && properties.capture_time) {
+				const capturedDate = new Date(properties.capture_time);
+				if (capturedDate < filters.startDate) {
+					return false;
+				}
+			}
+			if (filters.endDate && properties.capture_time) {
+				const capturedDate = new Date(properties.capture_time);
+				if (capturedDate > filters.endDate) {
+					return false;
+				}
+			}
+			
+			// Add more filter logic here based on properties like 'created_by_id', 'organization_key', etc.
+
+			return true; // If no filters are failed, show the feature
+		}
+
+		/**
+		 * Creates or re-creates the Mapilio vector tile layer with the specified filters.
+		 * @param {object} filters - An object containing the filter criteria.
+		 */
+		function createMapilioLayer(filters = {}) {
+			if (mapilioLayer) {
+				map.removeLayer(mapilioLayer);
+			}
+
+			const mapilioUrl = 'https://geo.mapilio.com/map/{x}/{y}/{z}';
+
+			mapilioLayer = L.vectorGrid.protobuf(mapilioUrl, {
+				vectorTileLayerStyles: {
+					// Style for the 'map_roads_line' layer you specified
+					'map_roads_line': function(properties, zoom) {
+						if (!passesMapilioFilters(properties, filters)) {
+							return { weight: 0, opacity: 0 }; // Hide features that don't pass the filter
+						}
+						// Style for visible features
+						return {
+							weight: 1,
+							color: '#8A2BE2', // Blue-violet color to distinguish from other layers
+							opacity: 0.9
+						};
+					},
+					'map_points': function(properties, zoom) {
+						// Hide the layer by setting style to transparent and no weight
+						return {
+							weight: 0,
+							opacity: 0,
+							fillOpacity: 0
+						};
+					}
+				},
+				maxNativeZoom: 16,
+				minZoom: 13, // The zoom level at which the layer becomes visible
+				maxZoom: 19,
+				rendererFactory: L.canvas.tile,
+				attribution: '<a href="https://mapilio.com" target="_blank">Mapilio</a>'
+			});
+		}
 
         // Overlay Maps for Leaflet Layer Control
         var overlayMaps = {
             "Mapillary Coverage": null,
             "Panoramax Coverage": null,
-            "KartaView Coverage": kartaviewLayer
+            "KartaView Coverage*": kartaviewLayer,
+			"Mapilio Coverage": null
         };
         var layerControl = null;
 
@@ -872,7 +947,8 @@
             }
             overlayMaps["Mapillary Coverage"] = mapillaryLayer;
             overlayMaps["Panoramax Coverage"] = panoramaxLayer;
-            overlayMaps["KartaView Coverage"] = kartaviewLayer;
+            overlayMaps["KartaView Coverage*"] = kartaviewLayer;
+			overlayMaps["Mapilio Coverage"] = mapilioLayer;
             layerControl = L.control.layers(null, overlayMaps).addTo(map);
         }
 
@@ -880,7 +956,7 @@
         function updateZoomTip() {
             var zoomLevel = map.getZoom();
             var tipElement = document.getElementById('zoomTip');
-            tipElement.textContent = 'Zoom in to enable coverage layers. Filtering is not available for KartaView.';
+            tipElement.textContent = 'Zoom in to enable coverage layers. *Filtering is not available for KartaView.';
             if (zoomLevel < 13) {
                 document.getElementById('applyFiltersBtn').disabled = true;
             } else {
@@ -893,11 +969,12 @@
             var zoomLevel = map.getZoom();
             // Do filtering only if zoom is sufficient
             if (zoomLevel < 13) {
-                alert('Zoom in to at least level 13 to apply filters on coverage layers. Filtering is not available for KartaView.');
+                alert('Zoom in to at least level 13 to apply filters on coverage layers. *Filtering is not available for KartaView.');
                 return;
             }
             var mapillaryVisible = mapillaryLayer && map.hasLayer(mapillaryLayer);
             var panoramaxVisible = panoramaxLayer && map.hasLayer(panoramaxLayer);
+			var mapilioVisible = mapilioLayer && map.hasLayer(mapilioLayer);
             var kartaviewVisible = kartaviewLayer && map.hasLayer(kartaviewLayer);
 
             var startDateStr = document.getElementById('startDate').value;
@@ -918,6 +995,7 @@
 
             createMapillaryLayer(filters);
             createPanoramaxLayer(filters);
+			createMapilioLayer(filters);
 
             if (mapillaryVisible) {
                 mapillaryLayer.addTo(map);
@@ -925,6 +1003,9 @@
             if (panoramaxVisible) {
                 panoramaxLayer.addTo(map);
             }
+			if (mapilioVisible) {
+				mapilioLayer.addTo(map);
+			}
             if (kartaviewVisible) {
                 // Kartaview is a standard tile layer, its filtering would require a separate approach
                 // For now, it's just toggled
@@ -987,6 +1068,7 @@
         // Initialize layers and controls
         createMapillaryLayer();
         createPanoramaxLayer();
+		createMapilioLayer({});
         updateLayerControl();
 
         // Event listeners for filter controls
