@@ -150,6 +150,40 @@
             font-style: italic;
         }
 		
+        /* Context Menu Styles */
+        .context-menu {
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            min-width: 200px;
+            display: none;
+        }
+
+        .context-menu-item {
+            margin: 5px 5px;
+            padding: 10px 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            font-size: 15px;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+
+        .context-menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .context-menu-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .context-menu-item:active {
+            background-color: #e0e0e0;
+        }
+
         /* Combined Media query for smaller screens (portrait and landscape mobile) */
         @media (max-width: 600px), /* For portrait phones and small tablets */
                (max-height: 450px) and (orientation: landscape) { /* For landscape phones where height is constrained */
@@ -220,6 +254,17 @@
 
 <body>
     <div id="map"></div>
+    
+    <!-- Context Menu -->
+    <div id="contextMenu" class="context-menu">
+        <div class="context-menu-item" data-service="openstreetmap">OpenStreetMap</div>
+        <div class="context-menu-item" data-service="openstreetmap-query">OSM - Query Features</div>
+        <div class="context-menu-item" data-service="nominatim">Nominatim</div>
+        <div class="context-menu-item" data-service="mapillary">Mapillary</div>
+        <div class="context-menu-item" data-service="panoramax">Panoramax</div>
+        <div class="context-menu-item" data-service="kartaview">KartaView</div>
+        <div class="context-menu-item" data-service="mapilio">Mapilio</div>
+    </div>
     <script>
         const highlightedPolygons = []; // To store highlighted polygons' Leaflet layers
         let previewLayer = null; // To hold the preview layer for the combined polygon
@@ -318,6 +363,141 @@
 
         map.on('moveend', debouncedSaveMapState);
         map.on('zoomend', debouncedSaveMapState);
+
+        // Context Menu functionality
+        const contextMenu = document.getElementById('contextMenu');
+        let contextMenuVisible = false;
+        let lastClickLatLng = null;
+
+        // Function to generate URLs for different mapping services
+        function generateServiceUrl(service, lat, lng, zoom) {
+            const latFixed = lat.toFixed(6);
+            const lngFixed = lng.toFixed(6);
+            const zoomFixed = zoom.toFixed(2);
+            
+            switch(service) {
+                case 'openstreetmap':
+                    return `https://www.openstreetmap.org/#map=${Math.round(zoom)}/${latFixed}/${lngFixed}`;
+                case 'openstreetmap-query':
+                    return `https://www.openstreetmap.org/query?lat=${latFixed}&lon=${lngFixed}#map=${Math.round(zoom)}/${latFixed}/${lngFixed}`;
+                case 'nominatim':
+                    return `https://nominatim.openstreetmap.org/ui/reverse.html?lat=${latFixed}&lon=${lngFixed}`;
+                case 'mapillary':
+                    return `https://www.mapillary.com/app/?lat=${latFixed}&lng=${lngFixed}&z=${zoomFixed}`;
+                case 'panoramax':
+                    return `https://api.panoramax.xyz/?focus=map&map=${zoomFixed}/${latFixed}/${lngFixed}&`;
+                case 'kartaview':
+                    return `https://kartaview.org/map/@${latFixed},${lngFixed},${Math.round(zoom)}z`;
+                case 'mapilio':
+                    return `https://www.mapilio.com/app?lat=${latFixed}&lng=${lngFixed}&zoom=${zoomFixed}`;
+                default:
+                    return '#';
+            }
+        }
+
+        // Function to show context menu
+        function showContextMenu(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const latlng = e.latlng || e.target.getLatLng();
+            lastClickLatLng = latlng;
+            
+            const mapContainer = map.getContainer();
+            const rect = mapContainer.getBoundingClientRect();
+            
+            // Calculate position relative to the map container
+            let x, y;
+            if (e.originalEvent) {
+                x = e.originalEvent.clientX - rect.left;
+                y = e.originalEvent.clientY - rect.top;
+            } else {
+                // For touch events
+                x = e.originalEvent.touches[0].clientX - rect.left;
+                y = e.originalEvent.touches[0].clientY - rect.top;
+            }
+            
+            // Position the context menu
+            contextMenu.style.left = x + 'px';
+            contextMenu.style.top = y + 'px';
+            contextMenu.style.display = 'block';
+            contextMenuVisible = true;
+        }
+
+        // Function to hide context menu
+        function hideContextMenu() {
+            contextMenu.style.display = 'none';
+            contextMenuVisible = false;
+        }
+
+        // Add right-click event listener to map
+        map.on('contextmenu', showContextMenu);
+
+        // Alternative method: Add direct event listener to map container
+        const mapContainer = map.getContainer();
+        mapContainer.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            const latlng = map.containerPointToLatLng([e.offsetX, e.offsetY]);
+            const fakeEvent = {
+                latlng: latlng,
+                originalEvent: e,
+                preventDefault: () => e.preventDefault(),
+                stopPropagation: () => e.stopPropagation()
+            };
+            showContextMenu(fakeEvent);
+        });
+
+        // Add long-press event listener for touch devices
+        let touchStartTime = 0;
+        let touchTimer = null;
+        
+        map.on('touchstart', function(e) {
+            touchStartTime = Date.now();
+            touchTimer = setTimeout(() => {
+                showContextMenu(e);
+            }, 500); // 500ms long press
+        });
+
+        map.on('touchend', function(e) {
+            if (touchTimer) {
+                clearTimeout(touchTimer);
+                touchTimer = null;
+            }
+        });
+
+        map.on('touchmove', function(e) {
+            if (touchTimer) {
+                clearTimeout(touchTimer);
+                touchTimer = null;
+            }
+        });
+
+        // Hide context menu when clicking elsewhere
+        map.on('click', hideContextMenu);
+        map.on('zoomstart', hideContextMenu);
+        map.on('movestart', hideContextMenu);
+
+        // Add click event listeners to context menu items
+        document.querySelectorAll('.context-menu-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (lastClickLatLng) {
+                    const service = this.getAttribute('data-service');
+                    const zoom = map.getZoom();
+                    const url = generateServiceUrl(service, lastClickLatLng.lat, lastClickLatLng.lng, zoom);
+                    window.open(url, '_blank');
+                }
+                hideContextMenu();
+            });
+        });
+
+        // Hide context menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (contextMenuVisible && !contextMenu.contains(e.target)) {
+                hideContextMenu();
+            }
+        });
+
 
         // Custom controls container for Route Crafter features
         const controlsContainer = L.control({ position: 'bottomleft' });
