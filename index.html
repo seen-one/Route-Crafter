@@ -857,20 +857,13 @@
             attribution: '<a href="https://kartaview.org">KartaView</a>'
         });
 		
-		/**
-		 * Helper function to check if a Mapilio feature passes the current filters.
-		 * This is a placeholder that you can expand with your own logic based on feature properties.
-		 * @param {object} properties - The properties of the vector tile feature.
-		 * @param {object} filters - The filter values from the UI.
-		 * @returns {boolean} - True if the feature should be displayed.
-		 */
 		function passesMapilioFilters(properties, filters) {
-			// Example: filter for 360-degree panorama images only
+			// Filter for 360-degree panorama images only
 			if (filters.panoramaOnly && properties.fov < 360) {
 				return false;
 			}
 
-			// Example: filter by capture date
+			// Filter by capture date
 			if (filters.startDate && properties.capture_time) {
 				const capturedDate = new Date(properties.capture_time);
 				if (capturedDate < filters.startDate) {
@@ -884,7 +877,12 @@
 				}
 			}
 			
-			// Add more filter logic here based on properties like 'created_by_id', 'organization_key', etc.
+			// Filter by Mapilio user ID (created_by_id)
+			if (filters.mapilioUserId && properties.created_by_id) {
+				if (properties.created_by_id !== filters.mapilioUserId) {
+					return false;
+				}
+			}
 
 			return true; // If no filters are failed, show the feature
 		}
@@ -952,7 +950,7 @@
             layerControl = L.control.layers(null, overlayMaps).addTo(map);
         }
 
-        // Update the UI tip visibility based on zoom for filter availability for Mapillary and Panoramax
+        // Update the UI tip visibility based on zoom for filter availability for Mapillary, Panoramax, and Mapilio
         function updateZoomTip() {
             var zoomLevel = map.getZoom();
             var tipElement = document.getElementById('zoomTip');
@@ -982,6 +980,7 @@
             var panoramaOnly = document.getElementById('panoramaOnly').checked;
             var mapillaryUserIdStr = document.getElementById('mapillaryUserId').value.trim();
             var panoramaxUsernameStr = document.getElementById('panoramaxUsername').value.trim();
+            var mapilioUserIdStr = document.getElementById('mapilioUserId').value.trim();
 
             var filters = {};
             if (startDateStr) filters.startDate = new Date(startDateStr);
@@ -992,6 +991,7 @@
             if (panoramaOnly) filters.panoramaOnly = true;
             if (mapillaryUserIdStr) filters.mapillaryUserId = parseInt(mapillaryUserIdStr, 10);
             if (panoramaxUsernameStr) filters.panoramaxUsername = panoramaxUsernameStr;
+            if (mapilioUserIdStr) filters.mapilioUserId = parseInt(mapilioUserIdStr, 10);
 
             createMapillaryLayer(filters);
             createPanoramaxLayer(filters);
@@ -1026,6 +1026,7 @@
                     <label>360° Only: <input type="checkbox" id="panoramaOnly"></label>
                     <label><input type="text" id="mapillaryUserId" placeholder="Mapillary User ID"></label>
                     <label><input type="text" id="panoramaxUsername" placeholder="Panoramax Account ID"></label>
+                    <label><input type="text" id="mapilioUserId" placeholder="Mapilio User ID"></label>
                     <button id="applyFiltersBtn">Apply Filters</button>
                 `;
                 L.DomEvent.disableClickPropagation(container);
