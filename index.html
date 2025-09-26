@@ -192,12 +192,17 @@
                 /* Do NOT set top/right !important here, let Leaflet handle stacking */
             }
 
-            /* Ensure all controls in the top-right have some padding/margin to not stick to the corner */
-            .leaflet-top.leaflet-right .leaflet-control {
-                margin-top: 5px;
-                margin-right: 5px;
-            }
-        }
+             /* Ensure all controls in the top-right have some padding/margin to not stick to the corner */
+             .leaflet-top.leaflet-right .leaflet-control {
+                 margin-top: 5px;
+                 margin-right: 5px;
+             }
+
+             /* Hide bottom controls when filter menu is open on mobile */
+             .leaflet-bottom.hidden-on-mobile {
+                 display: none !important;
+             }
+         }
     </style>
 </head>
 
@@ -1092,16 +1097,27 @@
                 btn.style.boxShadow = '0 0 5px rgba(0,0,0,0.3)';
                 btn.style.cursor = 'pointer';
 				btn.style.color = 'black';
-                btn.onclick = function () {
-                    var filterDiv = document.querySelector('.leaflet-control-filters');
-                    if (filterDiv.style.display === 'none') {
-                        filterDiv.style.display = 'block';
-                        btn.textContent = 'Hide Filter Menu';
-                    } else {
-                        filterDiv.style.display = 'none';
-                        btn.textContent = 'Show Filter Menu';
-                    }
-                };
+                 btn.onclick = function () {
+                     var filterDiv = document.querySelector('.leaflet-control-filters');
+                     var bottomControls = document.querySelector('.leaflet-bottom');
+                     if (filterDiv.style.display === 'none') {
+                         filterDiv.style.display = 'block';
+                         btn.textContent = 'Hide Filter Menu';
+                         // Hide bottom controls on mobile when filter menu is open
+                         if (window.innerWidth <= 600 || (window.innerHeight <= 450 && window.innerWidth > window.innerHeight)) {
+                             if (bottomControls) {
+                                 bottomControls.classList.add('hidden-on-mobile');
+                             }
+                         }
+                     } else {
+                         filterDiv.style.display = 'none';
+                         btn.textContent = 'Show Filter Menu';
+                         // Show bottom controls again when filter menu is closed
+                         if (bottomControls) {
+                             bottomControls.classList.remove('hidden-on-mobile');
+                         }
+                     }
+                 };
                 L.DomEvent.disableClickPropagation(btn); // Prevent map interactions
                 return btn;
             }
