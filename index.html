@@ -1100,7 +1100,9 @@
                  btn.onclick = function () {
                      var filterDiv = document.querySelector('.leaflet-control-filters');
                      var bottomControls = document.querySelector('.leaflet-bottom');
-                     if (filterDiv.style.display === 'none') {
+                     var isHidden = filterDiv.style.display === 'none' || 
+                                   (filterDiv.style.display === '' && window.getComputedStyle(filterDiv).display === 'none');
+                     if (isHidden) {
                          filterDiv.style.display = 'block';
                          btn.textContent = 'Hide Filter Menu';
                          // Hide bottom controls on mobile when filter menu is open
