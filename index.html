@@ -1216,6 +1216,61 @@
         createPanoramaxLayer();
 		createMapilioLayer({});
         updateLayerControl();
+        
+        // Setup layers control mobile behavior
+        function setupLayersControlMobileBehavior() {
+            if (!layerControl || !layerControl._container) {
+                return;
+            }
+            
+            const bottomControls = document.querySelector('.leaflet-bottom');
+            if (!bottomControls) {
+                return;
+            }
+            
+            // Function to check if we're on mobile
+            function isMobile() {
+                return window.innerWidth <= 600 || (window.innerHeight <= 450 && window.innerWidth > window.innerHeight);
+            }
+            
+            // Function to toggle bottom controls visibility
+            function toggleBottomControls(show) {
+                if (!isMobile()) return;
+                
+                if (show) {
+                    bottomControls.classList.remove('hidden-on-mobile');
+                } else {
+                    bottomControls.classList.add('hidden-on-mobile');
+                }
+            }
+            
+            // Use MutationObserver to watch for class changes on the layers control
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        const isExpanded = layerControl._container.classList.contains('leaflet-control-layers-expanded');
+                        toggleBottomControls(!isExpanded);
+                    }
+                });
+            });
+            
+            // Start observing
+            observer.observe(layerControl._container, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+            
+            // Also handle window resize
+            window.addEventListener('resize', function() {
+                if (!isMobile()) {
+                    // If not mobile, ensure bottom controls are visible
+                    bottomControls.classList.remove('hidden-on-mobile');
+                }
+            });
+        }
+        
+        // Setup the behavior after a short delay to ensure the layers control is ready
+        setTimeout(setupLayersControlMobileBehavior, 100);
 
         // Event listeners for filter controls
         map.whenReady(function () {
@@ -1237,6 +1292,9 @@
             
             // Initialize zoom tip and disable filters if zoom too low
             updateZoomTip();
+            
+            // Also setup layers control behavior here as a fallback
+            setTimeout(setupLayersControlMobileBehavior, 200);
         });
         map.on('zoomend', updateZoomTip);
 		
