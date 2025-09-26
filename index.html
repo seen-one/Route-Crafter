@@ -198,6 +198,12 @@
                  margin-right: 5px;
              }
 
+             /* Position the toggle filter button at the top of top-right controls */
+             .leaflet-top.leaflet-right .leaflet-control:first-child {
+                 margin-top: 5px;
+                 margin-right: 5px;
+             }
+
              /* Hide bottom controls when filter menu is open on mobile */
              .leaflet-bottom.hidden-on-mobile {
                  display: none !important;
@@ -1165,9 +1171,6 @@
                 return container;
             }
         });
-        var filterControl = new FilterControl();
-        map.addControl(filterControl);
-
         // Toggle button control to hide/show filters
         var ToggleFilterControl = L.Control.extend({
             options: { position: 'topright' },
@@ -1210,6 +1213,9 @@
             }
         });
         map.addControl(new ToggleFilterControl());
+
+        var filterControl = new FilterControl();
+        map.addControl(filterControl);
 
         // Initialize layers and controls
         createMapillaryLayer();
