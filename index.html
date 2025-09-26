@@ -116,6 +116,32 @@
             cursor: pointer;
         }
 
+        .image-type-btn {
+            display: inline-block;
+            margin: 0;
+            padding: 4px 8px;
+            font-size: 12px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            color: #333;
+            cursor: pointer;
+            border-radius: 3px;
+            flex: 1;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
+        .image-type-btn:hover {
+            background-color: #e9e9e9;
+            color: #333;
+        }
+
+        .image-type-btn.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
         /* Style for the zoom tip */
         .leaflet-control-filters .zoom-tip {
             font-size: 12px;
@@ -729,7 +755,10 @@
                 if (filters.startDate && capturedDate < filters.startDate) return false;
                 if (filters.endDate && capturedDate > filters.endDate) return false;
             }
-            if (filters.panoramaOnly && properties.is_pano !== true) {
+            if (filters.imageType === '360' && properties.is_pano !== true) {
+                return false;
+            }
+            if (filters.imageType === 'classic' && properties.is_pano === true) {
                 return false;
             }
             if (filters.mapillaryUserId && properties.creator_id !== filters.mapillaryUserId) {
@@ -748,7 +777,10 @@
                     if (filters.startDate && captureDate < filters.startDate) return false;
                     if (filters.endDate && captureDate > filters.endDate) return false;
                 }
-                if (filters.panoramaOnly && properties.type !== 'equirectangular') {
+                if (filters.imageType === '360' && properties.type !== 'equirectangular') {
+                    return false;
+                }
+                if (filters.imageType === 'classic' && properties.type === 'equirectangular') {
                     return false;
                 }
                 if (filters.panoramaxUsername && properties.account_id !== filters.panoramaxUsername) {
@@ -858,8 +890,11 @@
         });
 		
 		function passesMapilioFilters(properties, filters) {
-			// Filter for 360-degree panorama images only
-			if (filters.panoramaOnly && properties.fov < 360) {
+			// Filter by image type
+			if (filters.imageType === '360' && properties.fov < 360) {
+				return false;
+			}
+			if (filters.imageType === 'classic' && properties.fov >= 360) {
 				return false;
 			}
 
@@ -977,7 +1012,7 @@
 
             var startDateStr = document.getElementById('startDate').value;
             var endDateStr = document.getElementById('endDate').value;
-            var panoramaOnly = document.getElementById('panoramaOnly').checked;
+            var imageType = document.querySelector('.image-type-btn.active').getAttribute('data-type');
             var mapillaryUserIdStr = document.getElementById('mapillaryUserId').value.trim();
             var panoramaxUsernameStr = document.getElementById('panoramaxUsername').value.trim();
             var mapilioUserIdStr = document.getElementById('mapilioUserId').value.trim();
@@ -988,7 +1023,7 @@
                 filters.endDate = new Date(endDateStr);
                 filters.endDate.setHours(23, 59, 59, 999);
             }
-            if (panoramaOnly) filters.panoramaOnly = true;
+            if (imageType !== 'all') filters.imageType = imageType;
             if (mapillaryUserIdStr) filters.mapillaryUserId = parseInt(mapillaryUserIdStr, 10);
             if (panoramaxUsernameStr) filters.panoramaxUsername = panoramaxUsernameStr;
             if (mapilioUserIdStr) filters.mapilioUserId = parseInt(mapilioUserIdStr, 10);
@@ -1023,7 +1058,14 @@
                     <div class="zoom-tip" id="zoomTip"></div>
                     <label>Start Date: <input type="date" id="startDate"></label>
                     <label>End Date: <input type="date" id="endDate"></label>
-                    <label>360° Only: <input type="checkbox" id="panoramaOnly"></label>
+                    <label style="display: block; margin: 5px 0;">
+                        <div style="display: block; margin-bottom: 3px;">Image Type:</div>
+                        <div style="display: flex; gap: 2px; width: 100%; box-sizing: border-box;">
+                            <button type="button" class="image-type-btn active" data-type="all">All</button>
+                            <button type="button" class="image-type-btn" data-type="classic">Classic</button>
+                            <button type="button" class="image-type-btn" data-type="360">360°</button>
+                        </div>
+                    </label>
                     <label><input type="text" id="mapillaryUserId" placeholder="Mapillary User ID"></label>
                     <label><input type="text" id="panoramaxUsername" placeholder="Panoramax Account ID"></label>
                     <label><input type="text" id="mapilioUserId" placeholder="Mapilio User ID"></label>
@@ -1076,6 +1118,20 @@
         map.whenReady(function () {
             var btn = document.getElementById('applyFiltersBtn');
             if (btn) btn.addEventListener('click', applyFilters); // Check if button exists before adding listener
+            
+            // Add event listeners for image type buttons
+            var imageTypeButtons = document.querySelectorAll('.image-type-btn');
+            imageTypeButtons.forEach(function(button) {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    imageTypeButtons.forEach(function(btn) {
+                        btn.classList.remove('active');
+                    });
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                });
+            });
+            
             // Initialize zoom tip and disable filters if zoom too low
             updateZoomTip();
         });
