@@ -215,13 +215,57 @@
         // Initialize the map with wraparound enabled
         const map = L.map('map', {
             worldCopyJump: true // Enable world wraparound
-        }).setView([51.505, -0.09], 13);
+        });
+
+        // Function to save map state to URL hash fragment (OpenStreetMap style)
+        function saveMapStateToHash() {
+            const center = map.getCenter();
+            const zoom = map.getZoom();
+            const hash = `#map=${zoom}/${center.lat.toFixed(6)}/${center.lng.toFixed(6)}`;
+            window.location.hash = hash;
+        }
+
+        // Function to restore map state from URL hash fragment (OpenStreetMap style)
+        function restoreMapStateFromHash() {
+            const hash = window.location.hash.substring(1); // Remove the # symbol
+            if (hash && hash.startsWith('map=')) {
+                const mapPart = hash.substring(4); // Remove 'map=' prefix
+                const parts = mapPart.split('/');
+                
+                if (parts.length === 3) {
+                    const zoom = parseInt(parts[0]);
+                    const lat = parseFloat(parts[1]);
+                    const lng = parseFloat(parts[2]);
+                    
+                    if (!isNaN(lat) && !isNaN(lng) && !isNaN(zoom)) {
+                        map.setView([lat, lng], zoom);
+                        return true; // Successfully restored from hash
+                    }
+                }
+            }
+            return false; // No valid hash data found
+        }
+
+        // Initialize map with default view or restore from hash
+        if (!restoreMapStateFromHash()) {
+            map.setView([51.505, -0.09], 13); // Default view if no hash
+        }
 
         // Add OpenStreetMap tiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
+
+        // Add event listeners to save map state when view changes
+        let hashUpdateTimeout;
+        function debouncedSaveMapState() {
+            clearTimeout(hashUpdateTimeout);
+            hashUpdateTimeout = setTimeout(saveMapStateToHash, 500); // Debounce to avoid too frequent updates
+        }
+
+        map.on('moveend', debouncedSaveMapState);
+        map.on('zoomend', debouncedSaveMapState);
 
         // Custom controls container for Route Crafter features
         const controlsContainer = L.control({ position: 'bottomleft' });
@@ -490,6 +534,7 @@
                     display_name
                 } = data[0];
                 map.setView([parseFloat(lat), parseFloat(lon)], 14); // Center map on the search result
+                saveMapStateToHash(); // Update hash fragment with new position
                 console.log('Search result:', display_name);
             }).catch(err => console.error('Error searching location:', err)).finally(() => {
                 // Remove loading spinner
