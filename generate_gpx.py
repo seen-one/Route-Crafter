@@ -42,13 +42,13 @@ CUSTOM_FILTER = (
     'driveway|parking_aisle"]["toll"!~"yes"]'
 )
 
-def generate_gpx(polygon_coords):
+def generate_gpx(polygon_coords, truncate_by_edge=True, consolidate_tolerance=15):
     try:
         polygon = Polygon(polygon_coords)
-        org_graph = ox.graph_from_polygon(polygon, custom_filter=CUSTOM_FILTER, truncate_by_edge=True)
+        org_graph = ox.graph_from_polygon(polygon, custom_filter=CUSTOM_FILTER, truncate_by_edge=truncate_by_edge)
         
         graph = ox.project_graph(org_graph)
-        graph = ox.consolidate_intersections(graph, rebuild_graph=True, tolerance=15, dead_ends=True)
+        graph = ox.consolidate_intersections(graph, rebuild_graph=True, tolerance=consolidate_tolerance, dead_ends=True)
         graph = ox.project_graph(graph, to_latlong=True)
         org_graph = graph
         graph = ox.convert.to_undirected(graph)
@@ -221,8 +221,20 @@ def hierholzer_forward_prefer(network, source=0):
     return path
 
 if __name__ == '__main__':
-    # Read polygon coordinates from stdin
-    polygon_coords = json.load(sys.stdin)
+    # Read input data from stdin
+    input_data = json.load(sys.stdin)
+    
+    # Handle both old format (just polygon_coords) and new format (dict with parameters)
+    if isinstance(input_data, list):
+        # Old format: just polygon coordinates
+        polygon_coords = input_data
+        truncate_by_edge = True
+        consolidate_tolerance = 15
+    else:
+        # New format: dict with parameters
+        polygon_coords = input_data.get('polygon_coords')
+        truncate_by_edge = input_data.get('truncate_by_edge', True)
+        consolidate_tolerance = input_data.get('consolidate_tolerance', 15)
 
-    gpx_data = generate_gpx(polygon_coords)
+    gpx_data = generate_gpx(polygon_coords, truncate_by_edge, consolidate_tolerance)
     print(gpx_data)  # Print GPX data to stdout

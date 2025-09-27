@@ -776,8 +776,15 @@
                     <button id="downloadButton">Download GPX File</button>
                     <button id="clearButton">Reset</button>
                     <br>
-                    <label for="bufferSize">Add buffer to selected areas (in meters): </label>
+                    <label for="bufferSize">Add buffer to selected areas (meters): </label>
                     <input type="number" id="bufferSize" min="1" max="100" value="1">
+                    <br>
+                    <label for="consolidateTolerance">Consolidate intersections tolerance (meters): </label>
+                    <input type="number" id="consolidateTolerance" min="1" max="100" value="15">
+                    <br>
+                    <label for="truncateByEdge">
+                        <input type="checkbox" id="truncateByEdge" checked> Truncate by edge
+                    </label>
                     <p id="routeLength"></p>
                 </div>
             `;
@@ -1079,6 +1086,8 @@
             document.getElementById('routeLength').innerHTML = '';
             document.getElementById('searchBox').value = '';
             document.getElementById('bufferSize').value = '1';
+            document.getElementById('truncateByEdge').checked = true;
+            document.getElementById('consolidateTolerance').value = '15';
             document.getElementById('searchRules').selectedIndex = 0; // Reset to first option
             
             // Stop animation and hide media controls
@@ -1158,13 +1167,18 @@
                 }
                 
                 const combinedCoords = combinedPolygon.geometry.coordinates;
+                const truncateByEdge = document.getElementById('truncateByEdge').checked;
+                const consolidateTolerance = parseInt(document.getElementById('consolidateTolerance').value, 10);
+                
                 fetch('/generate-gpx/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        polygon_coords: combinedCoords[0]
+                        polygon_coords: combinedCoords[0],
+                        truncate_by_edge: truncateByEdge,
+                        consolidate_tolerance: consolidateTolerance
                     })
                 }).then(response => response.json()).then(data => {
                     if (data.gpx) {
@@ -1668,6 +1682,21 @@
             // Trigger the input event to automatically update the preview when the value changes
             previewCombinedPolygon();
         });
+
+        document.getElementById('consolidateTolerance').addEventListener('wheel', function (event) {
+            // Prevent the page from scrolling when using the scroll wheel on the input field
+            event.preventDefault();
+            let currentValue = parseInt(this.value, 10);
+            if (isNaN(currentValue)) currentValue = 15; // If the value is NaN (e.g., empty), default to 15
+            const step = 1; // The amount to change when scrolling (in meters)
+            if (event.deltaY < 0) {
+                // Scroll up (increase the value)
+                this.value = Math.min(currentValue + step, 100); // Cap at 100
+            } else if (event.deltaY > 0) {
+                // Scroll down (decrease the value)
+                this.value = Math.max(currentValue - step, 1); // Cap at 1
+            }
+        });
         document.getElementById('searchBox').addEventListener('keydown', function (event) {
             // Check if the pressed key is Enter (key code 13)
             if (event.key === 'Enter') {
@@ -1827,6 +1856,7 @@
         });
 
         const bufferInput = document.getElementById('bufferSize');
+        const consolidateToleranceInput = document.getElementById('consolidateTolerance');
 
         // Disable zooming when mouse hovers over the buffer input
         bufferInput.addEventListener('mouseover', () => {
@@ -1835,6 +1865,16 @@
 
         // Enable zooming again when mouse leaves the buffer input
         bufferInput.addEventListener('mouseout', () => {
+            map.scrollWheelZoom.enable();
+        });
+
+        // Disable zooming when mouse hovers over the consolidate tolerance input
+        consolidateToleranceInput.addEventListener('mouseover', () => {
+            map.scrollWheelZoom.disable();
+        });
+
+        // Enable zooming again when mouse leaves the consolidate tolerance input
+        consolidateToleranceInput.addEventListener('mouseout', () => {
             map.scrollWheelZoom.enable();
         });
 
