@@ -798,7 +798,7 @@
                         <input type="checkbox" id="truncateByEdge" checked>
                     </div>
                     <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                        <label for="customFilter" style="flex: 1;">Custom filter:</label>
+                        <label for="customFilter" style="flex: 1;">Route filter:</label>
                         <input type="text" id="customFilter" style="width: 100%; margin-left: 10px;" value='["highway"]["area"!~"yes"]["highway"!~"bridleway|bus_guideway|construction|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|construction|platform|raceway|rest_area|path"]["access"!~"customers|no|private"]["public_transport"!~"platform"]["fee"!~"yes"]["foot"!~"no"]["service"!~"drive-through|driveway|parking_aisle"]["toll"!~"yes"]'>
                     </div>
                     <p id="routeLength"></p>
@@ -1199,7 +1199,23 @@
                         consolidate_tolerance: consolidateTolerance,
                         custom_filter: customFilter
                     })
-                }).then(response => response.json()).then(data => {
+                }).then(response => {
+                    console.log('HTTP Response Status:', response.status);
+                    console.log('HTTP Response Headers:', response.headers);
+                    
+                    // Log the raw response text before parsing
+                    return response.text().then(text => {
+                        console.log('Raw HTTP Response Text:', text);
+                        try {
+                            return JSON.parse(text);
+                        } catch (e) {
+                            console.error('Failed to parse JSON response:', e);
+                            console.log('Raw response was:', text);
+                            throw new Error('Invalid JSON response from server: ' + text.substring(0, 200));
+                        }
+                    });
+                }).then(data => {
+                    console.log('HTTP Response Data:', data);
                     if (data.gpx) {
                         gpxData = data.gpx;
                         const parser = new DOMParser();
@@ -1274,11 +1290,13 @@
                         }).addTo(map);
                         map.fitBounds(previewLayer.getBounds());
                     } else {
-                        alert('Error generating GPX: ' + data.error);
+                        // Display the actual server error response
+                        console.error('Server error response:', data);
+                        alert('Error generating GPX:\n\n' + (data.error || 'Unknown error occurred'));
                     }
                 }).catch(err => {
-                    console.error('Error:', err);
-                    alert('Error generating GPX.');
+                    console.error('Network error:', err);
+                    alert('Error generating GPX:\n\nNetwork error: ' + (err.message || 'Failed to connect to server'));
                 }).finally(() => {
                     stopSpinner(previewGPXButton, 'Generate Route');
                 });

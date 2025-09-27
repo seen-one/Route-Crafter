@@ -82,6 +82,16 @@ def generate_gpx_route():
 
             # Capture the GPX data from stdout
             gpx_data = stdout.strip()
+            
+            # Check if the response is an error (JSON format)
+            try:
+                error_data = json.loads(gpx_data)
+                if 'error' in error_data:
+                    return jsonify({'error': error_data['error']}), 500
+            except json.JSONDecodeError:
+                # Not JSON, so it's valid GPX data
+                pass
+            
             return jsonify({'gpx': gpx_data}), 200
         except subprocess.TimeoutExpired:
             process.kill()

@@ -162,7 +162,12 @@ def generate_gpx(polygon_coords, truncate_by_edge=True, consolidate_tolerance=15
         return gpx_payload
 
     except Exception as e:
-        return str(e)
+        # Return error as JSON to be properly handled by the server
+        error_response = {
+            'error': str(e),
+            'error_type': type(e).__name__
+        }
+        return json.dumps(error_response)
 
 def hierholzer_forward_prefer(network, source=0):
     """ Hierholzer's algorithm with forward movement preference """
