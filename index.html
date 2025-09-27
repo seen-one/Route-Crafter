@@ -613,11 +613,16 @@
             const lngFixed = lng.toFixed(6);
             const zoomFixed = zoom.toFixed(2);
             
+            // Get current map center for services that need it
+            const mapCenter = map.getCenter();
+            const mapCenterLatFixed = mapCenter.lat.toFixed(6);
+            const mapCenterLngFixed = mapCenter.lng.toFixed(6);
+            
             switch(service) {
                 case 'openstreetmap':
                     return `https://www.openstreetmap.org/#map=${Math.round(zoom)}/${latFixed}/${lngFixed}`;
                 case 'openstreetmap-query':
-                    return `https://www.openstreetmap.org/query?lat=${latFixed}&lon=${lngFixed}#map=${Math.round(zoom)}/${latFixed}/${lngFixed}`;
+                    return `https://www.openstreetmap.org/query?lat=${latFixed}&lon=${lngFixed}#map=${Math.round(zoom)}/${mapCenterLatFixed}/${mapCenterLngFixed}`;
                 case 'nominatim':
                     return `https://nominatim.openstreetmap.org/ui/reverse.html?lat=${latFixed}&lon=${lngFixed}`;
                 case 'mapillary':
