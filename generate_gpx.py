@@ -92,9 +92,9 @@ def generate_gpx(polygon_coords):
                 # Fallback: calculate distance between nodes
                 node_u = org_graph.nodes[u]
                 node_v = org_graph.nodes[v]
-                route_length += ox.distance.great_circle_vec(
-                    node_u['y'], node_u['x'], node_v['y'], node_v['x']
-                )
+                # Calculate distance between nodes using OSMnx
+                distance = ox.distance.great_circle(node_u['y'], node_u['x'], node_v['y'], node_v['x'])
+                route_length += distance
         
         # The route length should always be >= street length
         # If it's not, there's an issue with the calculation
@@ -105,7 +105,9 @@ def generate_gpx(polygon_coords):
                 for i in range(len(coordinates_path) - 1):
                     lat1, lon1 = coordinates_path[i]
                     lat2, lon2 = coordinates_path[i + 1]
-                    route_length += ox.distance.great_circle_vec(lat1, lon1, lat2, lon2)
+                    # Calculate distance using OSMnx
+                    distance = ox.distance.great_circle(lat1, lon1, lat2, lon2)
+                    route_length += distance
         
         # Calculate efficiency (street length / route length * 100)
         # This represents what percentage of the route is actual street coverage
