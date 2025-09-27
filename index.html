@@ -302,6 +302,20 @@
             text-align: center;
         }
 
+        /* Mobile controls styles */
+        .leaflet-bar {
+            max-width: 90vw;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .leaflet-bar div {
+            padding: 5px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
         /* Combined Media query for smaller screens (portrait and landscape mobile) */
         @media (max-width: 600px), /* For portrait phones and small tablets */
                (max-height: 450px) and (orientation: landscape) { /* For landscape phones where height is constrained */
@@ -399,6 +413,32 @@
                  font-size: 11px;
                  min-width: 70px;
              }
+
+             /* Mobile controls styles */
+             .leaflet-bar {
+                 max-width: 95vw;
+                 max-height: 60vh;
+                 font-size: 12px;
+             }
+
+             .leaflet-bar div {
+                 padding: 3px;
+                 font-size: 12px;
+             }
+
+             .leaflet-bar input,
+             .leaflet-bar select,
+             .leaflet-bar button {
+                 font-size: 12px;
+                 padding: 6px 8px;
+                 margin: 2px;
+             }
+
+             .leaflet-bar label {
+                 font-size: 11px;
+                 margin: 2px 0;
+             }
+
          }
     </style>
 </head>
@@ -677,11 +717,12 @@
 
         // Custom controls container for Route Crafter features
         const controlsContainer = L.control({ position: 'bottomleft' });
+        let controlsDiv = null; // Store reference to the controls div
 
         controlsContainer.onAdd = function () {
             const div = L.DomUtil.create('div', 'leaflet-bar');
             div.innerHTML = `
-                <div style="padding: 5px; background: white;">
+                <div id="mainControlsDiv" style="padding: 5px; background: white;">
                     <input type="text" id="searchBox" placeholder="Search Map" />
                     <button id="searchButton">Search</button>
                     <br>
@@ -714,6 +755,10 @@
                 </div>
             `;
             L.DomEvent.disableClickPropagation(div); // Prevent map interactions when interacting with the controls
+            
+            // Store reference to the controls div
+            controlsDiv = div.querySelector('#mainControlsDiv');
+            
             return div;
         };
 
