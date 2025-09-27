@@ -801,6 +801,21 @@
                     stopSpinner(previewGPXButton, 'Generate Route');
                     return;
                 }
+                
+                // Calculate the area of the combined polygon
+                const areaInSquareMeters = turf.area(combinedPolygon);
+                const areaInSquareKm = areaInSquareMeters / 1000000; // Convert to km²
+                const areaInSquareMi = areaInSquareMeters / 2589988.11; // Convert to mi²
+                
+                // Check if area is very large (5 km² threshold)
+                if (areaInSquareKm > 5) {
+                    const confirmMessage = `Area is very big and may not successfully generate (${areaInSquareKm.toFixed(2)}km²/${areaInSquareMi.toFixed(2)}mi²). Continue?`;
+                    if (!confirm(confirmMessage)) {
+                        stopSpinner(previewGPXButton, 'Generate Route');
+                        return;
+                    }
+                }
+                
                 const combinedCoords = combinedPolygon.geometry.coordinates;
                 fetch('/generate-gpx/', {
                     method: 'POST',
