@@ -1147,6 +1147,25 @@
         let currentAnimationTime = 0; // Current time in the animation
         let totalRouteDistance = 0; // Total distance of the route in km
         let currentRouteDistance = 0; // Current distance covered in km
+        
+        // Interpolation variables for smoother movement
+        let currentInterpolatedPosition = null; // Current interpolated position between points
+        let interpolationStep = 0; // Current interpolation step (0-1)
+        let interpolationSteps = 10; // Number of interpolation steps between points
+        let useInterpolation = false; // Whether to use interpolation (for slower speeds)
+        // Function to interpolate between two points
+        function interpolatePoint(point1, point2, t) {
+            return [
+                point1[0] + (point2[0] - point1[0]) * t,
+                point1[1] + (point2[1] - point1[1]) * t
+            ];
+        }
+        
+        // Function to determine if interpolation should be used based on speed
+        function shouldUseInterpolation(speed) {
+            return speed < 1; // Use interpolation for speeds slower than 1x
+        }
+        
         // Function to show/hide media controls
         function toggleMediaControls(show) {
             const mediaControls = document.getElementById('mediaControls');
@@ -1243,6 +1262,20 @@
             animationInProgress = true;
             animationPaused = false;
             currentAnimationTime = 0;
+            
+            // Initialize interpolation
+            useInterpolation = shouldUseInterpolation(animationSpeed);
+            interpolationStep = 0;
+            currentInterpolatedPosition = null;
+            
+            // Adjust interpolation steps based on speed for optimal smoothness
+            if (animationSpeed <= 0.25) {
+                interpolationSteps = 20; // More steps for very slow speeds
+            } else if (animationSpeed <= 0.5) {
+                interpolationSteps = 15; // Medium steps for slow speeds
+            } else {
+                interpolationSteps = 10; // Default steps for other speeds
+            }
             
             // Calculate total animation time (30ms per point)
             totalAnimationTime = routePoints.length * 30;
@@ -1380,8 +1413,52 @@
                 return;
             }
             
-            // Track the last 5 points for the yellow polyline
-            const last5Points = routePoints.slice(Math.max(routeIndex - 4, 0), routeIndex + 1);
+            let currentPoint;
+            
+            if (useInterpolation && routeIndex < routePoints.length - 1) {
+                // Use interpolation for smoother movement
+                const point1 = routePoints[routeIndex];
+                const point2 = routePoints[routeIndex + 1];
+                const t = interpolationStep / interpolationSteps;
+                
+                currentPoint = interpolatePoint(point1, point2, t);
+                currentInterpolatedPosition = currentPoint;
+                
+                // Increment interpolation step
+                interpolationStep++;
+                
+                // If we've completed interpolation between these two points, move to next point
+                if (interpolationStep >= interpolationSteps) {
+                    interpolationStep = 0;
+                    routeIndex++;
+                }
+            } else {
+                // Use discrete point movement (original behavior)
+                currentPoint = routePoints[routeIndex];
+                routeIndex++;
+            }
+            
+            // Create interpolated route lines
+            let routeUntilCurrent, last5Points;
+            
+            if (useInterpolation && currentInterpolatedPosition) {
+                // Create interpolated route up to current position
+                routeUntilCurrent = routePoints.slice(0, routeIndex + 1);
+                if (currentInterpolatedPosition) {
+                    routeUntilCurrent.push(currentInterpolatedPosition);
+                }
+                
+                // Create interpolated last 5 points (including current interpolated position)
+                const baseLast5Points = routePoints.slice(Math.max(routeIndex - 4, 0), routeIndex + 1);
+                last5Points = [...baseLast5Points];
+                if (currentInterpolatedPosition) {
+                    last5Points.push(currentInterpolatedPosition);
+                }
+            } else {
+                // Use discrete points (original behavior)
+                routeUntilCurrent = routePoints.slice(0, routeIndex + 1);
+                last5Points = routePoints.slice(Math.max(routeIndex - 4, 0), routeIndex + 1);
+            }
             
             // Remove the old yellow polyline if it exists
             if (last5PointsPolyline) {
@@ -1394,9 +1471,6 @@
                 weight: 4,
                 opacity: 0.7
             }).addTo(map);
-            
-            // Create or update the red polyline for the full route up to the current point
-            const routeUntilCurrent = routePoints.slice(0, routeIndex + 1);
             
             // Remove the old red polyline if it exists
             if (currentRoutePolyline) {
@@ -1415,7 +1489,6 @@
                 map.removeLayer(currentPositionMarker);
             }
             
-            const currentPoint = routePoints[routeIndex];
             currentPositionMarker = L.circleMarker(currentPoint, {
                 radius: 8,
                 fillColor: '#ff6b35',
@@ -1425,15 +1498,25 @@
                 fillOpacity: 0.8
             }).addTo(map);
             
-            // Increment the route index for the next animation step
-            routeIndex++;
-            currentAnimationTime += 30;
+            // Update animation time
+            if (!useInterpolation) {
+                currentAnimationTime += 30;
+            } else {
+                // For interpolation, update time more frequently for smoother progress
+                currentAnimationTime += 30 / interpolationSteps;
+            }
             
             // Update progress
             updateProgress();
             
             // Calculate next interval based on speed
-            const interval = Math.max(30 / animationSpeed, 5); // Minimum 5ms interval
+            let interval;
+            if (useInterpolation) {
+                // For interpolation, use smaller intervals for smoother movement
+                interval = Math.max(30 / (animationSpeed * interpolationSteps), 2); // Minimum 2ms interval
+            } else {
+                interval = Math.max(30 / animationSpeed, 5); // Minimum 5ms interval
+            }
             
             // Schedule next animation step
             animationInterval = setTimeout(continueAnimation, interval);
@@ -1508,6 +1591,19 @@
                 this.classList.add('active');
                 // Update animation speed
                 animationSpeed = parseFloat(this.getAttribute('data-speed'));
+                
+                // Update interpolation settings if animation is in progress
+                if (animationInProgress) {
+                    useInterpolation = shouldUseInterpolation(animationSpeed);
+                    // Adjust interpolation steps based on speed for optimal smoothness
+                    if (animationSpeed <= 0.25) {
+                        interpolationSteps = 20; // More steps for very slow speeds
+                    } else if (animationSpeed <= 0.5) {
+                        interpolationSteps = 15; // Medium steps for slow speeds
+                    } else {
+                        interpolationSteps = 10; // Default steps for other speeds
+                    }
+                }
             });
         });
 
