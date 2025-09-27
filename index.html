@@ -44,6 +44,16 @@
             cursor: pointer;
         }
 
+        /* Ensure statistics use the same font size as labels on desktop */
+        #routeLength {
+            font-size: 15px;
+        }
+
+        /* Hide statistics when empty */
+        #routeLength:empty {
+            display: none;
+        }
+
         button {
             background-color: #007bff;
             color: white;
@@ -434,10 +444,22 @@
                  margin: 2px;
              }
 
-             .leaflet-bar label {
-                 font-size: 11px;
-                 margin: 2px 0;
-             }
+        .leaflet-bar label {
+            font-size: 11px;
+            margin: 2px 0;
+        }
+
+        /* Ensure statistics use the same font size as labels */
+        #routeLength {
+            font-size: 11px;
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        /* Hide statistics when empty */
+        #routeLength:empty {
+            display: none;
+        }
 
          }
     </style>
