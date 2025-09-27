@@ -184,6 +184,124 @@
             background-color: #e0e0e0;
         }
 
+        /* Media Player Controls Styles */
+        .media-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+            min-width: 300px;
+            font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+            font-size: 12px;
+        }
+
+        .media-controls.visible {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .media-controls-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .media-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            min-width: 40px;
+        }
+
+        .media-btn:hover {
+            background: #0056b3;
+        }
+
+        .media-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .media-btn.active {
+            background: #28a745;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .speed-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .speed-btn:hover {
+            background: #545b62;
+        }
+
+        .speed-btn.active {
+            background: #007bff;
+        }
+
+        .progress-container {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-bar:hover {
+            height: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #007bff;
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
+        .progress-bar.dragging {
+            cursor: grabbing;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: #666;
+            min-width: 80px;
+            text-align: center;
+        }
+
         /* Combined Media query for smaller screens (portrait and landscape mobile) */
         @media (max-width: 600px), /* For portrait phones and small tablets */
                (max-height: 450px) and (orientation: landscape) { /* For landscape phones where height is constrained */
@@ -248,6 +366,39 @@
                  max-height: 80vh;
                  overflow-y: auto;
              }
+
+             /* Media controls mobile styles */
+             .media-controls {
+                 min-width: 280px;
+                 padding: 8px 12px;
+                 bottom: 10px;
+             }
+
+             .media-controls-row {
+                 gap: 8px;
+             }
+
+             .media-btn {
+                 padding: 6px 10px;
+                 font-size: 12px;
+                 min-width: 35px;
+             }
+
+             .speed-btn {
+                 padding: 3px 6px;
+                 font-size: 11px;
+             }
+
+             /* Hide leaflet-bottom when media controls are visible on mobile */
+             .media-controls.visible ~ .leaflet-bottom,
+             .media-controls.visible + * .leaflet-bottom {
+                 display: none !important;
+             }
+
+             .progress-text {
+                 font-size: 11px;
+                 min-width: 70px;
+             }
          }
     </style>
 </head>
@@ -264,6 +415,31 @@
         <div class="context-menu-item" data-service="panoramax">Panoramax</div>
         <div class="context-menu-item" data-service="kartaview">KartaView</div>
         <div class="context-menu-item" data-service="mapilio">Mapilio</div>
+    </div>
+
+    <!-- Media Player Controls -->
+    <div id="mediaControls" class="media-controls">
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">0.0 km / 0.0 km</div>
+        </div>
+        <div class="media-controls-row">
+            <button class="media-btn" id="playFromBeginningBtn">⏮️</button>
+            <button class="media-btn" id="playPauseBtn">▶️</button>
+            <button class="media-btn" id="closeBtn">✕</button>
+        </div>
+        <div class="media-controls-row">
+            <div class="speed-control">
+                <span style="font-size: 12px; color: #666;">Speed:</span>
+                <button class="speed-btn" data-speed="0.1">0.1x</button>
+                <button class="speed-btn" data-speed="0.25">0.25x</button>
+                <button class="speed-btn" data-speed="0.5">0.5x</button>
+                <button class="speed-btn active" data-speed="1">1x</button>
+                <button class="speed-btn" data-speed="2">2x</button>
+            </div>
+        </div>
     </div>
     <script>
         const highlightedPolygons = []; // To store highlighted polygons' Leaflet layers
@@ -764,18 +940,8 @@
             }
             // Clear the route length display
             document.getElementById('routeLength').innerHTML = '';
-            // Reset route index and stop animation
-            routeIndex = 0;
-            animationInProgress = false;
-            // Remove any existing route lines (polyline layers)
-            if (currentRoutePolyline) {
-                map.removeLayer(currentRoutePolyline);
-                currentRoutePolyline = null;
-            }
-            if (last5PointsPolyline) {
-                map.removeLayer(last5PointsPolyline);
-                last5PointsPolyline = null;
-            }
+            // Stop animation and hide media controls
+            stopAnimation();
         }
         // Function to search for a location using Nominatim
         function searchLocation() {
@@ -972,90 +1138,310 @@
         let routePoints = []; // To store the GPX points
         let last5PointsPolyline = null; // To hold the yellow polyline of the last 5 points
         let currentRoutePolyline = null; // To hold the red polyline for the route
+        let currentPositionMarker = null; // To hold the current position circle marker
         let animationInProgress = false; // Track if animation is in progress
+        let animationPaused = false; // Track if animation is paused
+        let animationSpeed = 1; // Animation speed multiplier
+        let animationInterval = null; // Store the animation interval
+        let totalAnimationTime = 0; // Total time for the animation
+        let currentAnimationTime = 0; // Current time in the animation
+        let totalRouteDistance = 0; // Total distance of the route in km
+        let currentRouteDistance = 0; // Current distance covered in km
+        // Function to show/hide media controls
+        function toggleMediaControls(show) {
+            const mediaControls = document.getElementById('mediaControls');
+            const bottomControls = document.querySelector('.leaflet-bottom');
+            
+            if (show) {
+                mediaControls.classList.add('visible');
+                // Hide leaflet-bottom on mobile when media controls are visible
+                if (window.innerWidth <= 600 || (window.innerHeight <= 450 && window.innerWidth > window.innerHeight)) {
+                    if (bottomControls) {
+                        bottomControls.style.display = 'none';
+                    }
+                }
+            } else {
+                mediaControls.classList.remove('visible');
+                // Show leaflet-bottom again when media controls are hidden
+                if (bottomControls) {
+                    bottomControls.style.display = '';
+                }
+            }
+        }
+
+        // Function to calculate distance between two points
+        function calculateDistance(point1, point2) {
+            const R = 6371; // Earth's radius in kilometers
+            const dLat = (point2[0] - point1[0]) * Math.PI / 180;
+            const dLon = (point2[1] - point1[1]) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(point1[0] * Math.PI / 180) * Math.cos(point2[0] * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // Function to calculate total distance up to a point
+        function calculateDistanceToPoint(points, endIndex) {
+            let distance = 0;
+            for (let i = 1; i <= endIndex && i < points.length; i++) {
+                distance += calculateDistance(points[i-1], points[i]);
+            }
+            return distance;
+        }
+
+        // Function to update progress bar
+        function updateProgress() {
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            
+            if (routePoints.length === 0) return;
+            
+            const progress = (routeIndex / routePoints.length) * 100;
+            progressFill.style.width = progress + '%';
+            
+            // Calculate current distance
+            currentRouteDistance = calculateDistanceToPoint(routePoints, routeIndex);
+            
+            // Update distance display
+            progressText.textContent = `${currentRouteDistance.toFixed(1)} km / ${totalRouteDistance.toFixed(1)} km`;
+        }
+
+        // Function to format time for display
+        function formatTime(milliseconds) {
+            const seconds = Math.floor(milliseconds / 1000);
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
         // Function to animate the route
         function playRouteAnimation() {
             if (routePoints.length === 0) {
                 alert('No route to animate. Please generate the route first.');
                 return;
             }
+            
+            // If animation is paused, resume it
+            if (animationPaused) {
+                resumeAnimation();
+                return;
+            }
+            
             // If animation is already in progress or finished, stop and reset it
             if (animationInProgress || routeIndex >= routePoints.length) {
-                if (last5PointsPolyline) {
-                    map.removeLayer(last5PointsPolyline); // Hide the yellow polyline
-                }
-                if (currentRoutePolyline) {
-                    map.removeLayer(currentRoutePolyline); // Remove the red polyline
-                }
-                // Reset route index and start from the beginning
-                routeIndex = 0;
-                animationInProgress = false;
+                stopAnimation();
+                return;
             }
+            
             // Start the animation
+            startAnimation();
+        }
+
+        // Function to start animation
+        function startAnimation() {
             animationInProgress = true;
+            animationPaused = false;
+            currentAnimationTime = 0;
+            
+            // Calculate total animation time (30ms per point)
+            totalAnimationTime = routePoints.length * 30;
+            
+            // Calculate total route distance
+            totalRouteDistance = calculateDistanceToPoint(routePoints, routePoints.length - 1);
+            
+            // Show media controls
+            toggleMediaControls(true);
+            
+            // Update play/pause button
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            playPauseBtn.textContent = '⏸️';
+            playPauseBtn.classList.add('active');
+            
             // Remove the existing preview line before starting the animation
             if (previewLayer) {
                 map.removeLayer(previewLayer);
                 previewLayer = null;
             }
-            // Function to continue the animation
-            function continueAnimation() {
-                if (routeIndex >= routePoints.length) {
-                    // Stop the animation when the route is completed
-                    animationInProgress = false;
-                    if (last5PointsPolyline) {
-                        map.removeLayer(last5PointsPolyline); // Hide the yellow polyline
-                    }
-                    return; // End the animation
-                }
-                // Track the last 5 points for the yellow polyline
-                const last5Points = routePoints.slice(Math.max(routeIndex - 4, 0), routeIndex + 1); // Get the last 5 points
-                // Remove the old yellow polyline if it exists
-                if (last5PointsPolyline) {
-                    map.removeLayer(last5PointsPolyline);
-                }
-                // Create a new yellow polyline for the last 5 points
-                last5PointsPolyline = L.polyline(last5Points, {
-                    color: 'yellow',
-                    weight: 4,
-                    opacity: 0.7
-                }).addTo(map);
-                // Create or update the red polyline for the full route up to the current point
-                const routeUntilCurrent = routePoints.slice(0, routeIndex + 1); // Get the route up to the current point
-                // Remove the old red polyline if it exists
-                if (currentRoutePolyline) {
-                    map.removeLayer(currentRoutePolyline);
-                }
-                // Create a new red polyline for the current route
-                currentRoutePolyline = L.polyline(routeUntilCurrent, {
+            
+            // Start the animation loop
+            continueAnimation();
+        }
+
+        // Function to pause animation
+        function pauseAnimation() {
+            animationPaused = true;
+            if (animationInterval) {
+                clearTimeout(animationInterval);
+                animationInterval = null;
+            }
+            
+            // Update play/pause button
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            playPauseBtn.textContent = '▶️';
+            playPauseBtn.classList.remove('active');
+        }
+
+        // Function to resume animation
+        function resumeAnimation() {
+            animationPaused = false;
+            
+            // Update play/pause button
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            playPauseBtn.textContent = '⏸️';
+            playPauseBtn.classList.add('active');
+            
+            // Continue the animation
+            continueAnimation();
+        }
+
+        // Function to stop animation
+        function stopAnimation() {
+            animationInProgress = false;
+            animationPaused = false;
+            routeIndex = 0;
+            currentAnimationTime = 0;
+            currentRouteDistance = 0;
+            
+            if (animationInterval) {
+                clearTimeout(animationInterval);
+                animationInterval = null;
+            }
+            
+            // Remove polylines and marker
+            if (last5PointsPolyline) {
+                map.removeLayer(last5PointsPolyline);
+                last5PointsPolyline = null;
+            }
+            if (currentRoutePolyline) {
+                map.removeLayer(currentRoutePolyline);
+                currentRoutePolyline = null;
+            }
+            if (currentPositionMarker) {
+                map.removeLayer(currentPositionMarker);
+                currentPositionMarker = null;
+            }
+            
+            // Show the full route again
+            if (routePoints.length > 0) {
+                previewLayer = L.polyline(routePoints, {
                     color: 'red',
                     weight: 4,
                     opacity: 0.7
                 }).addTo(map);
-                // Increment the route index for the next animation step
-                routeIndex++;
-                // Repeat the animation at a fixed interval (30ms)
-                setTimeout(continueAnimation, 30); // Adjust the interval to 30ms
             }
-            // Start the animation
-            continueAnimation();
+            
+            // Hide media controls
+            toggleMediaControls(false);
+            
+            // Reset buttons
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            playPauseBtn.textContent = '▶️';
+            playPauseBtn.classList.remove('active');
+            
+            // Reset progress
+            updateProgress();
+        }
+
+        // Function to play from the beginning
+        function playFromBeginning() {
+            if (routePoints.length === 0) {
+                alert('No route to animate. Please generate the route first.');
+                return;
+            }
+            
+            // Stop current animation
+            if (animationInProgress) {
+                if (animationInterval) {
+                    clearTimeout(animationInterval);
+                    animationInterval = null;
+                }
+            }
+            
+            // Reset to beginning
+            routeIndex = 0;
+            currentAnimationTime = 0;
+            animationPaused = false;
+            
+            // Start animation
+            startAnimation();
+        }
+
+        // Function to continue the animation
+        function continueAnimation() {
+            if (!animationInProgress || animationPaused || routeIndex >= routePoints.length) {
+                if (routeIndex >= routePoints.length) {
+                    // Animation completed
+                    animationInProgress = false;
+                    const playPauseBtn = document.getElementById('playPauseBtn');
+                    playPauseBtn.textContent = '▶️';
+                    playPauseBtn.classList.remove('active');
+                }
+                return;
+            }
+            
+            // Track the last 5 points for the yellow polyline
+            const last5Points = routePoints.slice(Math.max(routeIndex - 4, 0), routeIndex + 1);
+            
+            // Remove the old yellow polyline if it exists
+            if (last5PointsPolyline) {
+                map.removeLayer(last5PointsPolyline);
+            }
+            
+            // Create a new yellow polyline for the last 5 points
+            last5PointsPolyline = L.polyline(last5Points, {
+                color: 'yellow',
+                weight: 4,
+                opacity: 0.7
+            }).addTo(map);
+            
+            // Create or update the red polyline for the full route up to the current point
+            const routeUntilCurrent = routePoints.slice(0, routeIndex + 1);
+            
+            // Remove the old red polyline if it exists
+            if (currentRoutePolyline) {
+                map.removeLayer(currentRoutePolyline);
+            }
+            
+            // Create a new red polyline for the current route
+            currentRoutePolyline = L.polyline(routeUntilCurrent, {
+                color: 'red',
+                weight: 4,
+                opacity: 0.7
+            }).addTo(map);
+            
+            // Add/update current position marker
+            if (currentPositionMarker) {
+                map.removeLayer(currentPositionMarker);
+            }
+            
+            const currentPoint = routePoints[routeIndex];
+            currentPositionMarker = L.circleMarker(currentPoint, {
+                radius: 8,
+                fillColor: '#ff6b35',
+                color: '#ffffff',
+                weight: 3,
+                opacity: 1,
+                fillOpacity: 0.8
+            }).addTo(map);
+            
+            // Increment the route index for the next animation step
+            routeIndex++;
+            currentAnimationTime += 30;
+            
+            // Update progress
+            updateProgress();
+            
+            // Calculate next interval based on speed
+            const interval = Math.max(30 / animationSpeed, 5); // Minimum 5ms interval
+            
+            // Schedule next animation step
+            animationInterval = setTimeout(continueAnimation, interval);
         }
         // Event listeners for the buttons
         document.getElementById('downloadButton').addEventListener('click', combineAndDownloadGPX);
         document.getElementById('clearButton').addEventListener('click', function () {
             clearAllSelections();
-            // Ensure animation is fully cleared
-            if (animationInProgress) {
-                if (last5PointsPolyline) {
-                    map.removeLayer(last5PointsPolyline); // Hide the yellow polyline
-                }
-                if (currentRoutePolyline) {
-                    map.removeLayer(currentRoutePolyline); // Remove the red polyline
-                }
-                // Reset route index and animation state
-                routeIndex = 0;
-                animationInProgress = false;
-            }
         });
         // Event listener for the search button
         document.getElementById('searchButton').addEventListener('click', searchLocation);
@@ -1093,6 +1479,149 @@
         document.getElementById('previewGPXButton').addEventListener('click', previewGPXRoute);
         // Add event listener for the Play Route button
         document.getElementById("playRouteButton").addEventListener("click", playRouteAnimation);
+
+        // Media controls event listeners
+        document.getElementById('playPauseBtn').addEventListener('click', function() {
+            if (animationInProgress && !animationPaused) {
+                pauseAnimation();
+            } else if (animationPaused) {
+                resumeAnimation();
+            } else {
+                playRouteAnimation();
+            }
+        });
+
+        document.getElementById('playFromBeginningBtn').addEventListener('click', function() {
+            playFromBeginning();
+        });
+
+        document.getElementById('closeBtn').addEventListener('click', function() {
+            stopAnimation();
+        });
+
+        // Speed control event listeners
+        document.querySelectorAll('.speed-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all speed buttons
+                document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                this.classList.add('active');
+                // Update animation speed
+                animationSpeed = parseFloat(this.getAttribute('data-speed'));
+            });
+        });
+
+        // Progress bar drag functionality
+        const progressBar = document.getElementById('progressBar');
+        let isDragging = false;
+
+        function seekToPosition(clientX) {
+            if (routePoints.length === 0) return;
+            
+            const rect = progressBar.getBoundingClientRect();
+            const clickX = clientX - rect.left;
+            const percentage = Math.max(0, Math.min(1, clickX / rect.width));
+            const newIndex = Math.floor(percentage * routePoints.length);
+            
+            if (newIndex >= 0 && newIndex < routePoints.length) {
+                routeIndex = newIndex;
+                currentAnimationTime = newIndex * 30;
+                currentRouteDistance = calculateDistanceToPoint(routePoints, routeIndex);
+                updateProgress();
+                
+                // Update the route display
+                if (routeIndex > 0) {
+                    const last5Points = routePoints.slice(Math.max(routeIndex - 4, 0), routeIndex + 1);
+                    const routeUntilCurrent = routePoints.slice(0, routeIndex + 1);
+                    
+                    // Remove existing polylines
+                    if (last5PointsPolyline) {
+                        map.removeLayer(last5PointsPolyline);
+                    }
+                    if (currentRoutePolyline) {
+                        map.removeLayer(currentRoutePolyline);
+                    }
+                    
+                    // Create new polylines
+                    last5PointsPolyline = L.polyline(last5Points, {
+                        color: 'yellow',
+                        weight: 4,
+                        opacity: 0.7
+                    }).addTo(map);
+                    
+                    currentRoutePolyline = L.polyline(routeUntilCurrent, {
+                        color: 'red',
+                        weight: 4,
+                        opacity: 0.7
+                    }).addTo(map);
+                    
+                    // Add/update current position marker
+                    if (currentPositionMarker) {
+                        map.removeLayer(currentPositionMarker);
+                    }
+                    
+                    const currentPoint = routePoints[routeIndex];
+                    currentPositionMarker = L.circleMarker(currentPoint, {
+                        radius: 8,
+                        fillColor: '#ff6b35',
+                        color: '#ffffff',
+                        weight: 3,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    }).addTo(map);
+                }
+            }
+        }
+
+        progressBar.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            progressBar.classList.add('dragging');
+            seekToPosition(e.clientX);
+            e.preventDefault();
+        });
+
+        progressBar.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                seekToPosition(e.clientX);
+            }
+        });
+
+        // Use document-level events to handle dragging outside the progress bar
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                seekToPosition(e.clientX);
+            }
+        });
+
+        document.addEventListener('mouseup', function(e) {
+            if (isDragging) {
+                isDragging = false;
+                progressBar.classList.remove('dragging');
+            }
+        });
+
+        // Touch events for mobile
+        progressBar.addEventListener('touchstart', function(e) {
+            isDragging = true;
+            progressBar.classList.add('dragging');
+            seekToPosition(e.touches[0].clientX);
+            e.preventDefault();
+        });
+
+        // Use document-level touch events to handle dragging outside the progress bar
+        document.addEventListener('touchmove', function(e) {
+            if (isDragging) {
+                seekToPosition(e.touches[0].clientX);
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('touchend', function(e) {
+            if (isDragging) {
+                isDragging = false;
+                progressBar.classList.remove('dragging');
+            }
+        });
 
         const bufferInput = document.getElementById('bufferSize');
 
