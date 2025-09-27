@@ -933,13 +933,57 @@
                 }); // Reset style to blue
             });
             highlightedPolygons.length = 0; // Clear the array
-            // Remove preview layer if it exists
+            
+            // Remove all layers from map
             if (previewLayer) {
                 map.removeLayer(previewLayer);
                 previewLayer = null;
             }
-            // Clear the route length display
+            if (geoJsonLayer) {
+                map.removeLayer(geoJsonLayer);
+                geoJsonLayer = null;
+            }
+            if (last5PointsPolyline) {
+                map.removeLayer(last5PointsPolyline);
+                last5PointsPolyline = null;
+            }
+            if (currentRoutePolyline) {
+                map.removeLayer(currentRoutePolyline);
+                currentRoutePolyline = null;
+            }
+            if (currentPositionMarker) {
+                map.removeLayer(currentPositionMarker);
+                currentPositionMarker = null;
+            }
+            if (routePolyline) {
+                map.removeLayer(routePolyline);
+                routePolyline = null;
+            }
+            
+            // Reset all variables to initial state
+            gpxData = null;
+            routePoints = [];
+            routeIndex = 0;
+            animationInProgress = false;
+            animationPaused = false;
+            currentAnimationTime = 0;
+            totalRouteDistance = 0;
+            currentRouteDistance = 0;
+            currentInterpolatedPosition = null;
+            interpolationStep = 0;
+            
+            // Clear animation interval if running
+            if (animationInterval) {
+                clearTimeout(animationInterval);
+                animationInterval = null;
+            }
+            
+            // Reset UI elements
             document.getElementById('routeLength').innerHTML = '';
+            document.getElementById('searchBox').value = '';
+            document.getElementById('bufferSize').value = '1';
+            document.getElementById('searchRules').selectedIndex = 0; // Reset to first option
+            
             // Stop animation and hide media controls
             stopAnimation();
         }
