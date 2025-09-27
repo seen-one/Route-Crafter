@@ -929,11 +929,11 @@
                 
                 const areaInSquareMeters = turf.area(combinedPolygon);
                 const areaInSquareKm = areaInSquareMeters / 1000000; // Convert to km²
-                const areaInSquareMi = areaInSquareMeters / 2589988.11; // Convert to mi²
+                const areaInSquareMi = areaInSquareMeters / 2589988.11; // Convert to sq mi
                 
                 // Create area statistics display
                 const areaWarning = areaInSquareKm > 5 ? ' <span style="color: red; font-weight: bold;">⚠️ Large Area</span>' : '';
-                areaStats = `<strong>Selected Area:</strong> ${areaInSquareKm.toFixed(2)} km² (${areaInSquareMi.toFixed(2)} mi²)${areaWarning}<br>`;
+                areaStats = `<strong>Selected Area:</strong> ${areaInSquareKm.toFixed(2)} km² (${areaInSquareMi.toFixed(2)} sq mi)${areaWarning}<br>`;
                 
                 // Update the route length display with area information
                 document.getElementById('routeLength').innerHTML = areaStats;
@@ -1098,7 +1098,7 @@
             previewGPXButton.classList.add('button-loading');
             previewGPXButton.innerHTML = 'Generating Route <span class="spinner"></span>';
             if (highlightedPolygons.length === 0) {
-                alert('No areas have been selected.');
+                alert('No area has been selected.');
                 stopSpinner(previewGPXButton, 'Generate Route');
                 return;
             }
@@ -1123,11 +1123,11 @@
                 // Calculate the area of the combined polygon
                 const areaInSquareMeters = turf.area(combinedPolygon);
                 const areaInSquareKm = areaInSquareMeters / 1000000; // Convert to km²
-                const areaInSquareMi = areaInSquareMeters / 2589988.11; // Convert to mi²
+                const areaInSquareMi = areaInSquareMeters / 2589988.11; // Convert to sq mi
                 
                 // Check if area is very large (5 km² threshold)
                 if (areaInSquareKm > 5) {
-                    const confirmMessage = `Area is very big and may not successfully generate (${areaInSquareKm.toFixed(2)}km²/${areaInSquareMi.toFixed(2)}mi²). Continue?`;
+                    const confirmMessage = `Area is very big and may not successfully generate (${areaInSquareKm.toFixed(2)}km²/${areaInSquareMi.toFixed(2)}sq mi). Continue?`;
                     if (!confirm(confirmMessage)) {
                         stopSpinner(previewGPXButton, 'Generate Route');
                         return;
@@ -1195,7 +1195,7 @@
                             const areaInSquareKm = areaInSquareMeters / 1000000;
                             const areaInSquareMi = areaInSquareMeters / 2589988.11;
                             const areaWarning = areaInSquareKm > 5 ? ' <span style="color: red; font-weight: bold;">⚠️ Large Area</span>' : '';
-                            areaStats = `<strong>Selected Area:</strong> ${areaInSquareKm.toFixed(2)} km² (${areaInSquareMi.toFixed(2)} mi²)${areaWarning}<br>`;
+                            areaStats = `<strong>Selected Area:</strong> ${areaInSquareKm.toFixed(2)} km² (${areaInSquareMi.toFixed(2)} sq mi)${areaWarning}<br>`;
                         } catch (err) {
                             console.error('Error calculating area for route stats:', err);
                         }
@@ -1205,8 +1205,8 @@
                             ${areaStats}
                             <strong>Route Length:</strong> ${distanceKm.toFixed(2)} km (${distanceMi.toFixed(2)} mi)<br>
                             <strong>Street Length:</strong> ${streetLengthKm.toFixed(2)} km (${streetLengthMi.toFixed(2)} mi)<br>
-                            <strong>Efficiency:</strong> ${efficiencyDisplay} (Street/Route)<br>
-                            <strong>Coverage:</strong> ${coverageDisplay} (Route/Street)
+                            <strong>Efficiency:</strong> ${efficiencyDisplay} (Street÷Route)<br>
+                            <strong>Coverage:</strong> ${coverageDisplay} (Route÷Street)
                         `;
                         if (previewLayer) {
                             map.removeLayer(previewLayer);
