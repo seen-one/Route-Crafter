@@ -776,15 +776,18 @@
                     <button id="downloadButton">Download GPX File</button>
                     <button id="clearButton">Reset</button>
                     <br>
-                    <label for="bufferSize">Add buffer to selected areas (meters): </label>
-                    <input type="number" id="bufferSize" min="1" max="100" value="1">
-                    <br>
-                    <label for="consolidateTolerance">Consolidate intersections tolerance (meters): </label>
-                    <input type="number" id="consolidateTolerance" min="1" max="100" value="15">
-                    <br>
-                    <label for="truncateByEdge">
-                        <input type="checkbox" id="truncateByEdge" checked> Truncate by edge
-                    </label>
+                    <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
+                        <label for="bufferSize" style="flex: 1;">Add buffer to selected areas (meters):</label>
+                        <input type="number" id="bufferSize" min="1" max="100" value="1" style="width: 80px;">
+                    </div>
+                    <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
+                        <label for="consolidateTolerance" style="flex: 1;">Consolidate intersections tolerance (meters):</label>
+                        <input type="number" id="consolidateTolerance" min="1" max="100" value="15" style="width: 80px;">
+                    </div>
+                    <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
+                        <label for="truncateByEdge" style="flex: 1;">Truncate by edge</label>
+                        <input type="checkbox" id="truncateByEdge" checked>
+                    </div>
                     <p id="routeLength"></p>
                 </div>
             `;
