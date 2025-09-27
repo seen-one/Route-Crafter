@@ -537,6 +537,10 @@
                         return true; // Successfully restored from hash
                     }
                 }
+            } else if (hash === '') {
+                // If hash is empty, restore to default view
+                map.setView([51.505, -0.09], 13);
+                return true;
             }
             return false; // No valid hash data found
         }
@@ -601,6 +605,11 @@
 
         map.on('moveend', debouncedSaveMapState);
         map.on('zoomend', debouncedSaveMapState);
+
+        // Listen for hash changes (back/forward button navigation)
+        window.addEventListener('hashchange', function() {
+            restoreMapStateFromHash();
+        });
 
         // Context Menu functionality
         const contextMenu = document.getElementById('contextMenu');
