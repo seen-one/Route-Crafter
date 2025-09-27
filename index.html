@@ -829,8 +829,33 @@
                         const distanceMi = turf.length(line, {
                             units: 'miles'
                         });
-                        // Update the routeLength paragraph
-                        document.getElementById('routeLength').innerHTML = `Route Length: ${distanceKm.toFixed(2)} km (${distanceMi.toFixed(2)} mi)`;
+                        
+                        // Extract street length and efficiency from GPX description
+                        const descElement = xmlDoc.getElementsByTagName('desc')[0];
+                        let streetLengthKm = 0;
+                        let streetLengthMi = 0;
+                        let efficiencyDisplay = "0%";
+                        
+                        if (descElement && descElement.textContent) {
+                            const desc = descElement.textContent;
+                            const streetMatch = desc.match(/Street Length: ([\d.]+) km \(([\d.]+) mi\)/);
+                            const efficiencyMatch = desc.match(/Efficiency: ([+\d.]+%)/);
+                            
+                            if (streetMatch) {
+                                streetLengthKm = parseFloat(streetMatch[1]);
+                                streetLengthMi = parseFloat(streetMatch[2]);
+                            }
+                            if (efficiencyMatch) {
+                                efficiencyDisplay = efficiencyMatch[1];
+                            }
+                        }
+                        
+                        // Update the routeLength paragraph with all metrics
+                        document.getElementById('routeLength').innerHTML = `
+                            <strong>Route Length:</strong> ${distanceKm.toFixed(2)} km (${distanceMi.toFixed(2)} mi)<br>
+                            <strong>Street Length:</strong> ${streetLengthKm.toFixed(2)} km (${streetLengthMi.toFixed(2)} mi)<br>
+                            <strong>Efficiency:</strong> ${efficiencyDisplay}
+                        `;
                         if (previewLayer) {
                             map.removeLayer(previewLayer);
                         }

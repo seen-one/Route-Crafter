@@ -4,12 +4,35 @@ import osmnx as ox
 import networkx as nx
 from shapely.geometry import Polygon
 from datetime import datetime
-from everystreet.libs.gpx_formatter import TEMPLATE, TRACE_POINT
+from everystreet.libs.gpx_formatter import TRACE_POINT
 from everystreet.libs.tools import *
 from everystreet.libs.graph_route import plot_graph_route
 from network import Network
 from network.algorithms import hierholzer
 from copy import deepcopy
+
+# GPX Template with street length and efficiency data
+GPX_TEMPLATE = """<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<gpx version="1.1"
+    creator="EMTAC BTGPS Trine II DataLog Dump 1.0 - http://www.ayeltd.biz"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.topografix.com/GPX/1/1"
+    xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+    <name>{name}</name>
+    <desc>Route Length: {route_length:.2f} km | Street Length: {street_length:.2f} km ({street_length_mi:.2f} mi) | Efficiency: {efficiency_display}</desc>
+    <wpt lat="{center_lat}" lon="{center_lon}">
+        <ele>2372</ele>
+        <name>{name}</name>
+    </wpt>
+    <trk>
+        <name>{name}</name>
+        <number>1</number>
+        <trkseg>
+            {trace_points}
+        </trkseg>
+    </trk>
+</gpx>
+"""
 
 CUSTOM_FILTER = (
     '["highway"]["area"!~"yes"]["highway"!~"bridleway|bus_guideway|construction|'
@@ -51,6 +74,53 @@ def generate_gpx(polygon_coords):
         final_path = convert_path(graph, converted_eulerian_path, double_edge_heap)
         coordinates_path = convert_final_path_to_coordinates(org_graph, final_path)
 
+        # Calculate total street length from the original graph (before any modifications)
+        # This represents the minimum distance needed to cover all streets
+        total_street_length = 0
+        for u, v, data in graph.edges(data=True):
+            if 'length' in data:
+                total_street_length += data['length']
+        
+        # Calculate route length from the generated path
+        # This should be the total length of the Eulerian path
+        route_length = 0
+        for u, v, i in final_path:
+            edge_data = org_graph.get_edge_data(u, v)
+            if edge_data and i in edge_data and 'length' in edge_data[i]:
+                route_length += edge_data[i]['length']
+            else:
+                # Fallback: calculate distance between nodes
+                node_u = org_graph.nodes[u]
+                node_v = org_graph.nodes[v]
+                route_length += ox.distance.great_circle_vec(
+                    node_u['y'], node_u['x'], node_v['y'], node_v['x']
+                )
+        
+        # The route length should always be >= street length
+        # If it's not, there's an issue with the calculation
+        if route_length < total_street_length:
+            # Fallback: use coordinate-based calculation for route length
+            if len(coordinates_path) > 1:
+                route_length = 0
+                for i in range(len(coordinates_path) - 1):
+                    lat1, lon1 = coordinates_path[i]
+                    lat2, lon2 = coordinates_path[i + 1]
+                    route_length += ox.distance.great_circle_vec(lat1, lon1, lat2, lon2)
+        
+        # Calculate efficiency (street length / route length * 100)
+        # This represents what percentage of the route is actual street coverage
+        # Higher efficiency means less extra distance needed to cover all streets
+        efficiency = (total_street_length / route_length) * 100 if route_length > 0 else 0
+        
+        # Calculate imperial units for street length
+        street_length_mi = total_street_length / 1609.344  # Convert meters to miles
+        
+        # Format efficiency display to show percentage above 100%
+        if efficiency >= 100:
+            efficiency_display = f"+{efficiency - 100:.1f}%"
+        else:
+            efficiency_display = f"{efficiency:.1f}%"
+
         eccentricity = nx.eccentricity(graph)
         center = nx.center(graph)
         center_node = graph.nodes[center[0]]
@@ -62,11 +132,15 @@ def generate_gpx(polygon_coords):
             for lat, lon in coordinates_path
         ])
 
-        gpx_payload = TEMPLATE.format(
+        gpx_payload = GPX_TEMPLATE.format(
             name="Generated Route",
             trace_points=trace_points,
             center_lat=center_node["y"],
-            center_lon=center_node["x"]
+            center_lon=center_node["x"],
+            route_length=route_length / 1000,  # Convert to km
+            street_length=total_street_length / 1000,  # Convert to km
+            street_length_mi=street_length_mi,  # Already in miles
+            efficiency_display=efficiency_display
         )
 
         return gpx_payload
