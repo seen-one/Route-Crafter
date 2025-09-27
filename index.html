@@ -800,7 +800,34 @@
                 `;
             }
             const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
-            fetch(url).then(response => response.json()).then(data => {
+            fetch(url).then(response => {
+                // Check if the response is ok (status 200-299)
+                if (!response.ok) {
+                    // Handle different HTTP error status codes
+                    let errorMessage = '';
+                    switch (response.status) {
+                        case 504:
+                            errorMessage = 'Gateway Timeout (504): The server took too long to respond. Please try again or zoom into a smaller area.';
+                            break;
+                        case 502:
+                            errorMessage = 'Bad Gateway (502): The server is temporarily unavailable. Please try again later.';
+                            break;
+                        case 503:
+                            errorMessage = 'Service Unavailable (503): The server is temporarily overloaded. Please try again later.';
+                            break;
+                        case 429:
+                            errorMessage = 'Too Many Requests (429): Rate limit exceeded. Please wait a moment before trying again.';
+                            break;
+                        case 400:
+                            errorMessage = 'Bad Request (400): Invalid query parameters. Please try a different search.';
+                            break;
+                        default:
+                            errorMessage = `Server Error (${response.status}): ${response.statusText}. Please try again.`;
+                    }
+                    throw new Error(errorMessage);
+                }
+                return response.json();
+            }).then(data => {
                 if (data.remark && data.remark.includes('Query timed out')) {
                     throw new Error('Too many results. Please zoom into a smaller area. (Overpass query timed out after 10 seconds)');
                 }
@@ -857,7 +884,9 @@
                 }
             }).catch(err => {
                 console.error('Error fetching data:', err);
-                alert(err.message || 'An error occurred while fetching data. Please try again.');
+                // Display the error message in an alert
+                const errorMessage = err.message || 'An unexpected error occurred while fetching data. Please try again.';
+                alert(`Error: ${errorMessage}`);
             }).finally(() => {
                 // Remove loading spinner and reset button text
                 fetchButton.classList.remove('button-loading');
