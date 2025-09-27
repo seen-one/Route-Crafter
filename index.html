@@ -2265,7 +2265,7 @@
             onAdd: function (map) {
                 var btn = L.DomUtil.create('button', '');
                 btn.id = 'toggleFilterBtn';
-                btn.textContent = 'Show Filter Menu';
+                btn.textContent = 'Show Coverage Filters Menu';
                 btn.style.background = '#fff';
                 btn.style.padding = '6px';
                 btn.style.border = 'none';
@@ -2280,7 +2280,7 @@
                                    (filterDiv.style.display === '' && window.getComputedStyle(filterDiv).display === 'none');
                      if (isHidden) {
                          filterDiv.style.display = 'block';
-                         btn.textContent = 'Hide Filter Menu';
+                         btn.textContent = 'Hide Coverage Filters Menu';
                          // Hide bottom controls on mobile when filter menu is open
                          if (window.innerWidth <= 600 || (window.innerHeight <= 450 && window.innerWidth > window.innerHeight)) {
                              if (bottomControls) {
@@ -2289,7 +2289,7 @@
                          }
                      } else {
                          filterDiv.style.display = 'none';
-                         btn.textContent = 'Show Filter Menu';
+                         btn.textContent = 'Show Coverage Filters Menu';
                          // Show bottom controls again when filter menu is closed
                          if (bottomControls) {
                              bottomControls.classList.remove('hidden-on-mobile');
