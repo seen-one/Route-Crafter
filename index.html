@@ -797,6 +797,10 @@
                         <label for="truncateByEdge" style="flex: 1;">Truncate by edge</label>
                         <input type="checkbox" id="truncateByEdge" checked>
                     </div>
+                    <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
+                        <label for="customFilter" style="flex: 1;">Custom filter:</label>
+                        <input type="text" id="customFilter" style="width: 100%; margin-left: 10px;" value='["highway"]["area"!~"yes"]["highway"!~"bridleway|bus_guideway|construction|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|construction|platform|raceway|rest_area|path"]["access"!~"customers|no|private"]["public_transport"!~"platform"]["fee"!~"yes"]["foot"!~"no"]["service"!~"drive-through|driveway|parking_aisle"]["toll"!~"yes"]'>
+                    </div>
                     <p id="routeLength"></p>
                 </div>
             `;
@@ -1100,6 +1104,7 @@
             document.getElementById('bufferSize').value = '1';
             document.getElementById('truncateByEdge').checked = true;
             document.getElementById('consolidateTolerance').value = '15';
+            document.getElementById('customFilter').value = '["highway"]["area"!~"yes"]["highway"!~"bridleway|bus_guideway|construction|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|construction|platform|raceway|rest_area|path"]["access"!~"customers|no|private"]["public_transport"!~"platform"]["fee"!~"yes"]["foot"!~"no"]["service"!~"drive-through|driveway|parking_aisle"]["toll"!~"yes"]';
             document.getElementById('searchRules').selectedIndex = 0; // Reset to first option
             
             // Stop animation and hide media controls
@@ -1181,6 +1186,7 @@
                 const combinedCoords = combinedPolygon.geometry.coordinates;
                 const truncateByEdge = document.getElementById('truncateByEdge').checked;
                 const consolidateTolerance = parseInt(document.getElementById('consolidateTolerance').value, 10);
+                const customFilter = document.getElementById('customFilter').value;
                 
                 fetch('/generate-gpx/', {
                     method: 'POST',
@@ -1190,7 +1196,8 @@
                     body: JSON.stringify({
                         polygon_coords: combinedCoords[0],
                         truncate_by_edge: truncateByEdge,
-                        consolidate_tolerance: consolidateTolerance
+                        consolidate_tolerance: consolidateTolerance,
+                        custom_filter: customFilter
                     })
                 }).then(response => response.json()).then(data => {
                     if (data.gpx) {

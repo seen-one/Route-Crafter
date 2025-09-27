@@ -42,10 +42,12 @@ CUSTOM_FILTER = (
     'driveway|parking_aisle"]["toll"!~"yes"]'
 )
 
-def generate_gpx(polygon_coords, truncate_by_edge=True, consolidate_tolerance=15):
+def generate_gpx(polygon_coords, truncate_by_edge=True, consolidate_tolerance=15, custom_filter=None):
     try:
         polygon = Polygon(polygon_coords)
-        org_graph = ox.graph_from_polygon(polygon, custom_filter=CUSTOM_FILTER, truncate_by_edge=truncate_by_edge)
+        # Use provided custom_filter or fall back to default CUSTOM_FILTER
+        filter_to_use = custom_filter if custom_filter is not None else CUSTOM_FILTER
+        org_graph = ox.graph_from_polygon(polygon, custom_filter=filter_to_use, truncate_by_edge=truncate_by_edge)
         
         graph = ox.project_graph(org_graph)
         graph = ox.consolidate_intersections(graph, rebuild_graph=True, tolerance=consolidate_tolerance, dead_ends=True)
@@ -230,11 +232,13 @@ if __name__ == '__main__':
         polygon_coords = input_data
         truncate_by_edge = True
         consolidate_tolerance = 15
+        custom_filter = None
     else:
         # New format: dict with parameters
         polygon_coords = input_data.get('polygon_coords')
         truncate_by_edge = input_data.get('truncate_by_edge', True)
         consolidate_tolerance = input_data.get('consolidate_tolerance', 15)
+        custom_filter = input_data.get('custom_filter', None)
 
-    gpx_data = generate_gpx(polygon_coords, truncate_by_edge, consolidate_tolerance)
+    gpx_data = generate_gpx(polygon_coords, truncate_by_edge, consolidate_tolerance, custom_filter)
     print(gpx_data)  # Print GPX data to stdout

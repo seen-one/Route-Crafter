@@ -40,6 +40,7 @@ def generate_gpx_route():
         polygon_coords = data.get('polygon_coords')
         truncate_by_edge = data.get('truncate_by_edge', True)  # Default to True for backward compatibility
         consolidate_tolerance = data.get('consolidate_tolerance', 15)  # Default to 15 for backward compatibility
+        custom_filter = data.get('custom_filter', None)  # Default to None for backward compatibility
 
         if not polygon_coords or not isinstance(polygon_coords, list):
             return jsonify({'error': 'Invalid polygon coordinates provided'}), 400
@@ -70,7 +71,8 @@ def generate_gpx_route():
             input_data = {
                 'polygon_coords': polygon_coords,
                 'truncate_by_edge': truncate_by_edge,
-                'consolidate_tolerance': consolidate_tolerance
+                'consolidate_tolerance': consolidate_tolerance,
+                'custom_filter': custom_filter
             }
             # Send data to the subprocess via stdin
             stdout, stderr = process.communicate(input=json.dumps(input_data), timeout=TIMEOUT_DURATION)
