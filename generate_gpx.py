@@ -19,7 +19,7 @@ GPX_TEMPLATE = """<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
     xmlns="http://www.topografix.com/GPX/1/1"
     xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
     <name>{name}</name>
-    <desc>Route Length: {route_length:.2f} km | Street Length: {street_length:.2f} km ({street_length_mi:.2f} mi) | Efficiency: {efficiency_display}</desc>
+    <desc>Route Length: {route_length:.2f} km | Street Length: {street_length:.2f} km ({street_length_mi:.2f} mi) | Efficiency: {efficiency_display} | Coverage: {coverage_display}</desc>
     <wpt lat="{center_lat}" lon="{center_lon}">
         <ele>2372</ele>
         <name>{name}</name>
@@ -114,14 +114,25 @@ def generate_gpx(polygon_coords):
         # Higher efficiency means less extra distance needed to cover all streets
         efficiency = (total_street_length / route_length) * 100 if route_length > 0 else 0
         
+        # Calculate coverage (route length / street length * 100)
+        # This represents how much longer the route is compared to the minimum street length
+        # Higher coverage means more extra distance needed to cover all streets
+        coverage = (route_length / total_street_length) * 100 if total_street_length > 0 else 0
+        
         # Calculate imperial units for street length
         street_length_mi = total_street_length / 1609.344  # Convert meters to miles
         
         # Format efficiency display to show percentage above 100%
         if efficiency >= 100:
-            efficiency_display = f"+{efficiency - 100:.1f}%"
+            efficiency_display = f"{efficiency:.1f}%"
         else:
             efficiency_display = f"{efficiency:.1f}%"
+            
+        # Format coverage display to show percentage above 100%
+        if coverage >= 100:
+            coverage_display = f"{coverage:.1f}%"
+        else:
+            coverage_display = f"{coverage:.1f}%"
 
         eccentricity = nx.eccentricity(graph)
         center = nx.center(graph)
@@ -142,7 +153,8 @@ def generate_gpx(polygon_coords):
             route_length=route_length / 1000,  # Convert to km
             street_length=total_street_length / 1000,  # Convert to km
             street_length_mi=street_length_mi,  # Already in miles
-            efficiency_display=efficiency_display
+            efficiency_display=efficiency_display,
+            coverage_display=coverage_display
         )
 
         return gpx_payload
