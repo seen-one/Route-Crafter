@@ -1017,10 +1017,6 @@
                 map.removeLayer(geoJsonLayer);
                 geoJsonLayer = null;
             }
-            if (last5PointsPolyline) {
-                map.removeLayer(last5PointsPolyline);
-                last5PointsPolyline = null;
-            }
             if (currentRoutePolyline) {
                 map.removeLayer(currentRoutePolyline);
                 currentRoutePolyline = null;
@@ -1254,7 +1250,6 @@
         let routePolyline = null; // To hold the polyline layer
         let routeIndex = 0; // To track the current point in the route animation
         let routePoints = []; // To store the GPX points
-        let last5PointsPolyline = null; // To hold the yellow polyline of the last 5 points
         let currentRoutePolyline = null; // To hold the red polyline for the route
         let currentPositionMarker = null; // To hold the current position circle marker
         let animationInProgress = false; // Track if animation is in progress
@@ -1460,10 +1455,6 @@
             }
             
             // Remove polylines and marker
-            if (last5PointsPolyline) {
-                map.removeLayer(last5PointsPolyline);
-                last5PointsPolyline = null;
-            }
             if (currentRoutePolyline) {
                 map.removeLayer(currentRoutePolyline);
                 currentRoutePolyline = null;
@@ -1557,7 +1548,7 @@
             }
             
             // Create interpolated route lines
-            let routeUntilCurrent, last5Points;
+            let routeUntilCurrent;
             
             if (useInterpolation && currentInterpolatedPosition) {
                 // Create interpolated route up to current position
@@ -1565,30 +1556,10 @@
                 if (currentInterpolatedPosition) {
                     routeUntilCurrent.push(currentInterpolatedPosition);
                 }
-                
-                // Create interpolated last 5 points (including current interpolated position)
-                const baseLast5Points = routePoints.slice(Math.max(routeIndex - 4, 0), routeIndex + 1);
-                last5Points = [...baseLast5Points];
-                if (currentInterpolatedPosition) {
-                    last5Points.push(currentInterpolatedPosition);
-                }
             } else {
                 // Use discrete points (original behavior)
                 routeUntilCurrent = routePoints.slice(0, routeIndex + 1);
-                last5Points = routePoints.slice(Math.max(routeIndex - 4, 0), routeIndex + 1);
             }
-            
-            // Remove the old yellow polyline if it exists
-            if (last5PointsPolyline) {
-                map.removeLayer(last5PointsPolyline);
-            }
-            
-            // Create a new yellow polyline for the last 5 points
-            last5PointsPolyline = L.polyline(last5Points, {
-                color: 'yellow',
-                weight: 4,
-                opacity: 0.7
-            }).addTo(map);
             
             // Remove the old red polyline if it exists
             if (currentRoutePolyline) {
@@ -1745,23 +1716,14 @@
                 
                 // Update the route display
                 if (routeIndex > 0) {
-                    const last5Points = routePoints.slice(Math.max(routeIndex - 4, 0), routeIndex + 1);
                     const routeUntilCurrent = routePoints.slice(0, routeIndex + 1);
                     
                     // Remove existing polylines
-                    if (last5PointsPolyline) {
-                        map.removeLayer(last5PointsPolyline);
-                    }
                     if (currentRoutePolyline) {
                         map.removeLayer(currentRoutePolyline);
                     }
                     
                     // Create new polylines
-                    last5PointsPolyline = L.polyline(last5Points, {
-                        color: 'yellow',
-                        weight: 4,
-                        opacity: 0.7
-                    }).addTo(map);
                     
                     currentRoutePolyline = L.polyline(routeUntilCurrent, {
                         color: 'red',
