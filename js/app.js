@@ -448,6 +448,12 @@ export class RouteCrafterApp {
         }
     }
 
+    // Helper function to convert polygon coordinates to Overpass poly format
+    polygonToOverpassPoly(polygon) {
+        const coordinates = polygon.geometry.coordinates[0];
+        return coordinates.map(coord => `${coord[1]} ${coord[0]}`).join(' ');
+    }
+
     fetchRoadsInArea() {
         const previewGPXButton = document.getElementById('previewGPXButton');
         previewGPXButton.classList.add('button-loading');
@@ -491,38 +497,22 @@ export class RouteCrafterApp {
                 return;
             }
             
-            // Get bounds from the combined polygon
-            const bbox = turf.bbox(combinedPolygon);
-            const bboxString = `${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]}`;
-            
-            // Parse the custom filter to create Overpass query
-            let filterConditions = '';
-            try {
-                const filterArray = JSON.parse(customFilter);
-                filterArray.forEach((condition, index) => {
-                    if (index > 0) {
-                        filterConditions += ' && ';
-                    }
-                    if (condition.includes('!~')) {
-                        const [key, value] = condition.split('!~');
-                        filterConditions += `["${key}"!~"${value}"]`;
-                    } else if (condition.includes('=')) {
-                        const [key, value] = condition.split('=');
-                        filterConditions += `["${key}"="${value}"]`;
-                    } else {
-                        filterConditions += `["${condition}"]`;
-                    }
-                });
-            } catch (e) {
-                console.warn('Could not parse custom filter, using default highway filter');
-                filterConditions = '["highway"]';
+            // Use the custom filter directly as Overpass QL format
+            let filterConditions = customFilter.trim();
+            if (!filterConditions) {
+                console.warn('No custom filter provided, using default highway filter');
+                filterConditions = '[highway]';
             }
             
-            // Create Overpass query to fetch roads within the polygon with custom filter
+            // Convert polygon to Overpass poly format
+            const polyString = this.polygonToOverpassPoly(combinedPolygon);
+            
+            // Create Overpass query using poly filter for precise polygon filtering
             const overpassQuery = `
                 [out:json][timeout:30];
                 (
-                    way${filterConditions}(${bboxString});
+                    way${filterConditions}
+                    (poly:"${polyString}");
                 );
                 (._;>;);
                 out body;
@@ -567,47 +557,13 @@ export class RouteCrafterApp {
                 // Convert OSM data to GeoJSON for display purposes only
                 const geoJsonData = osmtogeojson(data);
                 
-                // Filter to only include LineString features (roads) and apply additional filtering
+                // Filter to only include LineString features (roads) - no additional client-side filtering needed
+                // since Overpass poly filter already handled the polygon intersection
                 const roadFeatures = geoJsonData.features.filter(feature => {
-                    if (feature.geometry.type !== 'LineString' || !feature.properties.highway) {
-                        return false;
-                    }
-                    
-                    // Additional filtering based on the custom filter
-                    const props = feature.properties;
-                    const highway = props.highway;
-                    
-                    // Apply the same filtering logic as the custom filter
-                    if (highway === 'no' || highway === 'bridleway' || highway === 'bus_guideway' || 
-                        highway === 'construction' || highway === 'cycleway' || highway === 'elevator' || 
-                        highway === 'footway' || highway === 'motorway' || highway === 'motorway_junction' || 
-                        highway === 'motorway_link' || highway === 'escalator' || highway === 'proposed' || 
-                        highway === 'platform' || highway === 'raceway' || highway === 'rest_area' || 
-                        highway === 'path') {
-                        return false;
-                    }
-                    
-                    if (props.area === 'yes') return false;
-                    if (props.access === 'customers' || props.access === 'no' || props.access === 'private') return false;
-                    if (props.public_transport === 'platform') return false;
-                    if (props.fee === 'yes') return false;
-                    if (props.foot === 'no') return false;
-                    if (props.service === 'drive-through' || props.service === 'driveway' || props.service === 'parking_aisle') return false;
-                    if (props.toll === 'yes') return false;
-                    
-                    return true;
+                    return feature.geometry.type === 'LineString' && feature.properties.highway;
                 });
                 
-                // Further filter roads that are actually within the selected polygon
-                const filteredRoads = roadFeatures.filter(feature => {
-                    if (feature.geometry.type === 'LineString') {
-                        const line = turf.lineString(feature.geometry.coordinates);
-                        return turf.booleanIntersects(line, combinedPolygon);
-                    }
-                    return false;
-                });
-                
-                if (filteredRoads.length === 0) {
+                if (roadFeatures.length === 0) {
                     alert('No roads found within the selected area that match the filter criteria. Try adjusting the filter or selecting a different area.');
                     stopSpinner(previewGPXButton, 'Fetch Roads');
                     return;
@@ -619,7 +575,7 @@ export class RouteCrafterApp {
                 }
                 
                 // Create a new GeoJSON layer for roads
-                this.geoJsonLayer = L.geoJSON(filteredRoads, {
+                this.geoJsonLayer = L.geoJSON(roadFeatures, {
                     style: {
                         color: 'red',
                         weight: 4,
@@ -641,7 +597,7 @@ export class RouteCrafterApp {
                 
                 // Calculate total road length
                 let totalLengthKm = 0;
-                filteredRoads.forEach(feature => {
+                roadFeatures.forEach(feature => {
                     if (feature.geometry.type === 'LineString') {
                         const line = turf.lineString(feature.geometry.coordinates);
                         const length = turf.length(line, { units: 'kilometers' });
@@ -659,7 +615,7 @@ export class RouteCrafterApp {
                 // Update the routeLength paragraph with road statistics
                 document.getElementById('routeLength').innerHTML = `
                     <strong>Selected Area:</strong> ${areaInSquareKm.toFixed(2)} km² (${areaInSquareMi.toFixed(2)} sq mi)<br>
-                    <strong>Roads Found:</strong> ${filteredRoads.length} road segments<br>
+                    <strong>Roads Found:</strong> ${roadFeatures.length} road segments<br>
                     <strong>Total Road Length:</strong> ${totalLengthKm.toFixed(2)} km (${totalLengthMi.toFixed(2)} mi)
                 `;
                 
@@ -670,7 +626,12 @@ export class RouteCrafterApp {
                 
             }).catch(err => {
                 console.error('Error fetching roads:', err);
-                alert('Error fetching roads:\n\n' + (err.message || 'Failed to fetch road data from Overpass API'));
+                // If poly filter fails, provide helpful error message
+                if (err.message.includes('Invalid') || err.message.includes('poly')) {
+                    alert('Error: The selected area might be too complex for server-side filtering. Try selecting a simpler area or reducing the buffer size.');
+                } else {
+                    alert('Error fetching roads:\n\n' + (err.message || 'Failed to fetch road data from Overpass API'));
+                }
             }).finally(() => {
                 stopSpinner(previewGPXButton, 'Fetch Roads');
             });
@@ -713,7 +674,7 @@ export class RouteCrafterApp {
         document.getElementById('bufferSize').value = '1';
         document.getElementById('truncateByEdge').checked = true;
         document.getElementById('consolidateTolerance').value = '15';
-        document.getElementById('customFilter').value = '["highway"]["area"!~"yes"]["highway"!~"bridleway|bus_guideway|construction|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path"]["access"!~"customers|no|private"]["public_transport"!~"platform"]["fee"!~"yes"]["service"!~"drive-through|driveway|parking_aisle"]["toll"!~"yes"]';
+        document.getElementById('customFilter').value = '[highway][area!~"yes"][highway!~"bridleway|bus_guideway|construction|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path"][access!~"customers|no|private"][public_transport!~"platform"][fee!~"yes"][service!~"drive-through|driveway|parking_aisle"][toll!~"yes"]';
         document.getElementById('searchRules').selectedIndex = 0;
     }
 
