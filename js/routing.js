@@ -54,12 +54,6 @@ export class RoutingManager {
         document.getElementById('previewGPXButton').addEventListener('click', () => this.fetchRoadsInArea());
         document.getElementById('playRouteButton').addEventListener('click', () => this.startRouteAnimation());
 
-        // Download
-        document.getElementById('downloadButton').addEventListener('click', () => {
-            if (window.app && window.app.downloadRoadDataAsCustomFormat) {
-                window.app.downloadRoadDataAsCustomFormat();
-            }
-        });
 
         // Clear
         document.getElementById('clearButton').addEventListener('click', () => this.clearAllSelections());

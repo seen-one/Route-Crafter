@@ -202,7 +202,7 @@ export class MapManager {
                     <br>
                     <button id="previewGPXButton">Fetch Roads</button>
                     <button id="playRouteButton">Play Route</button>
-                    <button id="downloadButton">Download Roads</button>
+                    <button id="downloadButton">Download Overpass Response</button>
                     <button id="drawToggleButton">Toggle Drawing</button>
                     <button id="clearButton">Reset</button>
                     <br>

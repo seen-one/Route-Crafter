@@ -3,7 +3,7 @@
 import { MapManager } from './map.js';
 import { RoutingManager } from './routing.js';
 import { CoverageManager } from './coverage.js';
-import { stopSpinner, convertRoadsToCustomFormat } from './utils.js';
+import { stopSpinner } from './utils.js';
 
 export class RouteCrafterApp {
     constructor() {
@@ -560,7 +560,11 @@ export class RouteCrafterApp {
                     throw new Error('Too many results. Please zoom into a smaller area. (Overpass query timed out after 30 seconds)');
                 }
                 
-                // Convert OSM data to GeoJSON
+                // Store the raw Overpass response for download
+                window.overpassResponse = data;
+                window.overpassQuery = overpassQuery;
+                
+                // Convert OSM data to GeoJSON for display purposes only
                 const geoJsonData = osmtogeojson(data);
                 
                 // Filter to only include LineString features (roads) and apply additional filtering
@@ -608,12 +612,6 @@ export class RouteCrafterApp {
                     stopSpinner(previewGPXButton, 'Fetch Roads');
                     return;
                 }
-                
-                // Store the road data for download
-                window.roadGeoJsonData = {
-                    type: 'FeatureCollection',
-                    features: filteredRoads
-                };
                 
                 // Remove existing road layer if it exists
                 if (this.geoJsonLayer) {
@@ -802,24 +800,19 @@ export class RouteCrafterApp {
     }
 
     downloadRoadDataAsCustomFormat() {
-        if (!window.roadGeoJsonData) {
+        if (!window.overpassResponse) {
             alert('No road data available. Please fetch roads first.');
             return;
         }
         
-        // Get the selected route type
-        const routeType = document.getElementById('routeType').value || 'undirected';
-        
-        // Convert GeoJSON to custom nodes and edges format
-        const customRoadData = convertRoadsToCustomFormat(window.roadGeoJsonData, routeType);
-        
-        const blob = new Blob([JSON.stringify(customRoadData, null, 2)], {
+        // Download the raw Overpass response as a JSON file
+        const blob = new Blob([JSON.stringify(window.overpassResponse, null, 2)], {
             type: 'application/json'
         });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'roads.json';
+        a.download = 'overpass_response.json';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
