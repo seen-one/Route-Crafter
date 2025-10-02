@@ -39,24 +39,8 @@ export class RoutingManager {
     }
 
     setupEventListeners() {
-        // Search functionality
-        document.getElementById('searchButton').addEventListener('click', () => this.searchLocation());
-        document.getElementById('searchBox').addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                this.searchLocation();
-            }
-        });
-
-        // Area fetching
-        document.getElementById('fetchButton').addEventListener('click', () => this.fetchAreasByRule());
-
-        // Route generation
-        document.getElementById('previewGPXButton').addEventListener('click', () => this.fetchRoadsInArea());
-        document.getElementById('playRouteButton').addEventListener('click', () => this.startRouteAnimation());
-
-
-        // Clear
-        document.getElementById('clearButton').addEventListener('click', () => this.clearAllSelections());
+        // All button event listeners are handled by the main app
+        // This module only handles internal routing functionality
 
         // Buffer size changes
         document.getElementById('bufferSize').addEventListener('input', () => {
@@ -170,56 +154,8 @@ export class RoutingManager {
         });
     }
 
-    searchLocation() {
-        const searchButton = document.getElementById('searchButton');
-        const searchQuery = document.getElementById('searchBox').value;
-        if (!searchQuery) {
-            alert('Please enter a location to search.');
-            return;
-        }
-        // Add loading spinner
-        searchButton.classList.add('button-loading');
-        searchButton.innerHTML = 'Searching <span class="spinner"></span>';
-        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`;
-        fetch(url).then(response => response.json()).then(data => {
-            if (data.length === 0) {
-                alert('No results found. Please try a different search term.');
-                return;
-            }
-            const { lat, lon, display_name } = data[0];
-            this.map.setView([parseFloat(lat), parseFloat(lon)], 14); // Center map on the search result
-            console.log('Search result:', display_name);
-        }).catch(err => console.error('Error searching location:', err)).finally(() => {
-            // Remove loading spinner
-            stopSpinner(searchButton, 'Search');
-        });
-    }
 
-    fetchAreasByRule() {
-        const fetchButton = document.getElementById('fetchButton');
-        // Add loading spinner
-        fetchButton.classList.add('button-loading');
-        fetchButton.innerHTML = 'Finding Areas <span class="spinner"></span>';
-        const selectedRule = document.getElementById('searchRules').value;
-        
-        // This will be handled by the main app to manage layers
-        // For now, just remove the spinner
-        setTimeout(() => {
-            stopSpinner(fetchButton, 'Find Areas');
-        }, 1000);
-    }
 
-    fetchRoadsInArea() {
-        const previewGPXButton = document.getElementById('previewGPXButton');
-        previewGPXButton.classList.add('button-loading');
-        previewGPXButton.innerHTML = 'Fetching Roads <span class="spinner"></span>';
-        
-        // This will be handled by the main app
-        // For now, just remove the spinner
-        setTimeout(() => {
-            stopSpinner(previewGPXButton, 'Fetch Roads');
-        }, 1000);
-    }
 
 
     startRouteAnimation() {
@@ -552,10 +488,6 @@ export class RoutingManager {
         }
     }
 
-    clearAllSelections() {
-        // This will be handled by the main app to clear all layers and reset state
-        this.stopAnimation();
-    }
 
     // Setter for route points (called by main app)
     setRoutePoints(points) {

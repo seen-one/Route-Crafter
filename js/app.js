@@ -666,7 +666,7 @@ export class RouteCrafterApp {
         }
         
         // Reset routing manager
-        this.routingManager.clearAllSelections();
+        this.routingManager.stopAnimation();
         
         // Reset UI elements
         document.getElementById('routeLength').innerHTML = '';
@@ -712,7 +712,7 @@ export class RouteCrafterApp {
             alert('No route to animate. Please generate the route first.');
             return;
         }
-        this.routingManager.playRouteAnimation();
+        this.routingManager.startRouteAnimation();
     }
 
     downloadRoadDataAsCustomFormat() {
