@@ -620,55 +620,10 @@ export class RouteCrafterApp {
                 
                 // Create a new GeoJSON layer for roads
                 this.geoJsonLayer = L.geoJSON(filteredRoads, {
-                    style: function(feature) {
-                        // Style roads based on highway type
-                        const highway = feature.properties.highway;
-                        let color = '#666';
-                        let weight = 2;
-                        let opacity = 0.8;
-                        
-                        switch (highway) {
-                            case 'motorway':
-                            case 'trunk':
-                                color = '#ff0000';
-                                weight = 4;
-                                break;
-                            case 'primary':
-                                color = '#ff8800';
-                                weight = 3;
-                                break;
-                            case 'secondary':
-                                color = '#ffff00';
-                                weight = 3;
-                                break;
-                            case 'tertiary':
-                                color = '#00ff00';
-                                weight = 2;
-                                break;
-                            case 'residential':
-                            case 'unclassified':
-                                color = '#8888ff';
-                                weight = 1;
-                                break;
-                            case 'service':
-                                color = '#cccccc';
-                                weight = 1;
-                                opacity = 0.5;
-                                break;
-                            case 'footway':
-                            case 'path':
-                            case 'cycleway':
-                                color = '#ff00ff';
-                                weight = 1;
-                                opacity = 0.6;
-                                break;
-                        }
-                        
-                        return {
-                            color: color,
-                            weight: weight,
-                            opacity: opacity
-                        };
+                    style: {
+                        color: 'red',
+                        weight: 4,
+                        opacity: 0.7
                     },
                     onEachFeature: function(feature, layer) {
                         // Add popup with road information
