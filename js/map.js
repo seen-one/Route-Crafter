@@ -228,7 +228,7 @@ export class MapManager {
                     </div>
                     <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
                         <label for="customFilter" style="flex: 1;">Route filter:</label>
-                        <input type="text" id="customFilter" style="width: 100%; margin-left: 10px;" value='["highway"]["area"!~"yes"]["highway"!~"bridleway|bus_guideway|construction|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|construction|platform|raceway|rest_area|path"]["access"!~"customers|no|private"]["public_transport"!~"platform"]["fee"!~"yes"]["foot"!~"no"]["service"!~"drive-through|driveway|parking_aisle"]["toll"!~"yes"]'>
+                        <input type="text" id="customFilter" style="width: 100%; margin-left: 10px;" value='["highway"]["area"!~"yes"]["highway"!~"bridleway|bus_guideway|construction|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path"]["access"!~"customers|no|private"]["public_transport"!~"platform"]["fee"!~"yes"]["service"!~"drive-through|driveway|parking_aisle"]["toll"!~"yes"]'>
                     </div>
                     <p id="routeLength"></p>
                 </div>

@@ -760,7 +760,7 @@ export class RouteCrafterApp {
         document.getElementById('bufferSize').value = '1';
         document.getElementById('truncateByEdge').checked = true;
         document.getElementById('consolidateTolerance').value = '15';
-        document.getElementById('customFilter').value = '["highway"]["area"!~"yes"]["highway"!~"bridleway|bus_guideway|construction|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|construction|platform|raceway|rest_area|path"]["access"!~"customers|no|private"]["public_transport"!~"platform"]["fee"!~"yes"]["foot"!~"no"]["service"!~"drive-through|driveway|parking_aisle"]["toll"!~"yes"]';
+        document.getElementById('customFilter').value = '["highway"]["area"!~"yes"]["highway"!~"bridleway|bus_guideway|construction|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path"]["access"!~"customers|no|private"]["public_transport"!~"platform"]["fee"!~"yes"]["service"!~"drive-through|driveway|parking_aisle"]["toll"!~"yes"]';
         document.getElementById('searchRules').selectedIndex = 0;
     }
 
