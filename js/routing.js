@@ -42,10 +42,7 @@ export class RoutingManager {
         // All button event listeners are handled by the main app
         // This module only handles internal routing functionality
 
-        // Buffer size changes
-        document.getElementById('bufferSize').addEventListener('input', () => {
-            // This will be handled by the main app
-        });
+        // Buffer size changes are handled by the main app
 
         // Media controls
         this.setupMediaControls();
