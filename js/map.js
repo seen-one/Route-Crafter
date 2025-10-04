@@ -215,7 +215,7 @@ export class MapManager {
                         <input type="number" id="consolidateTolerance" min="1" max="100" value="15" style="width: 80px;">
                     </div>
                     <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                        <label for="truncateByEdge" style="flex: 1;">Truncate by edge</label>
+                        <label for="truncateByEdge" style="flex: 1;">Trim roads to polygon boundary</label>
                         <input type="checkbox" id="truncateByEdge" checked>
                     </div>
                     <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">

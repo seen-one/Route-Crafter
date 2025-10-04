@@ -454,6 +454,199 @@ export class RouteCrafterApp {
         return coordinates.map(coord => `${coord[1]} ${coord[0]}`).join(' ');
     }
 
+    // Helper function to trim road segments that extend beyond the polygon boundary
+    trimRoadsToPolygon(roadFeatures, polygon) {
+        const trimmedRoads = [];
+        
+        // Ensure polygon is in the correct format
+        let polygonFeature;
+        if (polygon.geometry && polygon.geometry.type === 'Polygon') {
+            polygonFeature = polygon;
+        } else if (polygon.type === 'Feature' && polygon.geometry.type === 'Polygon') {
+            polygonFeature = polygon;
+        } else {
+            console.error('Invalid polygon format for trimming:', polygon);
+            return roadFeatures; // Return original roads if polygon is invalid
+        }
+        
+        console.log('Polygon feature for trimming:', polygonFeature);
+        
+        roadFeatures.forEach((feature, index) => {
+            if (feature.geometry.type !== 'LineString') {
+                trimmedRoads.push(feature);
+                return;
+            }
+            
+            const roadLine = turf.lineString(feature.geometry.coordinates);
+            
+            try {
+                // Check if the road is completely inside the polygon
+                const isInside = turf.booleanWithin(roadLine, polygonFeature);
+                if (isInside) {
+                    trimmedRoads.push(feature);
+                    return;
+                }
+                
+                // Check if the road intersects with the polygon at all
+                const intersects = turf.booleanIntersects(roadLine, polygonFeature);
+                if (!intersects) {
+                    // Road doesn't intersect with polygon, skip it
+                    return;
+                }
+                
+                // Find intersection points with polygon boundary
+                const intersectionPoints = this.findRoadPolygonIntersections(roadLine, polygonFeature);
+                
+                if (intersectionPoints.length === 0) {
+                    // No intersections found, skip this road
+                    return;
+                }
+                
+                // Create trimmed road segments
+                const trimmedSegments = this.createTrimmedRoadSegments(
+                    feature, 
+                    roadLine, 
+                    polygonFeature, 
+                    intersectionPoints
+                );
+                
+                trimmedRoads.push(...trimmedSegments);
+                
+            } catch (error) {
+                console.warn(`Error processing road ${index}:`, error);
+                // If processing fails, include the original road
+                trimmedRoads.push(feature);
+            }
+        });
+        
+        return trimmedRoads;
+    }
+
+    // Helper function to find intersection points between road and polygon boundary
+    findRoadPolygonIntersections(roadLine, polygonFeature) {
+        const intersectionPoints = [];
+        
+        // Get polygon boundary as a line
+        const polygonBoundary = turf.polygonToLine(polygonFeature);
+        
+        // Find intersections between road and polygon boundary
+        const intersections = turf.lineIntersect(roadLine, polygonBoundary);
+        
+        if (intersections && intersections.features) {
+            intersections.features.forEach(feature => {
+                if (feature.geometry.type === 'Point') {
+                    intersectionPoints.push(feature.geometry.coordinates);
+                }
+            });
+        }
+        
+        return intersectionPoints;
+    }
+
+    // Helper function to create trimmed road segments with nodes at boundary
+    createTrimmedRoadSegments(originalFeature, roadLine, polygonFeature, intersectionPoints) {
+        const trimmedSegments = [];
+        const roadCoords = roadLine.geometry.coordinates;
+        
+        // Find which road coordinates are inside the polygon
+        const insideCoords = [];
+        const outsideCoords = [];
+        
+        roadCoords.forEach(coord => {
+            const point = turf.point(coord);
+            const isInside = turf.booleanWithin(point, polygonFeature);
+            
+            if (isInside) {
+                insideCoords.push(coord);
+            } else {
+                outsideCoords.push(coord);
+            }
+        });
+        
+        if (insideCoords.length === 0) {
+            // No coordinates inside polygon, skip this road
+            return [];
+        }
+        
+        if (insideCoords.length === roadCoords.length) {
+            // All coordinates inside polygon, return original road
+            return [originalFeature];
+        }
+        
+        // Find the intersection points closest to the road endpoints
+        const startCoord = roadCoords[0];
+        const endCoord = roadCoords[roadCoords.length - 1];
+        
+        let startIntersection = null;
+        let endIntersection = null;
+        
+        // Find closest intersection to start
+        let minStartDist = Infinity;
+        intersectionPoints.forEach(interPoint => {
+            const dist = turf.distance(turf.point(startCoord), turf.point(interPoint));
+            if (dist < minStartDist) {
+                minStartDist = dist;
+                startIntersection = interPoint;
+            }
+        });
+        
+        // Find closest intersection to end
+        let minEndDist = Infinity;
+        intersectionPoints.forEach(interPoint => {
+            const dist = turf.distance(turf.point(endCoord), turf.point(interPoint));
+            if (dist < minEndDist) {
+                minEndDist = dist;
+                endIntersection = interPoint;
+            }
+        });
+        
+        // Create trimmed road segment
+        let trimmedCoords = [...insideCoords];
+        
+        // Add intersection points at the boundaries
+        if (startIntersection && !this.coordExists(trimmedCoords, startIntersection)) {
+            trimmedCoords.unshift(startIntersection);
+        }
+        if (endIntersection && !this.coordExists(trimmedCoords, endIntersection)) {
+            trimmedCoords.push(endIntersection);
+        }
+        
+        // Remove duplicate coordinates and ensure proper order
+        trimmedCoords = this.removeDuplicateCoords(trimmedCoords);
+        
+        if (trimmedCoords.length >= 2) {
+            const trimmedFeature = {
+                ...originalFeature,
+                geometry: {
+                    type: 'LineString',
+                    coordinates: trimmedCoords
+                }
+            };
+            trimmedSegments.push(trimmedFeature);
+        }
+        
+        return trimmedSegments;
+    }
+
+    // Helper function to check if coordinate already exists in array
+    coordExists(coords, targetCoord, tolerance = 1e-10) {
+        return coords.some(coord => 
+            Math.abs(coord[0] - targetCoord[0]) < tolerance && 
+            Math.abs(coord[1] - targetCoord[1]) < tolerance
+        );
+    }
+
+    // Helper function to remove duplicate coordinates
+    removeDuplicateCoords(coords) {
+        const unique = [];
+        coords.forEach(coord => {
+            if (!this.coordExists(unique, coord)) {
+                unique.push(coord);
+            }
+        });
+        return unique;
+    }
+
     fetchRoadsInArea() {
         const previewGPXButton = document.getElementById('previewGPXButton');
         previewGPXButton.classList.add('button-loading');
@@ -559,7 +752,7 @@ export class RouteCrafterApp {
                 
                 // Filter to only include LineString features (roads) - no additional client-side filtering needed
                 // since Overpass poly filter already handled the polygon intersection
-                const roadFeatures = geoJsonData.features.filter(feature => {
+                let roadFeatures = geoJsonData.features.filter(feature => {
                     return feature.geometry.type === 'LineString' && feature.properties.highway;
                 });
                 
@@ -567,6 +760,15 @@ export class RouteCrafterApp {
                     alert('No roads found within the selected area that match the filter criteria. Try adjusting the filter or selecting a different area.');
                     stopSpinner(previewGPXButton, 'Fetch Roads');
                     return;
+                }
+                
+                // Apply road trimming if "truncate by edge" is enabled
+                const truncateByEdge = document.getElementById('truncateByEdge').checked;
+                if (truncateByEdge) {
+                    console.log('Trimming roads to polygon boundary...');
+                    console.log('Combined polygon:', combinedPolygon);
+                    roadFeatures = this.trimRoadsToPolygon(roadFeatures, combinedPolygon);
+                    console.log(`Trimmed ${roadFeatures.length} road segments`);
                 }
                 
                 // Remove existing road layer if it exists
@@ -613,9 +815,10 @@ export class RouteCrafterApp {
                 const areaInSquareMi = areaInSquareMeters / 2589988.11;
                 
                 // Update the routeLength paragraph with road statistics
+                const truncateStatus = truncateByEdge ? ' (trimmed to polygon boundary)' : '';
                 document.getElementById('routeLength').innerHTML = `
                     <strong>Selected Area:</strong> ${areaInSquareKm.toFixed(2)} km² (${areaInSquareMi.toFixed(2)} sq mi)<br>
-                    <strong>Roads Found:</strong> ${roadFeatures.length} road segments<br>
+                    <strong>Roads Found:</strong> ${roadFeatures.length} road segments${truncateStatus}<br>
                     <strong>Total Road Length:</strong> ${totalLengthKm.toFixed(2)} km (${totalLengthMi.toFixed(2)} mi)
                 `;
                 
