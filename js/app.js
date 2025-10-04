@@ -145,6 +145,11 @@ export class RouteCrafterApp {
             this.downloadRoadDataAsCustomFormat();
         });
 
+        // Export Chinese Postman button
+        document.getElementById('exportCPPButton').addEventListener('click', () => {
+            this.exportForChinesePostman();
+        });
+
         // Clear button
         document.getElementById('clearButton').addEventListener('click', () => {
             this.clearAllSelections();
@@ -469,7 +474,7 @@ export class RouteCrafterApp {
             return roadFeatures; // Return original roads if polygon is invalid
         }
         
-        console.log('Polygon feature for trimming:', polygonFeature);
+        console.log('Trimming roads to polygon boundary...');
         
         roadFeatures.forEach((feature, index) => {
             if (feature.geometry.type !== 'LineString') {
@@ -477,40 +482,77 @@ export class RouteCrafterApp {
                 return;
             }
             
-            const roadLine = turf.lineString(feature.geometry.coordinates);
-            
             try {
-                // Check if the road is completely inside the polygon
+                // Validate road coordinates
+                const coords = feature.geometry.coordinates;
+                if (!coords || coords.length < 2) {
+                    console.log(`Road ${index} has invalid coordinates, skipping`);
+                    return;
+                }
+                
+                const roadLine = turf.lineString(coords);
+                
+                // Validate the road line
+                if (!roadLine || !roadLine.geometry) {
+                    console.log(`Road ${index} could not be converted to LineString, skipping`);
+                    return;
+                }
+                
+                // Check if road is completely inside polygon
                 const isInside = turf.booleanWithin(roadLine, polygonFeature);
                 if (isInside) {
                     trimmedRoads.push(feature);
                     return;
                 }
                 
-                // Check if the road intersects with the polygon at all
+                // Check if road intersects with polygon
                 const intersects = turf.booleanIntersects(roadLine, polygonFeature);
                 if (!intersects) {
-                    // Road doesn't intersect with polygon, skip it
                     return;
                 }
                 
-                // Find intersection points with polygon boundary
-                const intersectionPoints = this.findRoadPolygonIntersections(roadLine, polygonFeature);
-                
-                if (intersectionPoints.length === 0) {
-                    // No intersections found, skip this road
+                // Use intersect for clipping - but handle the geometry validation issue
+                let intersection;
+                try {
+                    intersection = turf.intersect(roadLine, polygonFeature);
+                } catch (intersectError) {
+                    // Fallback: find intersection points and trim to boundary
+                    const trimmedCoords = this.trimRoadToPolygonBoundary(coords, polygonFeature);
+                    
+                    if (trimmedCoords && trimmedCoords.length >= 2) {
+                        const trimmedFeature = {
+                            ...feature,
+                            geometry: {
+                                type: 'LineString',
+                                coordinates: trimmedCoords
+                            }
+                        };
+                        trimmedRoads.push(trimmedFeature);
+                        console.log(`Road ${index} trimmed using boundary method`);
+                    }
                     return;
                 }
                 
-                // Create trimmed road segments
-                const trimmedSegments = this.createTrimmedRoadSegments(
-                    feature, 
-                    roadLine, 
-                    polygonFeature, 
-                    intersectionPoints
-                );
-                
-                trimmedRoads.push(...trimmedSegments);
+                if (intersection && intersection.geometry) {
+                    if (intersection.geometry.type === 'LineString') {
+                        const trimmedFeature = {
+                            ...feature,
+                            geometry: intersection.geometry
+                        };
+                        trimmedRoads.push(trimmedFeature);
+                    } else if (intersection.geometry.type === 'MultiLineString') {
+                        intersection.geometry.coordinates.forEach(coords => {
+                            const trimmedFeature = {
+                                ...feature,
+                                geometry: {
+                                    type: 'LineString',
+                                    coordinates: coords
+                                }
+                            };
+                            trimmedRoads.push(trimmedFeature);
+                        });
+                    }
+                }
                 
             } catch (error) {
                 console.warn(`Error processing road ${index}:`, error);
@@ -519,133 +561,73 @@ export class RouteCrafterApp {
             }
         });
         
+        console.log(`Trimmed ${roadFeatures.length} roads to ${trimmedRoads.length} segments`);
         return trimmedRoads;
     }
 
-    // Helper function to find intersection points between road and polygon boundary
-    findRoadPolygonIntersections(roadLine, polygonFeature) {
-        const intersectionPoints = [];
+    // Helper function to trim road to polygon boundary by finding intersection points
+    trimRoadToPolygonBoundary(coords, polygonFeature) {
+        if (!coords || coords.length < 2) return null;
         
-        // Get polygon boundary as a line
+        // Find which coordinates are inside the polygon
+        const insideIndices = [];
+        coords.forEach((coord, index) => {
+            const point = turf.point(coord);
+            if (turf.booleanWithin(point, polygonFeature)) {
+                insideIndices.push(index);
+            }
+        });
+        
+        if (insideIndices.length === 0) return null; // No coordinates inside
+        if (insideIndices.length === coords.length) return coords; // All coordinates inside
+        
+        // Find the first and last inside coordinates
+        const firstInside = Math.min(...insideIndices);
+        const lastInside = Math.max(...insideIndices);
+        
+        // Start with coordinates from first inside to last inside
+        let trimmedCoords = coords.slice(firstInside, lastInside + 1);
+        
+        // Try to find intersection points at the boundaries
         const polygonBoundary = turf.polygonToLine(polygonFeature);
         
-        // Find intersections between road and polygon boundary
-        const intersections = turf.lineIntersect(roadLine, polygonBoundary);
+        // Check if we need to add intersection points at the start
+        if (firstInside > 0) {
+            const startSegment = turf.lineString([coords[firstInside - 1], coords[firstInside]]);
+            const startIntersection = this.findLineIntersection(startSegment, polygonBoundary);
+            if (startIntersection) {
+                trimmedCoords.unshift(startIntersection);
+            }
+        }
         
-        if (intersections && intersections.features) {
-            intersections.features.forEach(feature => {
-                if (feature.geometry.type === 'Point') {
-                    intersectionPoints.push(feature.geometry.coordinates);
+        // Check if we need to add intersection points at the end
+        if (lastInside < coords.length - 1) {
+            const endSegment = turf.lineString([coords[lastInside], coords[lastInside + 1]]);
+            const endIntersection = this.findLineIntersection(endSegment, polygonBoundary);
+            if (endIntersection) {
+                trimmedCoords.push(endIntersection);
+            }
+        }
+        
+        return trimmedCoords.length >= 2 ? trimmedCoords : null;
+    }
+
+    // Helper function to find intersection point between two lines
+    findLineIntersection(line1, line2) {
+        try {
+            const intersection = turf.lineIntersect(line1, line2);
+            if (intersection && intersection.features && intersection.features.length > 0) {
+                const point = intersection.features[0];
+                if (point.geometry && point.geometry.type === 'Point') {
+                    return point.geometry.coordinates;
                 }
-            });
+            }
+        } catch (error) {
+            console.warn('Error finding line intersection:', error);
         }
-        
-        return intersectionPoints;
+        return null;
     }
 
-    // Helper function to create trimmed road segments with nodes at boundary
-    createTrimmedRoadSegments(originalFeature, roadLine, polygonFeature, intersectionPoints) {
-        const trimmedSegments = [];
-        const roadCoords = roadLine.geometry.coordinates;
-        
-        // Find which road coordinates are inside the polygon
-        const insideCoords = [];
-        const outsideCoords = [];
-        
-        roadCoords.forEach(coord => {
-            const point = turf.point(coord);
-            const isInside = turf.booleanWithin(point, polygonFeature);
-            
-            if (isInside) {
-                insideCoords.push(coord);
-            } else {
-                outsideCoords.push(coord);
-            }
-        });
-        
-        if (insideCoords.length === 0) {
-            // No coordinates inside polygon, skip this road
-            return [];
-        }
-        
-        if (insideCoords.length === roadCoords.length) {
-            // All coordinates inside polygon, return original road
-            return [originalFeature];
-        }
-        
-        // Find the intersection points closest to the road endpoints
-        const startCoord = roadCoords[0];
-        const endCoord = roadCoords[roadCoords.length - 1];
-        
-        let startIntersection = null;
-        let endIntersection = null;
-        
-        // Find closest intersection to start
-        let minStartDist = Infinity;
-        intersectionPoints.forEach(interPoint => {
-            const dist = turf.distance(turf.point(startCoord), turf.point(interPoint));
-            if (dist < minStartDist) {
-                minStartDist = dist;
-                startIntersection = interPoint;
-            }
-        });
-        
-        // Find closest intersection to end
-        let minEndDist = Infinity;
-        intersectionPoints.forEach(interPoint => {
-            const dist = turf.distance(turf.point(endCoord), turf.point(interPoint));
-            if (dist < minEndDist) {
-                minEndDist = dist;
-                endIntersection = interPoint;
-            }
-        });
-        
-        // Create trimmed road segment
-        let trimmedCoords = [...insideCoords];
-        
-        // Add intersection points at the boundaries
-        if (startIntersection && !this.coordExists(trimmedCoords, startIntersection)) {
-            trimmedCoords.unshift(startIntersection);
-        }
-        if (endIntersection && !this.coordExists(trimmedCoords, endIntersection)) {
-            trimmedCoords.push(endIntersection);
-        }
-        
-        // Remove duplicate coordinates and ensure proper order
-        trimmedCoords = this.removeDuplicateCoords(trimmedCoords);
-        
-        if (trimmedCoords.length >= 2) {
-            const trimmedFeature = {
-                ...originalFeature,
-                geometry: {
-                    type: 'LineString',
-                    coordinates: trimmedCoords
-                }
-            };
-            trimmedSegments.push(trimmedFeature);
-        }
-        
-        return trimmedSegments;
-    }
-
-    // Helper function to check if coordinate already exists in array
-    coordExists(coords, targetCoord, tolerance = 1e-10) {
-        return coords.some(coord => 
-            Math.abs(coord[0] - targetCoord[0]) < tolerance && 
-            Math.abs(coord[1] - targetCoord[1]) < tolerance
-        );
-    }
-
-    // Helper function to remove duplicate coordinates
-    removeDuplicateCoords(coords) {
-        const unique = [];
-        coords.forEach(coord => {
-            if (!this.coordExists(unique, coord)) {
-                unique.push(coord);
-            }
-        });
-        return unique;
-    }
 
     fetchRoadsInArea() {
         const previewGPXButton = document.getElementById('previewGPXButton');
@@ -936,6 +918,138 @@ export class RouteCrafterApp {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    }
+
+    exportForChinesePostman() {
+        if (!this.geoJsonLayer) {
+            alert('No road data available. Please fetch roads first.');
+            return;
+        }
+
+        try {
+            // Extract road features from the current layer
+            const roadFeatures = [];
+            this.geoJsonLayer.eachLayer((layer) => {
+                const feature = layer.feature;
+                if (feature && feature.geometry.type === 'LineString') {
+                    roadFeatures.push(feature);
+                }
+            });
+
+            if (roadFeatures.length === 0) {
+                alert('No road segments found to export.');
+                return;
+            }
+
+            // Build the road graph for Chinese Postman Problem
+            const roadGraph = this.buildChinesePostmanGraph(roadFeatures);
+            
+            // Create minimal JSON format for Chinese Postman Problem solvers
+            const cppData = {
+                nodes: roadGraph.nodes,
+                edges: roadGraph.edges
+            };
+
+            // Download the JSON file
+            const blob = new Blob([JSON.stringify(cppData, null, 2)], {
+                type: 'application/json'
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'chinese_postman_network.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            console.log('Chinese Postman Problem data exported successfully:', cppData);
+        } catch (error) {
+            console.error('Error exporting Chinese Postman data:', error);
+            alert('Error exporting data. Please try again.');
+        }
+    }
+
+    buildChinesePostmanGraph(roadFeatures) {
+        const nodes = [];
+        const edges = [];
+        const coordinateToNodeId = new Map();
+        let nodeIdCounter = 0;
+        let edgeIdCounter = 0;
+
+        // Helper function to get or create node ID for a coordinate
+        const getNodeId = (coord) => {
+            const key = `${coord[0].toFixed(8)},${coord[1].toFixed(8)}`;
+            if (coordinateToNodeId.has(key)) {
+                return coordinateToNodeId.get(key);
+            }
+            
+            const nodeId = nodeIdCounter++;
+            coordinateToNodeId.set(key, nodeId);
+            
+            // Create minimal node (no coordinates needed for CPP)
+            nodes.push({
+                id: nodeId
+            });
+            
+            return nodeId;
+        };
+
+        // Process each road feature
+        roadFeatures.forEach((feature, featureIndex) => {
+            const coordinates = feature.geometry.coordinates;
+            const properties = feature.properties || {};
+            
+            // Create edges between consecutive coordinates
+            for (let i = 0; i < coordinates.length - 1; i++) {
+                const sourceCoord = coordinates[i];
+                const targetCoord = coordinates[i + 1];
+                
+                const sourceNodeId = getNodeId(sourceCoord);
+                const targetNodeId = getNodeId(targetCoord);
+                
+                // Calculate distance between coordinates (weight for CPP)
+                const sourcePoint = turf.point(sourceCoord);
+                const targetPoint = turf.point(targetCoord);
+                const distance = turf.distance(sourcePoint, targetPoint, { units: 'meters' });
+                
+                // Skip zero-length edges
+                if (distance === 0) continue;
+                
+                // Determine if road is one-way (including roundabouts)
+                const isOneway = properties.oneway === 'yes' || 
+                                properties.oneway === '1' || 
+                                properties.oneway === 'true' ||
+                                properties.junction === 'roundabout';
+                
+                // Create edge(s) based on directionality
+                if (isOneway) {
+                    // One-way road - single directed edge
+                    edges.push({
+                        source: sourceNodeId,
+                        target: targetNodeId,
+                        weight: Math.round(distance * 100) / 100,
+                        directed: true
+                    });
+                } else {
+                    // Two-way road - create two directed edges (one in each direction)
+                    edges.push({
+                        source: sourceNodeId,
+                        target: targetNodeId,
+                        weight: Math.round(distance * 100) / 100,
+                        directed: false
+                    });
+                    edges.push({
+                        source: targetNodeId,
+                        target: sourceNodeId,
+                        weight: Math.round(distance * 100) / 100,
+                        directed: false
+                    });
+                }
+            }
+        });
+
+        return { nodes, edges };
     }
 }
 

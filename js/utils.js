@@ -214,10 +214,9 @@ export function stopSpinner(button, defaultText) {
 /**
  * Convert GeoJSON road data to custom nodes and edges format
  * @param {Object} geoJsonData - GeoJSON FeatureCollection containing road LineStrings
- * @param {string} routeType - Route type: 'undirected', 'directed', or 'mixed'
  * @returns {Object} Custom format with nodes and edges
  */
-export function convertRoadsToCustomFormat(geoJsonData, routeType = 'undirected') {
+export function convertRoadsToCustomFormat(geoJsonData) {
     const nodes = [];
     const edges = [];
     const nodeMap = new Map(); // Map to track unique nodes by coordinates
@@ -274,23 +273,9 @@ export function convertRoadsToCustomFormat(geoJsonData, routeType = 'undirected'
                 const distance = calculateDistance([fromCoord[1], fromCoord[0]], [toCoord[1], toCoord[0]]);
                 const cost = distance * 1000; // Convert to meters
                 
-                // Determine if road is undirected based on route type and oneway property
+                // Determine if road is undirected based on oneway property
                 const isOneway = properties.oneway === 'yes' || properties.oneway === '1' || properties.oneway === 'true';
-                let undirected;
-                
-                switch (routeType) {
-                    case 'undirected':
-                        undirected = true;
-                        break;
-                    case 'directed':
-                        undirected = false;
-                        break;
-                    case 'mixed':
-                        undirected = !isOneway; // Use OSM oneway property
-                        break;
-                    default:
-                        undirected = true;
-                }
+                const undirected = !isOneway; // Use OSM oneway property to determine direction
                 
                 // Add edge
                 edges.push({
