@@ -894,6 +894,7 @@ export class RouteCrafterApp {
         document.getElementById('searchBox').value = '';
         document.getElementById('bufferSize').value = '1';
         document.getElementById('truncateByEdge').checked = true;
+        document.getElementById('treatAsUndirected').checked = false;
         document.getElementById('consolidateTolerance').value = '15';
         document.getElementById('customFilter').value = '[highway][area!~"yes"][highway!~"bridleway|bus_guideway|construction|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path"][access!~"customers|no|private"][public_transport!~"platform"][fee!~"yes"][service!~"drive-through|driveway|parking_aisle"][toll!~"yes"]';
         document.getElementById('searchRules').selectedIndex = 0;
@@ -1061,6 +1062,9 @@ export class RouteCrafterApp {
             this.createCoordinateMappings(roadFeatures);
         }
 
+        // Check if we should treat all roads as undirected
+        const treatAsUndirected = document.getElementById('treatAsUndirected').checked;
+
         // Helper function to get node ID for a coordinate (should already exist)
         const getNodeId = (coord) => {
             const key = `${coord[0].toFixed(8)},${coord[1].toFixed(8)}`;
@@ -1105,38 +1109,71 @@ export class RouteCrafterApp {
                 // Skip zero-length edges
                 if (distance === 0) continue;
                 
-                // Determine if road is one-way (including roundabouts)
-                const isOneway = properties.oneway === 'yes' || 
-                                properties.oneway === '1' || 
-                                properties.oneway === 'true' ||
-                                properties.junction === 'roundabout';
-                
-                // Create edge(s) based on directionality
-                if (isOneway) {
-                    // One-way road - single directed edge
+                if (treatAsUndirected) {
+                    // For undirected graphs, create a single undirected edge
+                    // Use a consistent ordering to avoid duplicates (smaller node ID first)
+                    const edgeSource = Math.min(sourceNodeId, targetNodeId);
+                    const edgeTarget = Math.max(sourceNodeId, targetNodeId);
+                    
                     edges.push({
-                        source: sourceNodeId,
-                        target: targetNodeId,
+                        source: edgeSource,
+                        target: edgeTarget,
                         weight: Math.round(distance * 100) / 100,
-                        directed: true
+                        directed: false
                     });
                 } else {
-                    // Two-way road - create two directed edges (one in each direction)
-                    edges.push({
-                        source: sourceNodeId,
-                        target: targetNodeId,
-                        weight: Math.round(distance * 100) / 100,
-                        directed: false
-                    });
-                    edges.push({
-                        source: targetNodeId,
-                        target: sourceNodeId,
-                        weight: Math.round(distance * 100) / 100,
-                        directed: false
-                    });
+                    // Determine if road is one-way (including roundabouts)
+                    const isOneway = properties.oneway === 'yes' || 
+                                    properties.oneway === '1' || 
+                                    properties.oneway === 'true' ||
+                                    properties.junction === 'roundabout';
+                    
+                    // Create edge(s) based on directionality
+                    if (isOneway) {
+                        // One-way road - single directed edge
+                        edges.push({
+                            source: sourceNodeId,
+                            target: targetNodeId,
+                            weight: Math.round(distance * 100) / 100,
+                            directed: true
+                        });
+                    } else {
+                        // Two-way road - create two directed edges (one in each direction)
+                        edges.push({
+                            source: sourceNodeId,
+                            target: targetNodeId,
+                            weight: Math.round(distance * 100) / 100,
+                            directed: false
+                        });
+                        edges.push({
+                            source: targetNodeId,
+                            target: sourceNodeId,
+                            weight: Math.round(distance * 100) / 100,
+                            directed: false
+                        });
+                    }
                 }
             }
         });
+
+        // Remove duplicate edges for undirected mode
+        if (treatAsUndirected) {
+            const uniqueEdges = [];
+            const edgeSet = new Set();
+            
+            for (const edge of edges) {
+                // Create a unique key for the edge (since we already ordered source < target)
+                const edgeKey = `${edge.source}-${edge.target}`;
+                
+                if (!edgeSet.has(edgeKey)) {
+                    edgeSet.add(edgeKey);
+                    uniqueEdges.push(edge);
+                }
+            }
+            
+            console.log(`Removed ${edges.length - uniqueEdges.length} duplicate edges for undirected mode`);
+            return { nodes, edges: uniqueEdges };
+        }
 
         return { nodes, edges };
     }
