@@ -887,6 +887,7 @@ export class RouteCrafterApp {
         
         // Reset routing manager
         this.routingManager.stopAnimation();
+        this.routingManager.setRoutePoints([]);
         
         // Reset UI elements
         document.getElementById('routeLength').innerHTML = '';
@@ -932,6 +933,14 @@ export class RouteCrafterApp {
             alert('No route to animate. Please generate the route first.');
             return;
         }
+        
+        // Check if we have route points set (either from CPP solution or regular roads)
+        const routePoints = this.routingManager.getRoutePoints();
+        if (routePoints.length === 0) {
+            alert('No route to animate. Please upload a CPP solution or generate a route first.');
+            return;
+        }
+        
         this.routingManager.startRouteAnimation();
     }
 
@@ -1168,51 +1177,48 @@ export class RouteCrafterApp {
 
     parseCPPSolutionCSV(csvText) {
         const lines = csvText.trim().split('\n');
-        const solutionPath = [];
+        const vertexPath = [];
         
         for (const line of lines) {
             const trimmedLine = line.trim();
             if (!trimmedLine) continue;
             
-            const parts = trimmedLine.split(',');
-            if (parts.length < 3) {
-                console.warn('Skipping invalid line:', trimmedLine);
+            const vertex = parseInt(trimmedLine);
+            if (isNaN(vertex)) {
+                console.warn('Skipping invalid vertex ID:', trimmedLine);
                 continue;
             }
             
-            const from = parseInt(parts[0].trim());
-            const to = parseInt(parts[1].trim());
-            const cost = parseFloat(parts[2].trim());
-            
-            if (isNaN(from) || isNaN(to) || isNaN(cost)) {
-                console.warn('Skipping line with invalid numbers:', trimmedLine);
-                continue;
-            }
-            
-            solutionPath.push({ from, to, cost });
+            vertexPath.push(vertex);
         }
         
-        return solutionPath;
+        if (vertexPath.length === 0) {
+            alert('No valid vertex IDs found in the CSV file. Expected format: single vertex ID per line (e.g., 28, 29, 28, 27...)');
+            return null;
+        }
+        
+        console.log('Parsed vertex path:', vertexPath);
+        return vertexPath;
     }
 
-    visualizeCPPSolution(solutionPath) {
+    visualizeCPPSolution(vertexPath) {
         // Remove existing CPP solution layer
         if (this.cppSolutionLayer) {
             this.mapManager.getMap().removeLayer(this.cppSolutionLayer);
             this.cppSolutionLayer = null;
         }
 
-        if (solutionPath.length === 0) {
-            alert('No valid path segments found in the CSV file.');
+        if (!vertexPath || vertexPath.length === 0) {
+            alert('No valid vertex path found in the CSV file.');
             return;
         }
 
-        // Reconstruct the path from the edge sequence using stored coordinate mappings
-        const reconstructedPath = this.reconstructPathFromEdges(solutionPath);
+        // Reconstruct the path from vertex sequence
+        const reconstructedPath = this.reconstructPathFromVertices(vertexPath);
         const hasCoordinateMappings = this.nodeIdToCoordinateMap.size > 0;
         
         if (reconstructedPath.length === 0) {
-            alert('Unable to reconstruct path from the provided edges. The node IDs may not correspond to existing map features.');
+            alert('Unable to reconstruct path from the provided vertex IDs. The node IDs may not correspond to existing map features.');
             return;
         }
 
@@ -1245,15 +1251,14 @@ export class RouteCrafterApp {
         this.cppSolutionLayer = L.featureGroup([pathLayer, startMarker, endMarker]);
         
         // Add popup with solution information
-        const totalCost = solutionPath.reduce((sum, edge) => sum + edge.cost, 0);
+        const pathDescription = `${vertexPath.length} vertices`;
         const mappingStatus = hasCoordinateMappings ? 
             '<br><span style="color: green;">✓</span> <em>Mapped to actual road coordinates</em>' : 
             '<br><span style="color: orange;">⚠</span> <em>Using demonstration path (no roads fetched yet)</em>';
         
         const pathInfo = `
-            <strong>Chinese Postman Solution</strong><br>
-            Total edges: ${solutionPath.length}<br>
-            Total cost: ${totalCost.toFixed(2)}${mappingStatus}
+            <strong>Chinese Postman Solution (Vertex Path)</strong><br>
+            ${pathDescription}${mappingStatus}
         `;
         
         pathLayer.bindPopup(pathInfo);
@@ -1269,53 +1274,71 @@ export class RouteCrafterApp {
             '<br><span style="color: green;">✓</span> Mapped to actual road coordinates' : 
             '<br><span style="color: orange;">⚠</span> Demonstration path (fetch roads first for real mapping)';
         
+        const animationNote = reconstructedPath.length > 0 ? 
+            '<br><span style="color: #007bff;">🎬</span> Ready for animation - click "Play Route" to animate' : '';
+        
         document.getElementById('routeLength').innerHTML = `
-            <strong>CPP Solution:</strong> ${solutionPath.length} edges, ${totalCost.toFixed(2)} total cost${mappingNote}<br>
-            <span style="color: #ff6b00;">●</span> Orange dashed line shows the solution path
+            <strong>CPP Solution (Vertex Path):</strong> ${pathDescription}${mappingNote}<br>
+            <span style="color: #ff6b00;">●</span> Orange dashed line shows the solution path${animationNote}
         `;
 
-        console.log('CPP Solution visualized:', solutionPath);
+        // Set route points for animation
+        this.routingManager.setRoutePoints(reconstructedPath);
+        
+        console.log('CPP Solution visualized:', vertexPath);
+        console.log('Route points set for animation:', reconstructedPath.length);
     }
 
-    reconstructPathFromEdges(solutionPath) {
-        // Reconstruct the actual path using stored coordinate mappings
-        if (solutionPath.length === 0) {
+
+    reconstructPathFromVertices(vertexPath) {
+        // Reconstruct the path using stored coordinate mappings for vertex sequence
+        if (vertexPath.length === 0) {
             return [];
         }
         
         const reconstructedPath = [];
-        const visitedNodes = new Set();
         
-        // Try to map each edge to actual coordinates
-        for (const edge of solutionPath) {
-            // Check if we have coordinate mappings for these node IDs
-            const fromCoord = this.nodeIdToCoordinateMap.get(edge.from);
-            const toCoord = this.nodeIdToCoordinateMap.get(edge.to);
-            
-            if (fromCoord && toCoord) {
-                // Add coordinates if we haven't visited them yet
-                if (!visitedNodes.has(edge.from)) {
-                    reconstructedPath.push([fromCoord[1], fromCoord[0]]); // Convert [lng, lat] to [lat, lng]
-                    visitedNodes.add(edge.from);
-                }
-                if (!visitedNodes.has(edge.to)) {
-                    reconstructedPath.push([toCoord[1], toCoord[0]]); // Convert [lng, lat] to [lat, lng]
-                    visitedNodes.add(edge.to);
-                }
+        // Map each vertex ID to its coordinate
+        for (const vertexId of vertexPath) {
+            const coord = this.nodeIdToCoordinateMap.get(vertexId);
+            if (coord) {
+                // Convert [lng, lat] to [lat, lng]
+                reconstructedPath.push([coord[1], coord[0]]);
             }
         }
         
         // If we couldn't map any coordinates, fall back to a demonstration path
         if (reconstructedPath.length === 0) {
-            console.warn('No coordinate mappings found. This might be because no roads have been fetched yet.');
-            return this.createDemonstrationPath(solutionPath);
+            console.warn('No coordinate mappings found for vertex path. This might be because no roads have been fetched yet.');
+            return this.createVertexDemonstrationPath(vertexPath);
         }
         
-        return reconstructedPath;
+        // Remove duplicate consecutive coordinates to create a cleaner path
+        return this.removeDuplicateCoordinates(reconstructedPath);
     }
 
-    createDemonstrationPath(solutionPath) {
-        // Fallback: Create a demonstration path when no coordinate mappings exist
+    removeDuplicateCoordinates(path) {
+        if (path.length <= 1) return path;
+        
+        const cleanedPath = [path[0]];
+        
+        for (let i = 1; i < path.length; i++) {
+            const current = path[i];
+            const previous = cleanedPath[cleanedPath.length - 1];
+            
+            // Check if coordinates are different (with small tolerance for floating point precision)
+            const tolerance = 0.000001;
+            if (Math.abs(current[0] - previous[0]) > tolerance || Math.abs(current[1] - previous[1]) > tolerance) {
+                cleanedPath.push(current);
+            }
+        }
+        
+        return cleanedPath;
+    }
+
+
+    createVertexDemonstrationPath(vertexPath) {
+        // Fallback: Create a demonstration path when no coordinate mappings exist for vertex path
         const reconstructedPath = [];
         
         const centerLat = 51.505;
@@ -1323,23 +1346,28 @@ export class RouteCrafterApp {
         const radius = 0.05; // degrees
         
         // Start from the center
-        reconstructedPath.push([centerLat, centerLng]);
+        let currentLat = centerLat;
+        let currentLng = centerLng;
+        reconstructedPath.push([currentLat, currentLng]);
         
-        // Create a path that represents the solution
+        // Create a connected path that represents the vertex sequence
         let angle = 0;
-        const angleStep = (2 * Math.PI) / solutionPath.length;
+        const angleStep = (2 * Math.PI) / Math.max(vertexPath.length, 10);
         
-        for (let i = 0; i < solutionPath.length; i++) {
-            const edge = solutionPath[i];
+        for (let i = 0; i < vertexPath.length; i++) {
+            const vertexId = vertexPath[i];
             
-            // Calculate position based on angle and edge properties
-            const lat = centerLat + (radius * Math.cos(angle)) * (1 + edge.cost / 100);
-            const lng = centerLng + (radius * Math.sin(angle)) * (1 + edge.cost / 100);
+            // Calculate next position based on angle and vertex ID
+            const latOffset = (radius * Math.cos(angle)) * (0.3 + (vertexId % 10) / 100);
+            const lngOffset = (radius * Math.sin(angle)) * (0.3 + (vertexId % 10) / 100);
             
-            reconstructedPath.push([lat, lng]);
+            currentLat += latOffset;
+            currentLng += lngOffset;
             
-            // Adjust angle for next point
-            angle += angleStep * (1 + edge.from / 100);
+            reconstructedPath.push([currentLat, currentLng]);
+            
+            // Adjust angle for next point to create a more realistic path
+            angle += angleStep * (0.7 + (vertexId % 5) / 50);
         }
         
         return this.smoothPath(reconstructedPath);
