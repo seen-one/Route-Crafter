@@ -16,6 +16,9 @@ export class RouteCrafterApp {
         this.previewLayer = null;
         this.geoJsonLayer = null;
         this.drawingEnabled = false;
+        this.cppSolutionLayer = null;
+        this.coordinateToNodeIdMap = new Map();
+        this.nodeIdToCoordinateMap = new Map();
         
         this.init();
     }
@@ -153,6 +156,27 @@ export class RouteCrafterApp {
         // Clear button
         document.getElementById('clearButton').addEventListener('click', () => {
             this.clearAllSelections();
+        });
+
+        // Upload CPP Solution button
+        document.getElementById('uploadCPPButton').addEventListener('click', () => {
+            if (this.nodeIdToCoordinateMap.size === 0) {
+                const proceed = confirm(
+                    'No roads have been fetched yet. The solution will be shown as a demonstration path.\n\n' +
+                    'For accurate mapping:\n' +
+                    '1. First select an area and click "Fetch Roads"\n' +
+                    '2. Then click "Export for Chinese Postman" to get the CSV\n' +
+                    '3. Finally upload your solution CSV here\n\n' +
+                    'Do you want to proceed with a demonstration path?'
+                );
+                if (!proceed) return;
+            }
+            document.getElementById('cppUploadInput').click();
+        });
+
+        // File upload handler
+        document.getElementById('cppUploadInput').addEventListener('change', (event) => {
+            this.handleCPPSolutionUpload(event);
         });
     }
 
@@ -758,6 +782,9 @@ export class RouteCrafterApp {
                     this.mapManager.getMap().removeLayer(this.geoJsonLayer);
                 }
                 
+                // Create coordinate mappings for CPP export/import
+                this.createCoordinateMappings(roadFeatures);
+                
                 // Create a new GeoJSON layer for roads
                 this.geoJsonLayer = L.geoJSON(roadFeatures, {
                     style: {
@@ -849,6 +876,14 @@ export class RouteCrafterApp {
             this.mapManager.getMap().removeLayer(this.geoJsonLayer);
             this.geoJsonLayer = null;
         }
+        if (this.cppSolutionLayer) {
+            this.mapManager.getMap().removeLayer(this.cppSolutionLayer);
+            this.cppSolutionLayer = null;
+        }
+        
+        // Clear coordinate mappings
+        this.coordinateToNodeIdMap.clear();
+        this.nodeIdToCoordinateMap.clear();
         
         // Reset routing manager
         this.routingManager.stopAnimation();
@@ -970,30 +1005,75 @@ export class RouteCrafterApp {
         }
     }
 
-    buildChinesePostmanGraph(roadFeatures) {
-        const nodes = [];
-        const edges = [];
-        const coordinateToNodeId = new Map();
+    createCoordinateMappings(roadFeatures) {
+        // Clear existing mappings
+        this.coordinateToNodeIdMap.clear();
+        this.nodeIdToCoordinateMap.clear();
+        
         let nodeIdCounter = 0;
-        let edgeIdCounter = 0;
 
         // Helper function to get or create node ID for a coordinate
         const getNodeId = (coord) => {
             const key = `${coord[0].toFixed(8)},${coord[1].toFixed(8)}`;
-            if (coordinateToNodeId.has(key)) {
-                return coordinateToNodeId.get(key);
+            if (this.coordinateToNodeIdMap.has(key)) {
+                return this.coordinateToNodeIdMap.get(key);
             }
             
             const nodeId = nodeIdCounter++;
-            coordinateToNodeId.set(key, nodeId);
-            
-            // Create minimal node (no coordinates needed for CPP)
-            nodes.push({
-                id: nodeId
-            });
+            this.coordinateToNodeIdMap.set(key, nodeId);
+            this.nodeIdToCoordinateMap.set(nodeId, coord);
             
             return nodeId;
         };
+
+        // Process each road feature to create coordinate mappings
+        roadFeatures.forEach((feature) => {
+            if (feature.geometry.type === 'LineString') {
+                const coordinates = feature.geometry.coordinates;
+                
+                // Create node IDs for all coordinates in the road
+                coordinates.forEach(coord => {
+                    getNodeId(coord);
+                });
+            }
+        });
+        
+        console.log(`Created coordinate mappings for ${this.nodeIdToCoordinateMap.size} nodes`);
+    }
+
+    buildChinesePostmanGraph(roadFeatures) {
+        const nodes = [];
+        const edges = [];
+        let nodeIdCounter = 0;
+        let edgeIdCounter = 0;
+
+        // Use existing mappings or create new ones if needed
+        if (this.nodeIdToCoordinateMap.size === 0) {
+            this.createCoordinateMappings(roadFeatures);
+        }
+
+        // Helper function to get node ID for a coordinate (should already exist)
+        const getNodeId = (coord) => {
+            const key = `${coord[0].toFixed(8)},${coord[1].toFixed(8)}`;
+            if (this.coordinateToNodeIdMap.has(key)) {
+                return this.coordinateToNodeIdMap.get(key);
+            }
+            
+            // This shouldn't happen if mappings were created properly
+            console.warn('Coordinate mapping not found for:', coord);
+            const nodeId = nodeIdCounter++;
+            this.coordinateToNodeIdMap.set(key, nodeId);
+            this.nodeIdToCoordinateMap.set(nodeId, coord);
+            
+            return nodeId;
+        };
+
+        // Create nodes from existing mappings
+        this.nodeIdToCoordinateMap.forEach((coord, nodeId) => {
+            nodes.push({
+                id: nodeId
+            });
+        });
 
         // Process each road feature
         roadFeatures.forEach((feature, featureIndex) => {
@@ -1050,6 +1130,240 @@ export class RouteCrafterApp {
         });
 
         return { nodes, edges };
+    }
+
+    handleCPPSolutionUpload(event) {
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+
+        if (!file.name.toLowerCase().endsWith('.csv')) {
+            alert('Please select a CSV file.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const csvText = e.target.result;
+                const solutionPath = this.parseCPPSolutionCSV(csvText);
+                if (solutionPath && solutionPath.length > 0) {
+                    this.visualizeCPPSolution(solutionPath);
+                } else {
+                    alert('No valid path found in the CSV file. Please check the format.');
+                }
+            } catch (error) {
+                console.error('Error parsing CSV:', error);
+                alert('Error parsing CSV file. Please check the format and try again.');
+            }
+        };
+        
+        reader.onerror = () => {
+            alert('Error reading file. Please try again.');
+        };
+        
+        reader.readAsText(file);
+    }
+
+    parseCPPSolutionCSV(csvText) {
+        const lines = csvText.trim().split('\n');
+        const solutionPath = [];
+        
+        for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (!trimmedLine) continue;
+            
+            const parts = trimmedLine.split(',');
+            if (parts.length < 3) {
+                console.warn('Skipping invalid line:', trimmedLine);
+                continue;
+            }
+            
+            const from = parseInt(parts[0].trim());
+            const to = parseInt(parts[1].trim());
+            const cost = parseFloat(parts[2].trim());
+            
+            if (isNaN(from) || isNaN(to) || isNaN(cost)) {
+                console.warn('Skipping line with invalid numbers:', trimmedLine);
+                continue;
+            }
+            
+            solutionPath.push({ from, to, cost });
+        }
+        
+        return solutionPath;
+    }
+
+    visualizeCPPSolution(solutionPath) {
+        // Remove existing CPP solution layer
+        if (this.cppSolutionLayer) {
+            this.mapManager.getMap().removeLayer(this.cppSolutionLayer);
+            this.cppSolutionLayer = null;
+        }
+
+        if (solutionPath.length === 0) {
+            alert('No valid path segments found in the CSV file.');
+            return;
+        }
+
+        // Reconstruct the path from the edge sequence using stored coordinate mappings
+        const reconstructedPath = this.reconstructPathFromEdges(solutionPath);
+        const hasCoordinateMappings = this.nodeIdToCoordinateMap.size > 0;
+        
+        if (reconstructedPath.length === 0) {
+            alert('Unable to reconstruct path from the provided edges. The node IDs may not correspond to existing map features.');
+            return;
+        }
+
+        // Create a polyline for the solution path
+        const pathLayer = L.polyline(reconstructedPath, {
+            color: '#ff6b00',
+            weight: 6,
+            opacity: 0.8,
+            dashArray: '10, 10'
+        });
+
+        // Add markers for start and end points
+        const startMarker = L.marker(reconstructedPath[0], {
+            icon: L.divIcon({
+                className: 'cpp-start-marker',
+                html: '<div style="background-color: #00ff00; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;"></div>',
+                iconSize: [20, 20]
+            })
+        });
+
+        const endMarker = L.marker(reconstructedPath[reconstructedPath.length - 1], {
+            icon: L.divIcon({
+                className: 'cpp-end-marker',
+                html: '<div style="background-color: #ff0000; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;"></div>',
+                iconSize: [20, 20]
+            })
+        });
+
+        // Create a feature group to hold all solution elements
+        this.cppSolutionLayer = L.featureGroup([pathLayer, startMarker, endMarker]);
+        
+        // Add popup with solution information
+        const totalCost = solutionPath.reduce((sum, edge) => sum + edge.cost, 0);
+        const mappingStatus = hasCoordinateMappings ? 
+            '<br><span style="color: green;">✓</span> <em>Mapped to actual road coordinates</em>' : 
+            '<br><span style="color: orange;">⚠</span> <em>Using demonstration path (no roads fetched yet)</em>';
+        
+        const pathInfo = `
+            <strong>Chinese Postman Solution</strong><br>
+            Total edges: ${solutionPath.length}<br>
+            Total cost: ${totalCost.toFixed(2)}${mappingStatus}
+        `;
+        
+        pathLayer.bindPopup(pathInfo);
+        this.cppSolutionLayer.addTo(this.mapManager.getMap());
+
+        // Fit map to show the solution path
+        if (this.cppSolutionLayer.getBounds().isValid()) {
+            this.mapManager.getMap().fitBounds(this.cppSolutionLayer.getBounds());
+        }
+
+        // Update route length display
+        const mappingNote = hasCoordinateMappings ? 
+            '<br><span style="color: green;">✓</span> Mapped to actual road coordinates' : 
+            '<br><span style="color: orange;">⚠</span> Demonstration path (fetch roads first for real mapping)';
+        
+        document.getElementById('routeLength').innerHTML = `
+            <strong>CPP Solution:</strong> ${solutionPath.length} edges, ${totalCost.toFixed(2)} total cost${mappingNote}<br>
+            <span style="color: #ff6b00;">●</span> Orange dashed line shows the solution path
+        `;
+
+        console.log('CPP Solution visualized:', solutionPath);
+    }
+
+    reconstructPathFromEdges(solutionPath) {
+        // Reconstruct the actual path using stored coordinate mappings
+        if (solutionPath.length === 0) {
+            return [];
+        }
+        
+        const reconstructedPath = [];
+        const visitedNodes = new Set();
+        
+        // Try to map each edge to actual coordinates
+        for (const edge of solutionPath) {
+            // Check if we have coordinate mappings for these node IDs
+            const fromCoord = this.nodeIdToCoordinateMap.get(edge.from);
+            const toCoord = this.nodeIdToCoordinateMap.get(edge.to);
+            
+            if (fromCoord && toCoord) {
+                // Add coordinates if we haven't visited them yet
+                if (!visitedNodes.has(edge.from)) {
+                    reconstructedPath.push([fromCoord[1], fromCoord[0]]); // Convert [lng, lat] to [lat, lng]
+                    visitedNodes.add(edge.from);
+                }
+                if (!visitedNodes.has(edge.to)) {
+                    reconstructedPath.push([toCoord[1], toCoord[0]]); // Convert [lng, lat] to [lat, lng]
+                    visitedNodes.add(edge.to);
+                }
+            }
+        }
+        
+        // If we couldn't map any coordinates, fall back to a demonstration path
+        if (reconstructedPath.length === 0) {
+            console.warn('No coordinate mappings found. This might be because no roads have been fetched yet.');
+            return this.createDemonstrationPath(solutionPath);
+        }
+        
+        return reconstructedPath;
+    }
+
+    createDemonstrationPath(solutionPath) {
+        // Fallback: Create a demonstration path when no coordinate mappings exist
+        const reconstructedPath = [];
+        
+        const centerLat = 51.505;
+        const centerLng = -0.09;
+        const radius = 0.05; // degrees
+        
+        // Start from the center
+        reconstructedPath.push([centerLat, centerLng]);
+        
+        // Create a path that represents the solution
+        let angle = 0;
+        const angleStep = (2 * Math.PI) / solutionPath.length;
+        
+        for (let i = 0; i < solutionPath.length; i++) {
+            const edge = solutionPath[i];
+            
+            // Calculate position based on angle and edge properties
+            const lat = centerLat + (radius * Math.cos(angle)) * (1 + edge.cost / 100);
+            const lng = centerLng + (radius * Math.sin(angle)) * (1 + edge.cost / 100);
+            
+            reconstructedPath.push([lat, lng]);
+            
+            // Adjust angle for next point
+            angle += angleStep * (1 + edge.from / 100);
+        }
+        
+        return this.smoothPath(reconstructedPath);
+    }
+
+    smoothPath(path) {
+        if (path.length < 3) return path;
+        
+        const smoothed = [path[0]];
+        
+        for (let i = 1; i < path.length - 1; i++) {
+            const prev = path[i - 1];
+            const curr = path[i];
+            const next = path[i + 1];
+            
+            // Simple smoothing by averaging adjacent points
+            const smoothedLat = (prev[0] + curr[0] + next[0]) / 3;
+            const smoothedLng = (prev[1] + curr[1] + next[1]) / 3;
+            
+            smoothed.push([smoothedLat, smoothedLng]);
+        }
+        
+        smoothed.push(path[path.length - 1]);
+        return smoothed;
     }
 }
 

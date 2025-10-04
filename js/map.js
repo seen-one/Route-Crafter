@@ -204,6 +204,7 @@ export class MapManager {
                     <button id="playRouteButton">Play Route</button>
                     <button id="downloadButton">Download Overpass Response</button>
                     <button id="exportCPPButton">Export for Chinese Postman</button>
+                    <button id="uploadCPPButton">Upload CPP Solution</button>
                     <button id="drawToggleButton">Toggle Drawing</button>
                     <button id="clearButton">Reset</button>
                     <br>
