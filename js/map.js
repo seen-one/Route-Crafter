@@ -203,8 +203,8 @@ export class MapManager {
                     <button id="previewGPXButton">Fetch Roads</button>
                     <button id="playRouteButton">Play Route</button>
                     <button id="downloadButton">Download Overpass Response</button>
-                    <button id="exportCPPButton">Export for Chinese Postman</button>
-                    <button id="uploadCPPButton">Upload CPP Solution</button>
+                    <button id="exportCPPButton">Export OARLib Format</button>
+                    <button id="uploadCPPButton">Upload OARLib Solution</button>
                     <button id="drawToggleButton">Toggle Drawing</button>
                     <button id="clearButton">Reset</button>
                     <br>
@@ -219,10 +219,6 @@ export class MapManager {
                     <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
                         <label for="truncateByEdge" style="flex: 1;">Trim roads to polygon boundary</label>
                         <input type="checkbox" id="truncateByEdge" checked>
-                    </div>
-                    <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                        <label for="treatAsUndirected" style="flex: 1;">Treat all roads as undirected</label>
-                        <input type="checkbox" id="treatAsUndirected" checked>
                     </div>
                     <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
                         <label for="customFilter" style="flex: 1;">Route filter:</label>
