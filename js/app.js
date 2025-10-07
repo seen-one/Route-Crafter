@@ -160,6 +160,9 @@ export class RouteCrafterApp {
 
         // Upload CPP Solution button
         document.getElementById('uploadCPPButton').addEventListener('click', () => {
+            // Stop any running animation by clicking the close button
+            document.getElementById('closeBtn').click();
+            
             if (this.nodeIdToCoordinateMap.size === 0) {
                 const proceed = confirm(
                     'No roads have been fetched yet. The solution will be shown as a demonstration path.\n\n' +
@@ -1329,6 +1332,7 @@ Line Format: x,y
         // Accept both .txt and .csv files
         if (!file.name.toLowerCase().endsWith('.txt') && !file.name.toLowerCase().endsWith('.csv')) {
             alert('Please select a .txt or .csv file.');
+            event.target.value = ''; // Reset input to allow re-uploading the same file
             return;
         }
 
@@ -1345,11 +1349,16 @@ Line Format: x,y
             } catch (error) {
                 console.error('Error parsing solution file:', error);
                 alert('Error parsing solution file. Please check the format and try again.');
+            } finally {
+                // Reset the input value to allow re-uploading the same file
+                event.target.value = '';
             }
         };
         
         reader.onerror = () => {
             alert('Error reading file. Please try again.');
+            // Reset the input value to allow re-uploading the same file
+            event.target.value = '';
         };
         
         reader.readAsText(file);
