@@ -42,6 +42,11 @@ export class CoverageManager {
                 container.innerHTML = `
                     <div class="zoom-tip" id="zoomTip"></div>
                     <label>Start Date: <input type="date" id="startDate"></label>
+                    <div style="display: flex; gap: 2px; margin: 5px 0;">
+                        <button type="button" class="date-preset-btn" data-months="1">1 Month</button>
+                        <button type="button" class="date-preset-btn" data-months="6">6 Months</button>
+                        <button type="button" class="date-preset-btn" data-months="12">1 Year</button>
+                    </div>
                     <label>End Date: <input type="date" id="endDate"></label>
                     <label style="display: block; margin: 5px 0;">
                         <div style="display: block; margin-bottom: 3px;">Image Type:</div>
@@ -392,6 +397,29 @@ export class CoverageManager {
                     });
                     // Add active class to clicked button
                     this.classList.add('active');
+                });
+            });
+            
+            // Add event listeners for date preset buttons
+            const datePresetButtons = document.querySelectorAll('.date-preset-btn');
+            datePresetButtons.forEach((button) => {
+                button.addEventListener('click', function() {
+                    const months = parseInt(this.getAttribute('data-months'));
+                    const today = new Date();
+                    const startDate = new Date(today);
+                    startDate.setMonth(today.getMonth() - months);
+                    
+                    // Format date as YYYY-MM-DD for date input
+                    const year = startDate.getFullYear();
+                    const month = String(startDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(startDate.getDate()).padStart(2, '0');
+                    const formattedDate = `${year}-${month}-${day}`;
+                    
+                    // Set the start date input
+                    const startDateInput = document.getElementById('startDate');
+                    if (startDateInput) {
+                        startDateInput.value = formattedDate;
+                    }
                 });
             });
             
