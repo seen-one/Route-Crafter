@@ -9,6 +9,7 @@ export class MapManager {
         this.controlsDiv = null;
         this.drawnItems = null;
         this.drawControl = null;
+        this.drawControlEnabled = false;
         this.contextMenu = null;
         this.contextMenuVisible = false;
         this.lastClickLatLng = null;
@@ -240,12 +241,15 @@ export class MapManager {
                         <option value="place=postal_code">Place: Postal Code</option>
                         <option value="place=district">Place: District</option>
                         <option value="place=subdistrict">Place: Subdistrict</option>
+                        <option value="grid_500m">Grid: 500m × 500m</option>
+                        <option value="grid_1km">Grid: 1km × 1km</option>
+                        <option value="grid_1500m">Grid: 1.5km × 1.5km</option>
+                        <option value="draw_area">Draw Area</option>
                     </select>
                     <button id="fetchButton">Find Areas</button>
                     <br>
                     <button id="previewGPXButton">Fetch Roads</button>
                     <button id="playRouteButton">Play Route</button>
-                    <button id="drawToggleButton">Toggle Drawing</button>
                     <button id="clearButton">Reset</button>
                     <br>
                     <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
@@ -317,8 +321,21 @@ export class MapManager {
             }
         });
 
-        // Add draw control to map
-        this.map.addControl(this.drawControl);
+        // Do not add draw control to map by default - it will be added when "Draw Area" is selected
+    }
+
+    enableDrawControl() {
+        if (!this.drawControlEnabled) {
+            this.map.addControl(this.drawControl);
+            this.drawControlEnabled = true;
+        }
+    }
+
+    disableDrawControl() {
+        if (this.drawControlEnabled) {
+            this.map.removeControl(this.drawControl);
+            this.drawControlEnabled = false;
+        }
     }
 
     displayContextMenu(e) {

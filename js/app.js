@@ -15,10 +15,10 @@ export class RouteCrafterApp {
         this.highlightedPolygons = [];
         this.previewLayer = null;
         this.geoJsonLayer = null;
-        this.drawingEnabled = false;
         this.cppSolutionLayer = null;
         this.coordinateToNodeIdMap = new Map();
         this.nodeIdToCoordinateMap = new Map();
+        this.previousSearchRule = null;
         
         this.init();
     }
@@ -46,24 +46,45 @@ export class RouteCrafterApp {
     }
 
     setupEventListeners() {
-        // Drawing toggle
-        document.getElementById('drawToggleButton').addEventListener('click', () => {
-            this.drawingEnabled = !this.drawingEnabled;
-            const button = document.getElementById('drawToggleButton');
-            if (this.drawingEnabled) {
-                button.textContent = 'Disable Drawing';
-                button.style.backgroundColor = '#28a745';
-                // Enable drawing tools
-                const drawControl = this.mapManager.getDrawControl();
-                drawControl._toolbars.draw._modes.polygon.handler.enable();
-                drawControl._toolbars.draw._modes.rectangle.handler.enable();
+        // Search rules dropdown change handler
+        document.getElementById('searchRules').addEventListener('change', (event) => {
+            const selectedValue = event.target.value;
+            const fetchButton = document.getElementById('fetchButton');
+            const bufferContainer = document.getElementById('bufferSize').parentElement;
+            
+            // Check if switching from or to draw_area
+            const isFromDrawArea = this.previousSearchRule === 'draw_area';
+            const isToDrawArea = selectedValue === 'draw_area';
+            
+            // Always reset when switching from or to Draw Area
+            if (isFromDrawArea || isToDrawArea) {
+                this.clearAllSelectionsWithoutResettingDropdown();
+            }
+            
+            // Update previous search rule
+            this.previousSearchRule = selectedValue;
+            
+            // Check if grid option is selected
+            const isGrid = selectedValue === 'grid_500m' || selectedValue === 'grid_1km' || selectedValue === 'grid_1500m';
+            
+            if (selectedValue === 'draw_area') {
+                // Hide fetch button and enable draw control
+                fetchButton.style.display = 'none';
+                this.mapManager.enableDrawControl();
+                // Show buffer for draw area
+                bufferContainer.style.display = 'flex';
             } else {
-                button.textContent = 'Toggle Drawing';
-                button.style.backgroundColor = '#007bff';
-                // Disable drawing tools
-                const drawControl = this.mapManager.getDrawControl();
-                drawControl._toolbars.draw._modes.polygon.handler.disable();
-                drawControl._toolbars.draw._modes.rectangle.handler.disable();
+                // Show fetch button and disable draw control
+                fetchButton.style.display = 'inline-block';
+                this.mapManager.disableDrawControl();
+                // Hide buffer for grids, show for other options
+                if (isGrid) {
+                    bufferContainer.style.display = 'none';
+                    // Set buffer to 0 for grids
+                    document.getElementById('bufferSize').value = '0';
+                } else {
+                    bufferContainer.style.display = 'flex';
+                }
             }
         });
 
@@ -261,10 +282,31 @@ export class RouteCrafterApp {
 
     fetchAreasByRule() {
         const fetchButton = document.getElementById('fetchButton');
+        const selectedRule = document.getElementById('searchRules').value;
+        
+        // Don't fetch if "Draw Area" is selected
+        if (selectedRule === 'draw_area') {
+            alert('Please select a search rule or use the drawing tools to create an area.');
+            return;
+        }
+        
+        // Handle grid generation specially
+        if (selectedRule === 'grid_500m') {
+            this.generateGrid(500);
+            return;
+        }
+        if (selectedRule === 'grid_1km') {
+            this.generateGrid(1000);
+            return;
+        }
+        if (selectedRule === 'grid_1500m') {
+            this.generateGrid(1500);
+            return;
+        }
+        
         // Add loading spinner
         fetchButton.classList.add('button-loading');
         fetchButton.innerHTML = 'Finding Areas <span class="spinner"></span>';
-        const selectedRule = document.getElementById('searchRules').value;
         
         if (this.geoJsonLayer) {
             this.mapManager.getMap().removeLayer(this.geoJsonLayer);
@@ -371,6 +413,127 @@ export class RouteCrafterApp {
         }).finally(() => {
             stopSpinner(fetchButton, 'Find Areas');
         });
+    }
+
+    generateGrid(gridSize) {
+        if (this.geoJsonLayer) {
+            this.mapManager.getMap().removeLayer(this.geoJsonLayer);
+        }
+        
+        // Get current map bounds
+        const bounds = this.mapManager.getMap().getBounds();
+        const south = bounds.getSouth();
+        const west = bounds.getWest();
+        const north = bounds.getNorth();
+        const east = bounds.getEast();
+        
+        // Grid cell size in meters (passed as parameter)
+        
+        // Fixed origin point (0, 0)
+        const originLat = 0;
+        const originLng = 0;
+        
+        // Calculate meters per degree for latitude (roughly constant)
+        const metersPerDegreeLat = 111320;
+        
+        // Calculate grid indices for latitude (aligned to origin)
+        const latStep = gridSize / metersPerDegreeLat;
+        const southIndex = Math.floor((south - originLat) / latStep);
+        const northIndex = Math.ceil((north - originLat) / latStep);
+        
+        // For longitude, we need to calculate indices at the center latitude of the viewport
+        const centerLat = (south + north) / 2;
+        const metersPerDegreeLng = metersPerDegreeLat * Math.cos(centerLat * Math.PI / 180);
+        const lngStep = gridSize / metersPerDegreeLng;
+        const westIndex = Math.floor((west - originLng) / lngStep);
+        const eastIndex = Math.ceil((east - originLng) / lngStep);
+        
+        // Limit the number of grid cells to prevent performance issues
+        const maxCells = 200;
+        const totalCells = (northIndex - southIndex) * (eastIndex - westIndex);
+        
+        if (totalCells > maxCells) {
+            alert(`Too many grid cells (${totalCells}). Please zoom in to see fewer than ${maxCells} cells.`);
+            return;
+        }
+        
+        // Generate grid cells aligned to the global grid
+        const gridFeatures = [];
+        
+        for (let latIndex = southIndex; latIndex < northIndex; latIndex++) {
+            // Calculate cell latitude boundaries (constant for all longitudes)
+            const cellSouthLat = originLat + (latIndex * latStep);
+            const cellNorthLat = originLat + ((latIndex + 1) * latStep);
+            const cellCenterLat = (cellSouthLat + cellNorthLat) / 2;
+            
+            // Calculate longitude step at this specific latitude for 1km width
+            const metersPerDegreeLngAtLat = metersPerDegreeLat * Math.cos(cellCenterLat * Math.PI / 180);
+            const lngStepAtLat = gridSize / metersPerDegreeLngAtLat;
+            
+            for (let lngIndex = westIndex; lngIndex < eastIndex; lngIndex++) {
+                // Calculate cell longitude boundaries
+                const cellWestLng = originLng + (lngIndex * lngStepAtLat);
+                const cellEastLng = originLng + ((lngIndex + 1) * lngStepAtLat);
+                
+                // Create polygon for this grid cell
+                const coordinates = [[
+                    [cellWestLng, cellSouthLat],
+                    [cellEastLng, cellSouthLat],
+                    [cellEastLng, cellNorthLat],
+                    [cellWestLng, cellNorthLat],
+                    [cellWestLng, cellSouthLat]
+                ]];
+                
+                // Format grid size for display
+                let sizeLabel;
+                if (gridSize >= 1000) {
+                    const km = gridSize / 1000;
+                    sizeLabel = `${km}km × ${km}km`;
+                } else {
+                    sizeLabel = `${gridSize}m × ${gridSize}m`;
+                }
+                
+                const feature = {
+                    type: 'Feature',
+                    geometry: {
+                        type: 'Polygon',
+                        coordinates: coordinates
+                    },
+                    properties: {
+                        gridIndex: `${lngIndex},${latIndex}`,
+                        cellSize: sizeLabel
+                    }
+                };
+                
+                gridFeatures.push(feature);
+            }
+        }
+        
+        if (gridFeatures.length === 0) {
+            alert('No grid cells generated for the current view.');
+            return;
+        }
+        
+        // Create GeoJSON layer with the grid
+        this.geoJsonLayer = L.geoJSON({
+            type: "FeatureCollection",
+            features: gridFeatures
+        }, {
+            style: {
+                color: 'blue',
+                weight: 2,
+                fillOpacity: 0.1
+            },
+            onEachFeature: (feature, layer) => {
+                layer.on('click', () => {
+                    this.toggleAreaSelection(layer);
+                });
+            }
+        }).addTo(this.mapManager.getMap());
+        
+        // Format grid size for console log
+        const sizeLabelConsole = gridSize >= 1000 ? `${gridSize / 1000}km × ${gridSize / 1000}km` : `${gridSize}m × ${gridSize}m`;
+        console.log(`Generated ${gridFeatures.length} grid cells (${sizeLabelConsole})`);
     }
 
     toggleAreaSelection(layer) {
@@ -866,7 +1029,7 @@ export class RouteCrafterApp {
         }
     }
 
-    clearAllSelections() {
+    clearAllSelectionsWithoutResettingDropdown() {
         // Clear highlighted polygons
         this.highlightedPolygons.forEach(layer => {
             layer.setStyle({
@@ -901,14 +1064,24 @@ export class RouteCrafterApp {
         this.routingManager.stopAnimation();
         this.routingManager.setRoutePoints([]);
         
-        // Reset UI elements
+        // Reset UI elements (but not the dropdown)
         document.getElementById('routeLength').innerHTML = '';
         document.getElementById('searchBox').value = '';
         document.getElementById('bufferSize').value = '1';
         document.getElementById('truncateByEdge').checked = true;
         document.getElementById('consolidateTolerance').value = '15';
         document.getElementById('customFilter').value = '[highway][area!~"yes"][highway!~"bridleway|bus_guideway|construction|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path"][access!~"customers|no|private"][public_transport!~"platform"][fee!~"yes"][service!~"drive-through|driveway|parking_aisle"][toll!~"yes"]';
-        document.getElementById('searchRules').selectedIndex = 0;
+    }
+
+    clearAllSelections() {
+        // Clear everything including resetting dropdown
+        this.clearAllSelectionsWithoutResettingDropdown();
+        
+        // Reset to first option (will trigger the change event)
+        const searchRules = document.getElementById('searchRules');
+        searchRules.selectedIndex = 0;
+        // Manually trigger change event to update UI
+        searchRules.dispatchEvent(new Event('change'));
     }
 
     searchLocation() {
