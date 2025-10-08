@@ -95,6 +95,26 @@ export class RouteCrafterApp {
             this.handleDrawCreated(event);
         });
 
+        // Handle draw deleted event
+        this.mapManager.getMap().on(L.Draw.Event.DELETED, (event) => {
+            const layers = event.layers;
+            layers.eachLayer((layer) => {
+                // Remove from highlighted polygons if it was selected
+                const index = this.highlightedPolygons.indexOf(layer);
+                if (index > -1) {
+                    this.highlightedPolygons.splice(index, 1);
+                }
+            });
+            // Update preview after deletion
+            this.previewCombinedPolygon();
+        });
+
+        // Handle draw edited event
+        this.mapManager.getMap().on(L.Draw.Event.EDITED, (event) => {
+            // Update preview after editing
+            this.previewCombinedPolygon();
+        });
+
         // Buffer size changes
         document.getElementById('bufferSize').addEventListener('input', () => {
             this.previewCombinedPolygon();
@@ -241,6 +261,13 @@ export class RouteCrafterApp {
             
             // Add click handler to select the drawn area
             layer.on('click', (e) => {
+                // Don't interfere if Leaflet Draw is in delete or edit mode
+                const drawControl = this.mapManager.getDrawControl();
+                if (drawControl._toolbars.edit._activeMode) {
+                    // Edit or delete mode is active, don't run custom selection
+                    return;
+                }
+                
                 this.selectPolygon(layer);
                 this.previewDrawnAreaWithBuffer(layer);
             });
@@ -248,23 +275,28 @@ export class RouteCrafterApp {
     }
 
     selectPolygon(layer) {
-        // Remove existing highlights
-        this.highlightedPolygons.forEach(polygon => {
-            if (this.mapManager.getMap().hasLayer(polygon)) {
-                this.mapManager.getMap().removeLayer(polygon);
-            }
-        });
-        this.highlightedPolygons.length = 0;
+        // Check if layer is already highlighted
+        const index = this.highlightedPolygons.indexOf(layer);
         
-        // Highlight the clicked drawn area
-        const highlightLayer = L.polygon(layer.getLatLngs(), {
-            color: '#ff6b6b',
-            fillColor: '#ff6b6b',
-            fillOpacity: 0.3,
-            weight: 3
-        });
-        highlightLayer.addTo(this.mapManager.getMap());
-        this.highlightedPolygons.push(highlightLayer);
+        if (index > -1) {
+            // Unhighlight - reset to default style
+            this.highlightedPolygons.splice(index, 1);
+            layer.setStyle({
+                color: '#007bff',
+                fillColor: '#007bff',
+                fillOpacity: 0.2,
+                weight: 2
+            });
+        } else {
+            // Highlight - change style to red
+            this.highlightedPolygons.push(layer);
+            layer.setStyle({
+                color: '#ff6b6b',
+                fillColor: '#ff6b6b',
+                fillOpacity: 0.3,
+                weight: 3
+            });
+        }
     }
 
     previewDrawnAreaWithBuffer(drawnLayer) {
@@ -1040,12 +1072,24 @@ export class RouteCrafterApp {
     }
 
     clearAllSelectionsWithoutResettingDropdown() {
-        // Clear highlighted polygons
+        // Clear highlighted polygons - reset their styles
         this.highlightedPolygons.forEach(layer => {
-            layer.setStyle({
-                color: 'blue',
-                weight: 2
-            });
+            // Check if it's a drawn item or a fetched area
+            if (this.mapManager.getDrawnItems().hasLayer(layer)) {
+                // Reset drawn item style
+                layer.setStyle({
+                    color: '#007bff',
+                    fillColor: '#007bff',
+                    fillOpacity: 0.2,
+                    weight: 2
+                });
+            } else {
+                // Reset fetched area style
+                layer.setStyle({
+                    color: 'blue',
+                    weight: 2
+                });
+            }
         });
         this.highlightedPolygons.length = 0;
         
