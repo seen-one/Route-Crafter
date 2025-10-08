@@ -148,6 +148,11 @@ export class RouteCrafterApp {
             this.downloadRoadDataAsCustomFormat();
         });
 
+        // Upload Overpass Response button
+        document.getElementById('uploadOverpassButton').addEventListener('click', () => {
+            document.getElementById('overpassUploadInput').click();
+        });
+
         // Export Chinese Postman button
         document.getElementById('exportCPPButton').addEventListener('click', () => {
             this.exportForChinesePostman();
@@ -177,9 +182,13 @@ export class RouteCrafterApp {
             document.getElementById('cppUploadInput').click();
         });
 
-        // File upload handler
+        // File upload handlers
         document.getElementById('cppUploadInput').addEventListener('change', (event) => {
             this.handleCPPSolutionUpload(event);
+        });
+
+        document.getElementById('overpassUploadInput').addEventListener('change', (event) => {
+            this.handleOverpassResponseUpload(event);
         });
     }
 
@@ -965,6 +974,127 @@ export class RouteCrafterApp {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    }
+
+    handleOverpassResponseUpload(event) {
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+
+        if (!file.name.toLowerCase().endsWith('.json')) {
+            alert('Please select a JSON file.');
+            event.target.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const fileText = e.target.result;
+                const overpassData = JSON.parse(fileText);
+                
+                // Validate that this is an Overpass response
+                if (!overpassData.elements || !Array.isArray(overpassData.elements)) {
+                    alert('Invalid Overpass response format. The file must contain an "elements" array.');
+                    event.target.value = '';
+                    return;
+                }
+
+                // Store the response globally
+                window.overpassResponse = overpassData;
+                
+                // Process and display the roads
+                this.processUploadedOverpassResponse(overpassData);
+                
+                alert(`Successfully loaded Overpass response with ${overpassData.elements.length} elements.`);
+            } catch (error) {
+                console.error('Error parsing Overpass response:', error);
+                alert('Error parsing JSON file. Please ensure it is a valid Overpass API response.');
+            } finally {
+                event.target.value = '';
+            }
+        };
+        
+        reader.onerror = () => {
+            alert('Error reading file. Please try again.');
+            event.target.value = '';
+        };
+        
+        reader.readAsText(file);
+    }
+
+    processUploadedOverpassResponse(data) {
+        try {
+            // Convert OSM data to GeoJSON
+            const geoJsonData = osmtogeojson(data);
+            
+            // Filter to only include LineString features (roads)
+            let roadFeatures = geoJsonData.features.filter(feature => {
+                return feature.geometry.type === 'LineString' && feature.properties.highway;
+            });
+            
+            if (roadFeatures.length === 0) {
+                alert('No roads found in the uploaded Overpass response.');
+                return;
+            }
+            
+            // Remove existing road layer if it exists
+            if (this.geoJsonLayer) {
+                this.mapManager.getMap().removeLayer(this.geoJsonLayer);
+            }
+            
+            // Create coordinate mappings for CPP export/import
+            this.createCoordinateMappings(roadFeatures);
+            
+            // Create a new GeoJSON layer for roads
+            this.geoJsonLayer = L.geoJSON(roadFeatures, {
+                style: {
+                    color: 'red',
+                    weight: 4,
+                    opacity: 0.7
+                },
+                onEachFeature: function(feature, layer) {
+                    // Add popup with road information
+                    const props = feature.properties;
+                    const popupContent = `
+                        <strong>Road Type:</strong> ${props.highway || 'Unknown'}<br>
+                        <strong>Name:</strong> ${props.name || 'Unnamed'}<br>
+                        <strong>Surface:</strong> ${props.surface || 'Unknown'}<br>
+                        <strong>Access:</strong> ${props.access || 'Public'}<br>
+                        <strong>Oneway:</strong> ${props.oneway || 'No'}
+                    `;
+                    layer.bindPopup(popupContent);
+                }
+            }).addTo(this.mapManager.getMap());
+            
+            // Calculate total road length
+            let totalLengthKm = 0;
+            roadFeatures.forEach(feature => {
+                if (feature.geometry.type === 'LineString') {
+                    const line = turf.lineString(feature.geometry.coordinates);
+                    const length = turf.length(line, { units: 'kilometers' });
+                    totalLengthKm += length;
+                }
+            });
+            
+            const totalLengthMi = totalLengthKm * 0.621371;
+            
+            // Update the routeLength paragraph with road statistics
+            document.getElementById('routeLength').innerHTML = `
+                <strong>Uploaded Roads:</strong> ${roadFeatures.length} road segments<br>
+                <strong>Total Road Length:</strong> ${totalLengthKm.toFixed(2)} km (${totalLengthMi.toFixed(2)} mi)
+            `;
+            
+            // Fit map to show all roads
+            if (this.geoJsonLayer.getBounds().isValid()) {
+                this.mapManager.getMap().fitBounds(this.geoJsonLayer.getBounds());
+            }
+            
+        } catch (err) {
+            console.error('Error processing Overpass response:', err);
+            alert('Error processing Overpass response:\n\n' + (err.message || 'Unknown error'));
+        }
     }
 
     exportForChinesePostman() {

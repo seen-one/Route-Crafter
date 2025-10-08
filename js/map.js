@@ -172,6 +172,49 @@ export class MapManager {
     }
 
     setupControls() {
+        // Debug menu in top-left corner
+        this.debugMenuContainer = L.control({ position: 'topleft' });
+
+        this.debugMenuContainer.onAdd = () => {
+            const div = L.DomUtil.create('div', 'leaflet-bar debug-menu-container');
+            div.innerHTML = `
+                <div style="background: white; border-radius: 4px;">
+                    <button id="debugMenuToggle" style="width: 100%; background-color: #6c757d; color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-size: 14px; margin: 0;">
+                        🛠️ Debug Menu
+                    </button>
+                    <div id="debugMenuContent" style="display: none; padding: 5px; background: white; border-top: 1px solid #ddd; margin-top: 2px;">
+                        <button id="downloadButton" style="width: 100%; margin: 2px 0;">Download Overpass Response</button>
+                        <button id="uploadOverpassButton" style="width: 100%; margin: 2px 0;">Upload Overpass Response</button>
+                        <button id="exportCPPButton" style="width: 100%; margin: 2px 0;">Export OARLib Format</button>
+                        <button id="uploadCPPButton" style="width: 100%; margin: 2px 0;">Upload OARLib Solution</button>
+                    </div>
+                </div>
+            `;
+            L.DomEvent.disableClickPropagation(div);
+            
+            return div;
+        };
+
+        this.debugMenuContainer.addTo(this.map);
+
+        // Add toggle functionality for debug menu
+        setTimeout(() => {
+            const debugMenuToggle = document.getElementById('debugMenuToggle');
+            const debugMenuContent = document.getElementById('debugMenuContent');
+            
+            if (debugMenuToggle && debugMenuContent) {
+                debugMenuToggle.addEventListener('click', () => {
+                    if (debugMenuContent.style.display === 'none') {
+                        debugMenuContent.style.display = 'block';
+                        debugMenuToggle.textContent = '🛠️ Debug Menu ▼';
+                    } else {
+                        debugMenuContent.style.display = 'none';
+                        debugMenuToggle.textContent = '🛠️ Debug Menu';
+                    }
+                });
+            }
+        }, 100);
+
         // Custom controls container for Route Crafter features
         this.controlsContainer = L.control({ position: 'bottomleft' });
 
@@ -202,9 +245,6 @@ export class MapManager {
                     <br>
                     <button id="previewGPXButton">Fetch Roads</button>
                     <button id="playRouteButton">Play Route</button>
-                    <button id="downloadButton">Download Overpass Response</button>
-                    <button id="exportCPPButton">Export OARLib Format</button>
-                    <button id="uploadCPPButton">Upload OARLib Solution</button>
                     <button id="drawToggleButton">Toggle Drawing</button>
                     <button id="clearButton">Reset</button>
                     <br>

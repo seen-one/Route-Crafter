@@ -148,6 +148,31 @@ button:hover {
     font-style: italic;
 }
 
+/* Debug Menu Styles */
+.debug-menu-container {
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.debug-menu-container button {
+    font-size: 13px;
+    padding: 6px 10px;
+    margin: 2px 0;
+}
+
+#debugMenuToggle {
+    background-color: #6c757d;
+    transition: background-color 0.2s;
+}
+
+#debugMenuToggle:hover {
+    background-color: #545b62;
+}
+
+#debugMenuContent {
+    min-width: 200px;
+}
+
 /* Context Menu Styles */
 .context-menu {
     position: absolute;
