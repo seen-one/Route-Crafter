@@ -71,8 +71,10 @@ export class RouteCrafterApp {
                 // Hide fetch button and enable draw control
                 fetchButton.style.display = 'none';
                 this.mapManager.enableDrawControl();
-                // Show buffer for draw area
-                bufferContainer.style.display = 'flex';
+                // Hide buffer for draw area
+                bufferContainer.style.display = 'none';
+                // Set buffer to 0 for draw area
+                document.getElementById('bufferSize').value = '0';
             } else {
                 // Show fetch button and disable draw control
                 fetchButton.style.display = 'inline-block';
@@ -147,6 +149,14 @@ export class RouteCrafterApp {
         // Search button
         document.getElementById('searchButton').addEventListener('click', () => {
             this.searchLocation();
+        });
+
+        // Search box - trigger search on Enter key
+        document.getElementById('searchBox').addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                this.searchLocation();
+            }
         });
 
         // Fetch button
