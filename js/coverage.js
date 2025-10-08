@@ -13,6 +13,7 @@ export class CoverageManager {
         this.mapilioLayer = null;
         this.layerControl = null;
         this.overlayMaps = {};
+        this.greyOverlay = null;
         
         this.init();
     }
@@ -20,7 +21,43 @@ export class CoverageManager {
     init() {
         this.setupKartaviewLayer();
         this.setupFilterControls();
+        this.setupGreyOverlay();
         // Don't setup layers control here - wait for initializeLayers()
+    }
+
+    setupGreyOverlay() {
+        // Create a grey overlay pane
+        this.greyOverlay = L.rectangle(
+            [[-90, -180], [90, 180]], // Cover entire world
+            {
+                color: 'transparent',
+                fillColor: '#555555',
+                fillOpacity: 0.3,
+                interactive: false,
+                pane: 'overlayPane'
+            }
+        );
+    }
+
+    updateGreyOverlay() {
+        const zoomLevel = this.map.getZoom();
+        const anyCoverageLayerEnabled = 
+            (this.mapillaryLayer && this.map.hasLayer(this.mapillaryLayer)) ||
+            (this.panoramaxLayer && this.map.hasLayer(this.panoramaxLayer)) ||
+            (this.kartaviewLayer && this.map.hasLayer(this.kartaviewLayer)) ||
+            (this.mapilioLayer && this.map.hasLayer(this.mapilioLayer));
+        
+        // Show grey overlay if any coverage layer is enabled and zoom is too low
+        if (anyCoverageLayerEnabled && zoomLevel < 13) {
+            if (!this.map.hasLayer(this.greyOverlay)) {
+                this.greyOverlay.addTo(this.map);
+                this.greyOverlay.bringToBack();
+            }
+        } else {
+            if (this.map.hasLayer(this.greyOverlay)) {
+                this.map.removeLayer(this.greyOverlay);
+            }
+        }
     }
 
     setupKartaviewLayer() {
@@ -278,6 +315,9 @@ export class CoverageManager {
         } else {
             document.getElementById('applyFiltersBtn').disabled = false;
         }
+        
+        // Update grey overlay based on zoom and active layers
+        this.updateGreyOverlay();
     }
 
     applyFilters() {
@@ -329,6 +369,9 @@ export class CoverageManager {
             this.kartaviewLayer.addTo(this.map);
         }
         this.refreshLayerControl();
+        
+        // Update grey overlay after applying filters
+        this.updateGreyOverlay();
     }
 
     setupLayersControlMobileBehavior() {
@@ -431,6 +474,15 @@ export class CoverageManager {
         });
         
         this.map.on('zoomend', () => this.updateZoomLevelIndicator());
+        
+        // Listen for overlay layers being added or removed
+        this.map.on('overlayadd', () => {
+            this.updateGreyOverlay();
+        });
+        
+        this.map.on('overlayremove', () => {
+            this.updateGreyOverlay();
+        });
     }
 
     // Initialize layers
