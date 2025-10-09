@@ -194,11 +194,25 @@ export class RouteCrafterApp {
             }
         });
 
+        // Boundary buffer wheel
+        document.getElementById('boundaryBuffer').addEventListener('wheel', (event) => {
+            event.preventDefault();
+            let currentValue = parseInt(event.target.value, 10);
+            if (isNaN(currentValue)) currentValue = 500;
+            const step = 50;
+            if (event.deltaY < 0) {
+                event.target.value = Math.min(currentValue + step, 2000);
+            } else if (event.deltaY > 0) {
+                event.target.value = Math.max(currentValue - step, 1);
+            }
+        });
+
         // Disable zooming when hovering over inputs
         const bufferInput = document.getElementById('bufferSize');
         const consolidateToleranceInput = document.getElementById('consolidateTolerance');
         const coverageThresholdInput = document.getElementById('coverageThreshold');
         const proximityThresholdInput = document.getElementById('proximityThreshold');
+        const boundaryBufferInput = document.getElementById('boundaryBuffer');
 
         bufferInput.addEventListener('mouseover', () => {
             this.mapManager.getMap().scrollWheelZoom.disable();
@@ -229,6 +243,14 @@ export class RouteCrafterApp {
         });
 
         proximityThresholdInput.addEventListener('mouseout', () => {
+            this.mapManager.getMap().scrollWheelZoom.enable();
+        });
+
+        boundaryBufferInput.addEventListener('mouseover', () => {
+            this.mapManager.getMap().scrollWheelZoom.disable();
+        });
+
+        boundaryBufferInput.addEventListener('mouseout', () => {
             this.mapManager.getMap().scrollWheelZoom.enable();
         });
 
@@ -448,6 +470,8 @@ export class RouteCrafterApp {
         document.getElementById('searchBox').value = '';
         document.getElementById('bufferSize').value = '1';
         document.getElementById('truncateByEdge').checked = true;
+        document.getElementById('allowNavigationPastBoundary').checked = false;
+        document.getElementById('boundaryBuffer').value = '500';
         document.getElementById('consolidateTolerance').value = '15';
         document.getElementById('navigationFilter').value = '[highway][area!~"yes"][highway!~"bridleway|bus_guideway|construction|corridor|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path|steps"][access!~"customers|no|private"][public_transport!~"platform"][fee!~"yes"][service!~"drive-through|driveway|parking_aisle"][toll!~"yes"]';
         document.getElementById('routeFilter').value = '';

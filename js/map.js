@@ -271,6 +271,14 @@ export class MapManager {
                         <input type="checkbox" id="truncateByEdge" checked>
                     </div>
                     <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
+                        <label for="allowNavigationPastBoundary" style="flex: 1;">Allow navigation past boundary</label>
+                        <input type="checkbox" id="allowNavigationPastBoundary">
+                    </div>
+                    <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
+                        <label for="boundaryBuffer" style="flex: 1;">Boundary buffer (meters):</label>
+                        <input type="number" id="boundaryBuffer" min="1" max="2000" value="500" style="width: 80px;">
+                    </div>
+                    <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
                         <label for="filterMapillaryCoverage" style="flex: 1;">Filter roads with street-level coverage</label>
                         <input type="checkbox" id="filterMapillaryCoverage">
                     </div>

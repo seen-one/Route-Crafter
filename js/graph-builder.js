@@ -114,14 +114,15 @@ export class GraphBuilder {
         if (!useMixedFormat) {
             content += `% WINDY VERSION (default)
 % For one-way roads, reverse cost is set to 999999 (essentially infinity)
+% Roads outside the original boundary are always OPTIONAL
 `;
             if (coverageFilterEnabled) {
-                content += `% Roads are REQUIRED if: uncovered AND NOT in route filter
-% Roads are OPTIONAL if: covered OR in route filter
+                content += `% Roads are REQUIRED if: inside boundary AND uncovered AND NOT in route filter
+% Roads are OPTIONAL if: outside boundary OR covered OR in route filter
 `;
             } else {
-                content += `% Roads are REQUIRED if: NOT in route filter
-% Roads are OPTIONAL if: in route filter
+                content += `% Roads are REQUIRED if: inside boundary AND NOT in route filter
+% Roads are OPTIONAL if: outside boundary OR in route filter
 `;
             }
             content += `%

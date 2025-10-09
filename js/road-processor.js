@@ -263,6 +263,106 @@ export class RoadProcessor {
         return null;
     }
 
+    // Helper function to split a road at the boundary into inside and outside parts
+    splitRoadAtBoundary(feature, polygon) {
+        const result = [];
+        const coords = feature.geometry.coordinates;
+        
+        if (coords.length < 2) {
+            result.push(feature);
+            return result;
+        }
+        
+        // Check each coordinate to see if it's inside or outside the boundary
+        const coordStatus = coords.map(coord => {
+            const point = turf.point(coord);
+            return turf.booleanWithin(point, polygon);
+        });
+        
+        const polygonBoundary = turf.polygonToLine(polygon);
+        
+        // Build segments by walking through the coordinates
+        let currentSegment = [];
+        let currentSegmentIsInside = null;
+        
+        for (let i = 0; i < coords.length; i++) {
+            const coord = coords[i];
+            const isInside = coordStatus[i];
+            
+            // Initialize the segment type on first point
+            if (currentSegmentIsInside === null) {
+                currentSegmentIsInside = isInside;
+                currentSegment.push(coord);
+                continue;
+            }
+            
+            // Check if we're transitioning between inside and outside
+            if (i > 0 && coordStatus[i - 1] !== isInside) {
+                // Find the intersection point where the road crosses the boundary
+                const segment = turf.lineString([coords[i - 1], coord]);
+                const intersection = this.findLineIntersection(segment, polygonBoundary);
+                
+                if (intersection) {
+                    // Close current segment at intersection point
+                    currentSegment.push(intersection);
+                    
+                    // Save current segment if it has at least 2 points
+                    if (currentSegment.length >= 2) {
+                        result.push({
+                            ...feature,
+                            geometry: {
+                                type: 'LineString',
+                                coordinates: [...currentSegment]
+                            },
+                            properties: {
+                                ...feature.properties,
+                                isOutsideBoundary: !currentSegmentIsInside
+                            }
+                        });
+                    }
+                    
+                    // Start new segment from intersection point
+                    currentSegment = [intersection, coord];
+                    currentSegmentIsInside = isInside;
+                } else {
+                    // No intersection found, just continue
+                    currentSegment.push(coord);
+                }
+            } else {
+                // Same status as previous point, just add it
+                currentSegment.push(coord);
+            }
+        }
+        
+        // Save the final segment
+        if (currentSegment.length >= 2) {
+            result.push({
+                ...feature,
+                geometry: {
+                    type: 'LineString',
+                    coordinates: currentSegment
+                },
+                properties: {
+                    ...feature.properties,
+                    isOutsideBoundary: !currentSegmentIsInside
+                }
+            });
+        }
+        
+        // If no valid segments were created, return the original feature as inside
+        if (result.length === 0) {
+            result.push({
+                ...feature,
+                properties: {
+                    ...feature.properties,
+                    isOutsideBoundary: false
+                }
+            });
+        }
+        
+        return result;
+    }
+
     fetchRoadsInArea(createCoordinateMappingsCallback) {
         const previewGPXButton = document.getElementById('previewGPXButton');
         previewGPXButton.classList.add('button-loading');
@@ -307,6 +407,19 @@ export class RoadProcessor {
                 return;
             }
             
+            // Check if navigation past boundary is enabled
+            const allowNavigationPastBoundary = document.getElementById('allowNavigationPastBoundary').checked;
+            const boundaryBuffer = parseInt(document.getElementById('boundaryBuffer').value, 10);
+            
+            // Create expanded polygon for fetching if navigation past boundary is enabled
+            let queryPolygon = combinedPolygon;
+            if (allowNavigationPastBoundary && boundaryBuffer > 0) {
+                queryPolygon = turf.buffer(combinedPolygon, boundaryBuffer, {
+                    units: 'meters'
+                });
+                console.log(`Fetching roads with ${boundaryBuffer}m boundary buffer for navigation continuity`);
+            }
+            
             // Use the navigation filter directly as Overpass QL format
             let filterConditions = navigationFilter.trim();
             if (!filterConditions) {
@@ -314,8 +427,8 @@ export class RoadProcessor {
                 filterConditions = '[highway]';
             }
             
-            // Convert polygon to Overpass poly format
-            const polyString = this.polygonToOverpassPoly(combinedPolygon);
+            // Convert polygon to Overpass poly format (use queryPolygon for fetching)
+            const polyString = this.polygonToOverpassPoly(queryPolygon);
             
             // Create Overpass query using poly filter for precise polygon filtering
             const overpassQuery = `
@@ -380,22 +493,89 @@ export class RoadProcessor {
                     return;
                 }
                 
-                // Apply road trimming if "truncate by edge" is enabled
+                // Apply road trimming/splitting based on settings
                 const truncateByEdge = document.getElementById('truncateByEdge').checked;
-                if (truncateByEdge) {
+                
+                if (allowNavigationPastBoundary && boundaryBuffer > 0 && truncateByEdge) {
+                    // Split roads at boundary: inside parts remain normal, outside parts marked as outside boundary
+                    console.log('Splitting roads at polygon boundary...');
+                    const splitRoads = [];
+                    
+                    roadFeatures.forEach(feature => {
+                        if (feature.geometry.type !== 'LineString') {
+                            splitRoads.push(feature);
+                            return;
+                        }
+                        
+                        const roadLine = turf.lineString(feature.geometry.coordinates);
+                        
+                        // Check if road intersects with boundary
+                        const intersects = turf.booleanIntersects(roadLine, combinedPolygon);
+                        
+                        if (!intersects) {
+                            // Completely outside - mark as outside boundary
+                            feature.properties.isOutsideBoundary = true;
+                            splitRoads.push(feature);
+                        } else {
+                            // Check if completely inside
+                            const isWithin = turf.booleanWithin(roadLine, combinedPolygon);
+                            
+                            if (isWithin) {
+                                // Completely inside - keep as is
+                                feature.properties.isOutsideBoundary = false;
+                                splitRoads.push(feature);
+                            } else {
+                                // Crosses boundary - split it
+                                const splitResult = this.splitRoadAtBoundary(feature, combinedPolygon);
+                                splitRoads.push(...splitResult);
+                            }
+                        }
+                    });
+                    
+                    roadFeatures = splitRoads;
+                    const outsideCount = roadFeatures.filter(f => f.properties.isOutsideBoundary).length;
+                    const insideCount = roadFeatures.filter(f => !f.properties.isOutsideBoundary).length;
+                    console.log(`Split roads at boundary: ${roadFeatures.length} total segments (${insideCount} inside, ${outsideCount} outside)`);
+                } else if (truncateByEdge && (!allowNavigationPastBoundary || boundaryBuffer === 0)) {
+                    // Normal trimming (no navigation past boundary)
                     console.log('Trimming roads to polygon boundary...');
-                    console.log('Combined polygon:', combinedPolygon);
                     roadFeatures = this.trimRoadsToPolygon(roadFeatures, combinedPolygon);
+                    roadFeatures.forEach(feature => {
+                        feature.properties.isOutsideBoundary = false;
+                    });
                     console.log(`Trimmed ${roadFeatures.length} road segments`);
+                } else if (allowNavigationPastBoundary && boundaryBuffer > 0) {
+                    // Navigation past boundary enabled, no trimming - mark completely outside roads
+                    console.log('Marking roads outside the original boundary...');
+                    roadFeatures.forEach(feature => {
+                        if (feature.geometry.type === 'LineString') {
+                            const roadLine = turf.lineString(feature.geometry.coordinates);
+                            const intersects = turf.booleanIntersects(roadLine, combinedPolygon);
+                            feature.properties.isOutsideBoundary = !intersects;
+                        } else {
+                            feature.properties.isOutsideBoundary = false;
+                        }
+                    });
+                    const outsideCount = roadFeatures.filter(f => f.properties.isOutsideBoundary).length;
+                    console.log(`Found ${outsideCount} road segments completely outside the original boundary`);
+                } else {
+                    // No trimming, no boundary buffer - mark all as inside
+                    roadFeatures.forEach(feature => {
+                        feature.properties.isOutsideBoundary = false;
+                    });
                 }
                 
                 // Apply route filter marking - check if each road matches the route filter
-                // If route filter is empty, all roads are required
+                // Roads outside boundary are always optional (not required)
+                // If route filter is empty, all roads inside boundary are required
                 // If it matches route filter, mark as optional (NOT required)
                 // If it doesn't match route filter, mark as required
                 roadFeatures.forEach(feature => {
-                    if (!routeFilter || routeFilter.trim() === '') {
-                        // Empty filter - all roads are required
+                    if (feature.properties.isOutsideBoundary) {
+                        // Roads outside boundary are always optional
+                        feature.properties.isRouteRequired = false;
+                    } else if (!routeFilter || routeFilter.trim() === '') {
+                        // Empty filter - all roads inside boundary are required
                         feature.properties.isRouteRequired = true;
                     } else {
                         // Check if matches route filter
@@ -498,9 +678,18 @@ export class RoadProcessor {
                 // Create a new GeoJSON layer for roads
                 this.geoJsonLayer = L.geoJSON(roadFeatures, {
                     style: function(feature) {
-                        // Style based on route filter and coverage status
+                        // First check if outside boundary (always optional, dashed line)
+                        if (feature.properties.isOutsideBoundary) {
+                            return {
+                                color: '#888888',
+                                weight: 3,
+                                opacity: 0.4,
+                                dashArray: '5, 5'
+                            };
+                        }
+                        // Then style based on route filter and coverage status
                         // If road is marked as optional (NOT required), show in dark grey
-                        if (!feature.properties.isRouteRequired) {
+                        else if (!feature.properties.isRouteRequired) {
                             return {
                                 color: '#555555',
                                 weight: 4,
@@ -546,9 +735,11 @@ export class RoadProcessor {
                 let coveredLengthKm = 0;
                 let uncoveredLengthKm = 0;
                 let optionalLengthKm = 0;
+                let outsideBoundaryLengthKm = 0;
                 let coveredCount = 0;
                 let uncoveredCount = 0;
                 let optionalCount = 0;
+                let outsideBoundaryCount = 0;
                 
                 roadFeatures.forEach(feature => {
                     if (feature.geometry.type === 'LineString') {
@@ -556,8 +747,11 @@ export class RoadProcessor {
                         const length = turf.length(line, { units: 'kilometers' });
                         totalLengthKm += length;
                         
-                        // Check if optional (matches route filter)
-                        if (!feature.properties.isRouteRequired) {
+                        // Categorize roads: outside boundary first, then optional, then covered/uncovered
+                        if (feature.properties.isOutsideBoundary) {
+                            outsideBoundaryLengthKm += length;
+                            outsideBoundaryCount++;
+                        } else if (!feature.properties.isRouteRequired) {
                             optionalLengthKm += length;
                             optionalCount++;
                         } else if (feature.properties.isCovered) {
@@ -574,6 +768,7 @@ export class RoadProcessor {
                 const coveredLengthMi = coveredLengthKm * 0.621371;
                 const uncoveredLengthMi = uncoveredLengthKm * 0.621371;
                 const optionalLengthMi = optionalLengthKm * 0.621371;
+                const outsideBoundaryLengthMi = outsideBoundaryLengthKm * 0.621371;
                 
                 // Calculate the area of the combined polygon
                 const areaInSquareMeters = turf.area(combinedPolygon);
@@ -588,6 +783,14 @@ export class RoadProcessor {
                     <strong>Roads Found:</strong> ${roadFeatures.length} road segments${truncateStatus}<br>
                     <strong>Total Road Length:</strong> ${totalLengthKm.toFixed(2)} km (${totalLengthMi.toFixed(2)} mi)
                 `;
+                
+                // Add outside boundary statistics if navigation past boundary is enabled
+                if (outsideBoundaryCount > 0) {
+                    statsHtml += `<br>
+                    <strong>Navigation Past Boundary:</strong><br>
+                    <span style="color: #888888; font-style: italic;">● Outside boundary (optional):</span> ${outsideBoundaryCount} segments, ${outsideBoundaryLengthKm.toFixed(2)} km (${outsideBoundaryLengthMi.toFixed(2)} mi)
+                    `;
+                }
                 
                 // Add optional roads statistics if route filter is used
                 if (optionalCount > 0) {
@@ -714,6 +917,7 @@ export class RoadProcessor {
                 feature.properties.coveragePercent = 0;
                 feature.properties.isCovered = false;
                 feature.properties.coverageSources = 'None';
+                feature.properties.isOutsideBoundary = false; // No boundary context for uploaded roads
                 
                 if (!routeFilter || routeFilter.trim() === '') {
                     // Empty filter - all roads are required
@@ -731,9 +935,18 @@ export class RoadProcessor {
             // Create a new GeoJSON layer for roads
             this.geoJsonLayer = L.geoJSON(roadFeatures, {
                 style: function(feature) {
-                    // Style based on route filter and coverage status
+                    // First check if outside boundary (always optional, dashed line)
+                    if (feature.properties.isOutsideBoundary) {
+                        return {
+                            color: '#888888',
+                            weight: 3,
+                            opacity: 0.4,
+                            dashArray: '5, 5'
+                        };
+                    }
+                    // Then style based on route filter and coverage status
                     // If road is marked as optional (NOT required), show in dark grey
-                    if (!feature.properties.isRouteRequired) {
+                    else if (!feature.properties.isRouteRequired) {
                         return {
                             color: '#555555',
                             weight: 4,
