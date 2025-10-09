@@ -189,6 +189,7 @@ export class MapManager {
                         <button id="downloadButton" style="width: 100%; margin: 2px 0;">Download Overpass Response</button>
                         <button id="uploadOverpassButton" style="width: 100%; margin: 2px 0;">Upload Overpass Response</button>
                         <button id="exportCPPButton" style="width: 100%; margin: 2px 0;">Export OARLib Format</button>
+                        <button id="exportLargestComponentButton" style="width: 100%; margin: 2px 0;">Export Largest Component OARLib</button>
                         <div style="display: flex; align-items: center; margin: 5px 0; padding: 3px 0;">
                             <input type="checkbox" id="useMixedGraphFormat" style="margin-right: 5px;">
                             <label for="useMixedGraphFormat" style="font-size: 12px; cursor: pointer;">Use Mixed Graph Format</label>
@@ -196,6 +197,7 @@ export class MapManager {
                         <label for="oarlibSolutionTextarea" style="display: block; margin-top: 5px; font-size: 12px;">OARLib Solution:</label>
                         <textarea id="oarlibSolutionTextarea" placeholder="Paste OARLib solution here..." style="width: 100%; min-height: 80px; margin: 2px 0; padding: 5px; font-size: 11px; font-family: monospace; resize: vertical; box-sizing: border-box;"></textarea>
                         <button id="applyCPPSolutionButton" style="width: 100%; margin: 2px 0;">Apply Solution</button>
+                        <button id="applyLargestComponentSolutionButton" style="width: 100%; margin: 2px 0;">Apply Solution (Largest Component)</button>
                     </div>
                 </div>
             `;

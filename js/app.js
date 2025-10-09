@@ -23,6 +23,10 @@ export class RouteCrafterApp {
         this.coordinateToNodeIdMap = new Map();
         this.nodeIdToCoordinateMap = new Map();
         
+        // Coordinate mappings for largest component (when exported)
+        this.largestComponentCoordinateToNodeIdMap = new Map();
+        this.largestComponentNodeIdToCoordinateMap = new Map();
+        
         this.init();
     }
 
@@ -343,6 +347,22 @@ export class RouteCrafterApp {
             );
         });
 
+        // Export Largest Component button
+        document.getElementById('exportLargestComponentButton').addEventListener('click', () => {
+            const mappings = this.graphBuilder.exportLargestComponentForChinesePostman(
+                this.roadProcessor.getGeoJsonLayer(),
+                this.coordinateToNodeIdMap,
+                this.nodeIdToCoordinateMap
+            );
+            
+            // Store the renumbered coordinate mappings for use with "Apply Solution (Largest Component)"
+            if (mappings) {
+                this.largestComponentCoordinateToNodeIdMap = mappings.coordinateToNodeIdMap;
+                this.largestComponentNodeIdToCoordinateMap = mappings.nodeIdToCoordinateMap;
+                console.log('Stored largest component coordinate mappings for solution application');
+            }
+        });
+
         // Clear button
         document.getElementById('clearButton').addEventListener('click', () => {
             this.clearAllSelections();
@@ -373,6 +393,33 @@ export class RouteCrafterApp {
             }
             
             this.solutionVisualizer.handleCPPSolutionText(solutionText, this.nodeIdToCoordinateMap);
+        });
+
+        // Apply Largest Component Solution button
+        document.getElementById('applyLargestComponentSolutionButton').addEventListener('click', () => {
+            // Stop any running animation by clicking the close button
+            document.getElementById('closeBtn').click();
+            
+            const solutionText = document.getElementById('oarlibSolutionTextarea').value.trim();
+            
+            if (!solutionText) {
+                alert('Please paste an OARLib solution into the text box.');
+                return;
+            }
+            
+            if (this.largestComponentNodeIdToCoordinateMap.size === 0) {
+                alert(
+                    'No largest component has been exported yet.\n\n' +
+                    'Please:\n' +
+                    '1. First select an area and click "Fetch Roads"\n' +
+                    '2. Then click "Export Largest Component OARLib" to get the file\n' +
+                    '3. Solve the problem with OARLib\n' +
+                    '4. Finally paste your solution here and click this button'
+                );
+                return;
+            }
+            
+            this.solutionVisualizer.handleCPPSolutionText(solutionText, this.largestComponentNodeIdToCoordinateMap);
         });
 
         document.getElementById('overpassUploadInput').addEventListener('change', (event) => {
@@ -475,6 +522,10 @@ export class RouteCrafterApp {
         // Clear coordinate mappings
         this.coordinateToNodeIdMap.clear();
         this.nodeIdToCoordinateMap.clear();
+        
+        // Clear largest component coordinate mappings
+        this.largestComponentCoordinateToNodeIdMap.clear();
+        this.largestComponentNodeIdToCoordinateMap.clear();
         
         // Reset routing manager
         this.routingManager.stopAnimation();

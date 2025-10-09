@@ -1,5 +1,7 @@
 // Graph building module for OARLib format export
 
+import { findStronglyConnectedComponents, filterGraphByComponent } from './utils.js';
+
 export class GraphBuilder {
     constructor() {
         // This class is stateless and works with coordinate maps passed from app
@@ -468,6 +470,146 @@ Line Format: x,y
         console.log(`Depot vertex: ${connectedNodes.find(n => n.id === 1) ? '1' : 'not found'}`);
         
         return { nodes: connectedNodes, edges };
+    }
+
+    exportLargestComponentForChinesePostman(geoJsonLayer, coordinateToNodeIdMap, nodeIdToCoordinateMap) {
+        if (!geoJsonLayer) {
+            alert('No road data available. Please fetch roads first.');
+            return null;
+        }
+
+        try {
+            // Extract road features from the current layer
+            const roadFeatures = [];
+            geoJsonLayer.eachLayer((layer) => {
+                const feature = layer.feature;
+                if (feature && feature.geometry.type === 'LineString') {
+                    roadFeatures.push(feature);
+                }
+            });
+
+            if (roadFeatures.length === 0) {
+                alert('No road segments found to export.');
+                return;
+            }
+
+            // Check if coverage filtering is enabled
+            const coverageFilterEnabled = document.getElementById('filterMapillaryCoverage').checked;
+            
+            // Check if mixed format should be used (default is windy)
+            const useMixedFormat = document.getElementById('useMixedGraphFormat').checked;
+            
+            // Build the road graph
+            const roadGraph = this.buildChinesePostmanGraph(roadFeatures, coordinateToNodeIdMap, nodeIdToCoordinateMap);
+            
+            // Find strongly connected components
+            const components = findStronglyConnectedComponents(roadGraph.nodes, roadGraph.edges);
+            
+            // Get statistics before filtering
+            const totalNodes = roadGraph.nodes.length;
+            const totalEdges = roadGraph.edges.length;
+            
+            console.log(`Found ${components.length} strongly connected component(s)`);
+            components.forEach((comp, idx) => {
+                console.log(`  Component ${idx + 1}: ${comp.size} nodes`);
+            });
+            
+            // Find the largest component
+            let largestComponent = components[0];
+            for (const component of components) {
+                if (component.size > largestComponent.size) {
+                    largestComponent = component;
+                }
+            }
+            
+            console.log(`Largest component has ${largestComponent.size} nodes`);
+            
+            // Filter graph to only include the largest component
+            const filteredGraph = filterGraphByComponent(roadGraph.nodes, roadGraph.edges, largestComponent);
+            
+            // Renumber nodes to be sequential (1, 2, 3, ...) for OARLib format
+            // Create mapping from old IDs to new IDs
+            const oldIdToNewId = new Map();
+            let newId = 1;
+            filteredGraph.nodes.forEach(node => {
+                oldIdToNewId.set(node.id, newId);
+                newId++;
+            });
+            
+            // Update node IDs in the filtered graph
+            filteredGraph.nodes.forEach(node => {
+                node.id = oldIdToNewId.get(node.id);
+            });
+            
+            // Update edge source and target references
+            filteredGraph.edges.forEach(edge => {
+                edge.source = oldIdToNewId.get(edge.source);
+                edge.target = oldIdToNewId.get(edge.target);
+            });
+            
+            // Create new coordinate mappings with sequential IDs (don't modify originals)
+            // This ensures the original export button and other features still work
+            const newNodeIdToCoordinateMap = new Map();
+            const newCoordinateToNodeIdMap = new Map();
+            
+            nodeIdToCoordinateMap.forEach((coord, oldNodeId) => {
+                if (largestComponent.has(oldNodeId)) {
+                    const newNodeId = oldIdToNewId.get(oldNodeId);
+                    const coordKey = `${coord[0].toFixed(8)},${coord[1].toFixed(8)}`;
+                    newNodeIdToCoordinateMap.set(newNodeId, coord);
+                    newCoordinateToNodeIdMap.set(coordKey, newNodeId);
+                }
+            });
+            
+            console.log(`Created renumbered coordinate mappings: ${newNodeIdToCoordinateMap.size} nodes`);
+            
+            // Generate OARLib native format with filtered graph and new coordinate maps
+            const oarLibContent = this.generateOARLibFormat(filteredGraph, roadFeatures, newCoordinateToNodeIdMap, newNodeIdToCoordinateMap, coverageFilterEnabled, useMixedFormat);
+
+            // Download the OARLib file
+            const blob = new Blob([oarLibContent], {
+                type: 'text/plain'
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.download = 'route_crafter_graph_largest_component.oarlib';
+            document.body.appendChild(a);
+            a.href = url;
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            // Calculate statistics
+            const nodePercentage = ((filteredGraph.nodes.length / totalNodes) * 100).toFixed(1);
+            const edgePercentage = ((filteredGraph.edges.length / totalEdges) * 100).toFixed(1);
+            const nodesRemoved = totalNodes - filteredGraph.nodes.length;
+            
+            // Show comprehensive alert
+            const componentInfo = components.length === 1 
+                ? 'Graph is fully connected (1 component).'
+                : `Found ${components.length} strongly connected components.`;
+            
+            const graphTypeStr = useMixedFormat ? 'MIXED' : 'WINDY';
+            
+            alert(`${componentInfo}\n\n` +
+                  `Exported largest component as ${graphTypeStr} OARLib format:\n\n` +
+                  `✓ ${filteredGraph.nodes.length}/${totalNodes} nodes (${nodePercentage}%)\n` +
+                  `✓ ${filteredGraph.edges.length}/${totalEdges} edges (${edgePercentage}%)\n\n` +
+                  `${nodesRemoved > 0 ? `Removed ${nodesRemoved} node(s) from smaller components.` : 'All nodes included.'}\n` +
+                  `Nodes renumbered sequentially (1-${filteredGraph.nodes.length}).`);
+            
+            console.log(`Exported largest component: ${filteredGraph.nodes.length}/${totalNodes} nodes (${nodePercentage}%), ${filteredGraph.edges.length}/${totalEdges} edges (${edgePercentage}%)`);
+            
+            // Return the new coordinate mappings so they can be used for applying solutions
+            return {
+                coordinateToNodeIdMap: newCoordinateToNodeIdMap,
+                nodeIdToCoordinateMap: newNodeIdToCoordinateMap
+            };
+        } catch (error) {
+            console.error('Error exporting largest component:', error);
+            alert('Error exporting data. Please try again.');
+            return null;
+        }
     }
 }
 

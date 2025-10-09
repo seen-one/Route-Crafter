@@ -309,3 +309,110 @@ export function debounce(func, wait) {
         timeout = setTimeout(later, wait);
     };
 }
+
+/**
+ * Find strongly connected components using Tarjan's algorithm
+ * @param {Array} nodes - Array of node objects with id property
+ * @param {Array} edges - Array of edge objects with source, target, and directed properties
+ * @returns {Array} Array of Sets, where each Set contains node IDs in a component
+ */
+export function findStronglyConnectedComponents(nodes, edges) {
+    // Build adjacency list (treating undirected edges as bidirectional)
+    const adjacencyList = new Map();
+    
+    // Initialize adjacency list
+    nodes.forEach(node => {
+        adjacencyList.set(node.id, []);
+    });
+    
+    // Add edges to adjacency list
+    edges.forEach(edge => {
+        const source = edge.source;
+        const target = edge.target;
+        
+        if (!adjacencyList.has(source)) adjacencyList.set(source, []);
+        if (!adjacencyList.has(target)) adjacencyList.set(target, []);
+        
+        if (edge.directed === false) {
+            // Undirected edge - add both directions
+            adjacencyList.get(source).push(target);
+            adjacencyList.get(target).push(source);
+        } else {
+            // Directed edge - add only forward direction
+            adjacencyList.get(source).push(target);
+        }
+    });
+    
+    // Tarjan's algorithm state
+    let index = 0;
+    const indices = new Map();
+    const lowlinks = new Map();
+    const onStack = new Map();
+    const stack = [];
+    const components = [];
+    
+    // Tarjan's DFS
+    function strongConnect(v) {
+        indices.set(v, index);
+        lowlinks.set(v, index);
+        index++;
+        stack.push(v);
+        onStack.set(v, true);
+        
+        // Consider successors of v
+        const neighbors = adjacencyList.get(v) || [];
+        for (const w of neighbors) {
+            if (!indices.has(w)) {
+                // Successor w has not yet been visited; recurse on it
+                strongConnect(w);
+                lowlinks.set(v, Math.min(lowlinks.get(v), lowlinks.get(w)));
+            } else if (onStack.get(w)) {
+                // Successor w is in stack and hence in the current SCC
+                lowlinks.set(v, Math.min(lowlinks.get(v), indices.get(w)));
+            }
+        }
+        
+        // If v is a root node, pop the stack and create an SCC
+        if (lowlinks.get(v) === indices.get(v)) {
+            const component = new Set();
+            let w;
+            do {
+                w = stack.pop();
+                onStack.set(w, false);
+                component.add(w);
+            } while (w !== v);
+            components.push(component);
+        }
+    }
+    
+    // Run Tarjan's algorithm on all nodes
+    for (const node of nodes) {
+        if (!indices.has(node.id)) {
+            strongConnect(node.id);
+        }
+    }
+    
+    return components;
+}
+
+/**
+ * Filter graph to only include nodes and edges in a specific component
+ * @param {Array} nodes - Array of node objects with id property
+ * @param {Array} edges - Array of edge objects with source and target properties
+ * @param {Set} componentNodeIds - Set of node IDs to include
+ * @returns {Object} Filtered graph with nodes and edges arrays
+ */
+export function filterGraphByComponent(nodes, edges, componentNodeIds) {
+    // Filter nodes
+    const filteredNodes = nodes.filter(node => componentNodeIds.has(node.id));
+    
+    // Filter edges - only include edges where both source and target are in component
+    const filteredEdges = edges.filter(edge => 
+        componentNodeIds.has(edge.source) && componentNodeIds.has(edge.target)
+    );
+    
+    return {
+        nodes: filteredNodes,
+        edges: filteredEdges
+    };
+}
