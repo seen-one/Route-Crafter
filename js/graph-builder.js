@@ -97,8 +97,20 @@ export class GraphBuilder {
         const numVertices = roadGraph.nodes.length;
         const numEdges = roadGraph.edges.length;
         
-        // Determine depot (use first vertex as depot, which should be vertex 1)
-        const depotId = roadGraph.nodes.length > 0 ? roadGraph.nodes[0].id : 1;
+        // Determine depot - use selected depot if available, otherwise default to vertex 1
+        let depotId = 1;
+        if (window.app && window.app.mapManager) {
+            const selectedDepotId = window.app.mapManager.getSelectedDepotId();
+            if (selectedDepotId !== null) {
+                depotId = selectedDepotId;
+                console.log(`Using user-selected depot: ${depotId}`);
+            } else {
+                depotId = roadGraph.nodes.length > 0 ? roadGraph.nodes[0].id : 1;
+                console.log(`Using default depot: ${depotId}`);
+            }
+        } else {
+            depotId = roadGraph.nodes.length > 0 ? roadGraph.nodes[0].id : 1;
+        }
         
         // Determine problem type based on graph type
         const problemType = useMixedFormat ? 'CHINESE_POSTMAN' : 'WINDY_RURAL_POSTMAN';

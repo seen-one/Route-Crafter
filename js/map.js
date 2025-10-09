@@ -14,6 +14,8 @@ export class MapManager {
         this.contextMenuVisible = false;
         this.lastClickLatLng = null;
         this.hashUpdateTimeout = null;
+        this.depotMarker = null;
+        this.selectedDepotId = null;
         
         this.init();
     }
@@ -104,20 +106,10 @@ export class MapManager {
         this.contextMenu = document.getElementById('contextMenu');
         
         // Add right-click event listener to map
-        this.map.on('contextmenu', (e) => this.displayContextMenu(e));
-
-        // Alternative method: Add direct event listener to map container
-        const mapContainer = this.map.getContainer();
-        mapContainer.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            const latlng = this.map.containerPointToLatLng([e.offsetX, e.offsetY]);
-            const fakeEvent = {
-                latlng: latlng,
-                originalEvent: e,
-                preventDefault: () => e.preventDefault(),
-                stopPropagation: () => e.stopPropagation()
-            };
-            this.displayContextMenu(fakeEvent);
+        this.map.on('contextmenu', (e) => {
+            // Store the click location immediately
+            this.lastClickLatLng = e.latlng;
+            this.displayContextMenu(e);
         });
 
         // Add long-press event listener for touch devices
@@ -126,6 +118,8 @@ export class MapManager {
         
         this.map.on('touchstart', (e) => {
             touchStartTime = Date.now();
+            // Store the touch location
+            this.lastClickLatLng = e.latlng;
             touchTimer = setTimeout(() => {
                 this.displayContextMenu(e);
             }, 500); // 500ms long press
@@ -156,9 +150,17 @@ export class MapManager {
                 e.stopPropagation();
                 if (this.lastClickLatLng) {
                     const service = item.getAttribute('data-service');
-                    const zoom = this.map.getZoom();
-                    const url = generateServiceUrl(service, this.lastClickLatLng.lat, this.lastClickLatLng.lng, zoom, this.map.getCenter());
-                    window.open(url, '_blank');
+                    const action = item.getAttribute('data-action');
+                    
+                    if (action === 'set-depot') {
+                        // Handle set depot action
+                        this.handleSetDepot(this.lastClickLatLng);
+                    } else if (service) {
+                        // Handle external service links
+                        const zoom = this.map.getZoom();
+                        const url = generateServiceUrl(service, this.lastClickLatLng.lat, this.lastClickLatLng.lng, zoom, this.map.getCenter());
+                        window.open(url, '_blank');
+                    }
                 }
                 this.hideContextMenu();
             });
@@ -369,11 +371,16 @@ export class MapManager {
     }
 
     displayContextMenu(e) {
-        e.preventDefault();
-        e.stopPropagation();
+        // Prevent default on the original event if it exists
+        if (e.originalEvent) {
+            e.originalEvent.preventDefault();
+            e.originalEvent.stopPropagation();
+        }
         
-        const latlng = e.latlng || e.target.getLatLng();
-        this.lastClickLatLng = latlng;
+        // Ensure we have the click location stored (should already be set by the event handler)
+        if (!this.lastClickLatLng && e.latlng) {
+            this.lastClickLatLng = e.latlng;
+        }
         
         const mapContainer = this.map.getContainer();
         const rect = mapContainer.getBoundingClientRect();
@@ -381,12 +388,20 @@ export class MapManager {
         // Calculate position relative to the map container
         let x, y;
         if (e.originalEvent) {
-            x = e.originalEvent.clientX - rect.left;
-            y = e.originalEvent.clientY - rect.top;
+            if (e.originalEvent.touches && e.originalEvent.touches.length > 0) {
+                // For touch events
+                x = e.originalEvent.touches[0].clientX - rect.left;
+                y = e.originalEvent.touches[0].clientY - rect.top;
+            } else {
+                // For mouse events
+                x = e.originalEvent.clientX - rect.left;
+                y = e.originalEvent.clientY - rect.top;
+            }
         } else {
-            // For touch events
-            x = e.originalEvent.touches[0].clientX - rect.left;
-            y = e.originalEvent.touches[0].clientY - rect.top;
+            // Fallback: convert latlng to screen coordinates
+            const point = this.map.latLngToContainerPoint(e.latlng);
+            x = point.x;
+            y = point.y;
         }
         
         // Position the context menu
@@ -399,6 +414,79 @@ export class MapManager {
     hideContextMenu() {
         this.contextMenu.style.display = 'none';
         this.contextMenuVisible = false;
+        // Don't clear lastClickLatLng here - it needs to persist for the menu item click handler
+    }
+
+    handleSetDepot(latlng) {
+        console.log('Setting depot at location:', latlng);
+        
+        // Get the coordinate mappings from the global app instance
+        if (!window.app || !window.app.nodeIdToCoordinateMap || window.app.nodeIdToCoordinateMap.size === 0) {
+            alert('Please fetch roads first before setting a starting location. The starting location must be at a road intersection.');
+            return;
+        }
+
+        const nodeIdToCoordinateMap = window.app.nodeIdToCoordinateMap;
+        
+        // Find the nearest node to the clicked location
+        let nearestNodeId = null;
+        let minDistance = Infinity;
+        
+        nodeIdToCoordinateMap.forEach((coord, nodeId) => {
+            // coord is [lng, lat], latlng is {lat, lng}
+            const dx = coord[0] - latlng.lng;
+            const dy = coord[1] - latlng.lat;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestNodeId = nodeId;
+            }
+        });
+
+        if (nearestNodeId === null) {
+            alert('No nodes found. Please fetch roads first.');
+            return;
+        }
+
+        // Get the coordinate of the nearest node
+        const nearestCoord = nodeIdToCoordinateMap.get(nearestNodeId);
+        const nearestLatLng = [nearestCoord[1], nearestCoord[0]]; // Convert [lng, lat] to [lat, lng]
+
+        // Remove existing depot marker if any
+        if (this.depotMarker) {
+            this.map.removeLayer(this.depotMarker);
+        }
+
+        // Create a marker at the nearest node
+        this.depotMarker = L.marker(nearestLatLng, {
+            icon: L.divIcon({
+                className: 'depot-marker',
+                html: '<div style="background-color: #00ff00; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"><div style="color: white; font-weight: bold; font-size: 14px; text-align: center; line-height: 24px;">▶</div></div>',
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            })
+        }).addTo(this.map);
+
+        // Add popup to the marker
+        this.depotMarker.bindPopup(`<strong>Starting Location (Depot)</strong><br>Node ID: ${nearestNodeId}`).openPopup();
+
+        // Store the selected depot ID
+        this.selectedDepotId = nearestNodeId;
+
+        console.log(`Depot set to node ${nearestNodeId} at coordinates [${nearestCoord[1]}, ${nearestCoord[0]}]`);
+    }
+
+    getSelectedDepotId() {
+        return this.selectedDepotId;
+    }
+
+    clearDepotMarker() {
+        if (this.depotMarker) {
+            this.map.removeLayer(this.depotMarker);
+            this.depotMarker = null;
+        }
+        this.selectedDepotId = null;
     }
 
     saveMapViewToUrlHash() {

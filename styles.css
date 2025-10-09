@@ -227,6 +227,12 @@ button:hover {
     background-color: #e0e0e0;
 }
 
+.context-menu-divider {
+    height: 1px;
+    background-color: #ccc;
+    margin: 5px 0;
+}
+
 /* Media Player Controls Styles */
 .media-controls {
     position: fixed;

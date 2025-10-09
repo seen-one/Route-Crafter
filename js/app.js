@@ -469,6 +469,9 @@ export class RouteCrafterApp {
         // Clear solution visualizer layers
         this.solutionVisualizer.clearLayers();
         
+        // Clear depot marker
+        this.mapManager.clearDepotMarker();
+        
         // Clear coordinate mappings
         this.coordinateToNodeIdMap.clear();
         this.nodeIdToCoordinateMap.clear();
