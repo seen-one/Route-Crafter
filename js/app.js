@@ -467,7 +467,9 @@ export class RouteCrafterApp {
             `;
         }
         
-        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
+        // Minify query to reduce URL length
+        const minifiedQuery = this.minifyOverpassQuery(overpassQuery);
+        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(minifiedQuery)}`;
         
         fetch(url).then(response => {
             if (!response.ok) {
@@ -786,6 +788,14 @@ export class RouteCrafterApp {
         return coordinates.map(coord => `${coord[1]} ${coord[0]}`).join(' ');
     }
 
+    // Helper function to minify Overpass query by removing unnecessary whitespace
+    minifyOverpassQuery(query) {
+        return query
+            .replace(/\s+/g, ' ')  // Replace multiple spaces/newlines with single space
+            .replace(/\s*([;(){}\[\]])\s*/g, '$1')  // Remove spaces around special chars
+            .trim();
+    }
+
     // Helper function to trim road segments that extend beyond the polygon boundary
     trimRoadsToPolygon(roadFeatures, polygon) {
         const trimmedRoads = [];
@@ -1020,7 +1030,9 @@ export class RouteCrafterApp {
                 out body;
             `;
             
-            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
+            // Minify query to reduce URL length
+            const minifiedQuery = this.minifyOverpassQuery(overpassQuery);
+            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(minifiedQuery)}`;
             
             fetch(url).then(response => {
                 if (!response.ok) {
