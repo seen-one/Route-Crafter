@@ -1606,11 +1606,14 @@ export class RouteCrafterApp {
                 return;
             }
 
+            // Check if coverage filtering is enabled
+            const coverageFilterEnabled = document.getElementById('filterMapillaryCoverage').checked;
+            
             // Build the road graph for Chinese Postman Problem
             const roadGraph = this.buildChinesePostmanGraph(roadFeatures);
             
             // Generate OARLib native format
-            const oarLibContent = this.generateOARLibFormat(roadGraph, roadFeatures);
+            const oarLibContent = this.generateOARLibFormat(roadGraph, roadFeatures, coverageFilterEnabled);
 
             // Download the OARLib file
             const blob = new Blob([oarLibContent], {
@@ -1618,23 +1621,34 @@ export class RouteCrafterApp {
             });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url;
             a.download = 'route_crafter_graph.oarlib';
             document.body.appendChild(a);
+            a.href = url;
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
-            console.log('OARLib format exported successfully');
+            // Show info message about export type
+            if (coverageFilterEnabled) {
+                const coveredCount = roadFeatures.filter(f => f.properties.isCovered).length;
+                const uncoveredCount = roadFeatures.filter(f => !f.properties.isCovered).length;
+                console.log(`OARLib "windy" format exported: ${uncoveredCount} required roads (uncovered), ${coveredCount} optional roads (covered)`);
+                alert(`Exported "windy" OARLib format:\n\n` +
+                      `✓ ${uncoveredCount} roads marked as REQUIRED (need coverage)\n` +
+                      `✓ ${coveredCount} roads marked as OPTIONAL (already covered)\n\n` +
+                      `This is suitable for Windy Rural Postman Problem solvers.`);
+            } else {
+                console.log('OARLib format exported successfully (all roads required)');
+            }
         } catch (error) {
             console.error('Error exporting OARLib data:', error);
             alert('Error exporting data. Please try again.');
         }
     }
 
-    generateOARLibFormat(roadGraph, roadFeatures) {
-        // Create MIXED graphs for OARLib export
-        const graphType = 'MIXED';
+    generateOARLibFormat(roadGraph, roadFeatures, coverageFilterEnabled = false) {
+        // For Windy Rural Postman, use WINDY graph type, otherwise MIXED
+        const graphType = coverageFilterEnabled ? 'WINDY' : 'MIXED';
 
         // Get basic counts
         const numVertices = roadGraph.nodes.length;
@@ -1642,6 +1656,9 @@ export class RouteCrafterApp {
         
         // Determine depot (use first vertex as depot, which should be vertex 1)
         const depotId = roadGraph.nodes.length > 0 ? roadGraph.nodes[0].id : 1;
+        
+        // Determine problem type based on whether we're exporting windy version
+        const problemType = coverageFilterEnabled ? 'WINDY_RURAL_POSTMAN' : 'CHINESE_POSTMAN';
 
         // Build header
         let content = `%
@@ -1649,29 +1666,54 @@ export class RouteCrafterApp {
 % For more information on OAR Lib, or the format please visit: 
 % https://github.com/Olibear/ArcRoutingLibrary 
 %
-
+`;
+        
+        if (coverageFilterEnabled) {
+            content += `% WINDY VERSION: Roads without coverage are REQUIRED, covered roads are OPTIONAL
+% For one-way roads, reverse cost is set to 999999 (essentially infinity)
+%
+`;
+        }
+        
+        content += `
 ================================
 Format: OAR Lib
 Graph Type: ${graphType}
 Depot ID(s): ${depotId}
 N: ${numVertices}
 M: ${numEdges}
-Problem Type: CHINESE_POSTMAN
+Problem Type: ${problemType}
 Fleet Size: 1
 Number of Depots: 1
 ================================
 
 LINKS
-Line Format: V1,V2,COST,isDirected,isRequired
-
 `;
 
-        // Add edges (mixed: directed and undirected based on edge properties)
+        // Different line format for WINDY vs MIXED graphs
+        if (coverageFilterEnabled) {
+            content += `Line Format: V1,V2,COST,REVERSE_COST,isRequired\n\n`;
+        } else {
+            content += `Line Format: V1,V2,COST,isDirected,isRequired\n\n`;
+        }
+
+        // Add edges
         roadGraph.edges.forEach((edge, index) => {
-            const isDirected = edge.directed === true;
-            const isRequired = true; // All edges required for Chinese Postman Problem
-            
-            content += `${edge.source},${edge.target},${Math.round(edge.weight)},${isDirected},${isRequired}\n`;
+            if (coverageFilterEnabled) {
+                // WINDY format: V1,V2,COST,REVERSE_COST,isRequired
+                // For one-way roads, set reverse cost very high (999999)
+                // For two-way roads, reverse cost equals forward cost
+                const reverseCost = edge.directed ? 999999 : edge.weight;
+                const isRequired = !edge.isCovered; // Only uncovered roads are required
+                
+                content += `${edge.source},${edge.target},${Math.round(edge.weight)},${Math.round(reverseCost)},${isRequired}\n`;
+            } else {
+                // MIXED format: V1,V2,COST,isDirected,isRequired
+                const isDirected = edge.directed === true;
+                const isRequired = true; // All edges required for Chinese Postman
+                
+                content += `${edge.source},${edge.target},${Math.round(edge.weight)},${isDirected},${isRequired}\n`;
+            }
         });
 
         content += `===========END LINKS============
@@ -1855,6 +1897,9 @@ Line Format: x,y
             const coordinates = feature.geometry.coordinates;
             const properties = feature.properties || {};
             
+            // Get coverage information from feature properties
+            const isCovered = properties.isCovered || false;
+            
             // Create edges between consecutive coordinates
             for (let i = 0; i < coordinates.length - 1; i++) {
                 const sourceCoord = coordinates[i];
@@ -1891,7 +1936,8 @@ Line Format: x,y
                         weight: Math.round(distance * 100) / 100,
                         directed: false,
                         roadName: roadName,
-                        highwayType: highwayType
+                        highwayType: highwayType,
+                        isCovered: isCovered
                     });
                 } else {
                     // Determine if road is one-way (including roundabouts)
@@ -1909,7 +1955,8 @@ Line Format: x,y
                             weight: Math.round(distance * 100) / 100,
                             directed: true,
                             roadName: roadName,
-                            highwayType: highwayType
+                            highwayType: highwayType,
+                            isCovered: isCovered
                         });
                     } else {
                         // Two-way road - create single undirected edge for mixed graph
@@ -1919,7 +1966,8 @@ Line Format: x,y
                             weight: Math.round(distance * 100) / 100,
                             directed: false,
                             roadName: roadName,
-                            highwayType: highwayType
+                            highwayType: highwayType,
+                            isCovered: isCovered
                         });
                     }
                 }
