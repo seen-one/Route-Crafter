@@ -1660,6 +1660,7 @@ Number of Depots: 1
 
 LINKS
 Line Format: V1,V2,COST,isDirected,isRequired
+
 `;
 
         // Add edges (mixed: directed and undirected based on edge properties)
@@ -1674,6 +1675,7 @@ Line Format: V1,V2,COST,isDirected,isRequired
 
 VERTICES
 Line Format: x,y
+
 `;
 
         // Add vertex coordinates
