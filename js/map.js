@@ -265,6 +265,14 @@ export class MapManager {
                         <input type="checkbox" id="truncateByEdge" checked>
                     </div>
                     <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
+                        <label for="filterMapillaryCoverage" style="flex: 1;">Filter roads with Mapillary coverage</label>
+                        <input type="checkbox" id="filterMapillaryCoverage">
+                    </div>
+                    <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
+                        <label for="coverageThreshold" style="flex: 1;">Coverage threshold (%):</label>
+                        <input type="number" id="coverageThreshold" min="0" max="100" value="50" style="width: 80px;">
+                    </div>
+                    <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
                         <label for="customFilter" style="flex: 1;">Route filter:</label>
                         <input type="text" id="customFilter" style="width: 100%; margin-left: 10px;" value='[highway][area!~"yes"][highway!~"bridleway|bus_guideway|construction|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path"][access!~"customers|no|private"][public_transport!~"platform"][fee!~"yes"][service!~"drive-through|driveway|parking_aisle"][toll!~"yes"]'>
                     </div>

@@ -493,4 +493,203 @@ export class CoverageManager {
         this.setupLayersControl();
         this.setupEventListeners();
     }
+
+    // Get active filters from the coverage menu
+    getActiveFilters() {
+        const startDateStr = document.getElementById('startDate').value;
+        const endDateStr = document.getElementById('endDate').value;
+        const imageType = document.querySelector('.image-type-btn.active')?.getAttribute('data-type') || 'all';
+        const mapillaryUserIdStr = document.getElementById('mapillaryUserId').value.trim();
+
+        const filters = {};
+        if (startDateStr) filters.startDate = new Date(startDateStr);
+        if (endDateStr) {
+            filters.endDate = new Date(endDateStr);
+            filters.endDate.setHours(23, 59, 59, 999);
+        }
+        if (imageType !== 'all') filters.imageType = imageType;
+        if (mapillaryUserIdStr) filters.mapillaryUserId = parseInt(mapillaryUserIdStr, 10);
+
+        return filters;
+    }
+
+    // Fetch Mapillary coverage data for a given bounding box
+    async fetchMapillaryCoverageForBounds(bbox) {
+        // bbox format: { minLat, minLng, maxLat, maxLng }
+        const filters = this.getActiveFilters();
+        
+        // Calculate which tiles we need at zoom level 14
+        const zoom = 14;
+        const tiles = this.getTilesForBounds(bbox, zoom);
+        
+        console.log(`Fetching Mapillary coverage for ${tiles.length} tiles at zoom ${zoom}`);
+        
+        // Fetch all tiles
+        const tilePromises = tiles.map(tile => 
+            this.fetchMapillaryTile(tile.x, tile.y, tile.z)
+        );
+        
+        try {
+            const tileResults = await Promise.all(tilePromises);
+            
+            // Combine all sequences from all tiles
+            const allSequences = [];
+            tileResults.forEach(sequences => {
+                if (sequences && sequences.length > 0) {
+                    allSequences.push(...sequences);
+                }
+            });
+            
+            console.log(`Fetched ${allSequences.length} Mapillary sequences`);
+            
+            // Apply filters to sequences
+            const filteredSequences = allSequences.filter(seq => {
+                return matchesMapillaryFilterCriteria(seq.properties, filters, 'sequence');
+            });
+            
+            console.log(`After filtering: ${filteredSequences.length} sequences`);
+            
+            return filteredSequences;
+        } catch (error) {
+            console.error('Error fetching Mapillary coverage:', error);
+            throw error;
+        }
+    }
+
+    // Calculate which tiles are needed for a bounding box at a given zoom level
+    getTilesForBounds(bbox, zoom) {
+        const tiles = [];
+        
+        // Convert lat/lng to tile coordinates
+        const minTile = this.latLngToTile(bbox.minLat, bbox.minLng, zoom);
+        const maxTile = this.latLngToTile(bbox.maxLat, bbox.maxLng, zoom);
+        
+        // Generate all tiles in the range
+        for (let x = Math.min(minTile.x, maxTile.x); x <= Math.max(minTile.x, maxTile.x); x++) {
+            for (let y = Math.min(minTile.y, maxTile.y); y <= Math.max(minTile.y, maxTile.y); y++) {
+                tiles.push({ x, y, z: zoom });
+            }
+        }
+        
+        return tiles;
+    }
+
+    // Convert lat/lng to tile coordinates
+    latLngToTile(lat, lng, zoom) {
+        const n = Math.pow(2, zoom);
+        const x = Math.floor((lng + 180) / 360 * n);
+        const latRad = lat * Math.PI / 180;
+        const y = Math.floor((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n);
+        return { x, y };
+    }
+
+    // Fetch a single Mapillary tile and extract sequences
+    async fetchMapillaryTile(x, y, z) {
+        const url = `https://tiles.mapillary.com/maps/vtp/mly1_public/2/${z}/${x}/${y}?access_token=${this.accessToken}`;
+        
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                console.warn(`Failed to fetch tile ${z}/${x}/${y}: ${response.status}`);
+                return [];
+            }
+            
+            const arrayBuffer = await response.arrayBuffer();
+            const tile = new VectorTile(new Pbf(arrayBuffer));
+            
+            // Extract sequences from the tile
+            const sequences = [];
+            
+            // Check if sequence layer exists
+            if (tile.layers.sequence) {
+                const layer = tile.layers.sequence;
+                
+                for (let i = 0; i < layer.length; i++) {
+                    const feature = layer.feature(i);
+                    const geom = feature.loadGeometry();
+                    
+                    // Convert tile coordinates to lat/lng
+                    const coordinates = [];
+                    geom.forEach(ring => {
+                        ring.forEach(point => {
+                            const latLng = this.tilePointToLatLng(point.x, point.y, x, y, z, layer.extent);
+                            coordinates.push([latLng.lng, latLng.lat]);
+                        });
+                    });
+                    
+                    if (coordinates.length > 0) {
+                        sequences.push({
+                            type: 'Feature',
+                            geometry: {
+                                type: 'LineString',
+                                coordinates: coordinates
+                            },
+                            properties: feature.properties
+                        });
+                    }
+                }
+            }
+            
+            return sequences;
+        } catch (error) {
+            console.warn(`Error fetching tile ${z}/${x}/${y}:`, error);
+            return [];
+        }
+    }
+
+    // Convert tile pixel coordinates to lat/lng
+    tilePointToLatLng(x, y, tileX, tileY, zoom, extent) {
+        const n = Math.pow(2, zoom);
+        const lng = (tileX + x / extent) / n * 360 - 180;
+        const latRad = Math.atan(Math.sinh(Math.PI * (1 - 2 * (tileY + y / extent) / n)));
+        const lat = latRad * 180 / Math.PI;
+        return { lat, lng };
+    }
+
+    // Calculate what percentage of a road is covered by Mapillary sequences
+    calculateRoadCoveragePercentage(roadFeature, mapillarySequences, proximityThreshold = 20) {
+        if (!roadFeature || !roadFeature.geometry || roadFeature.geometry.type !== 'LineString') {
+            return 0;
+        }
+        
+        if (!mapillarySequences || mapillarySequences.length === 0) {
+            return 0;
+        }
+        
+        const roadLine = turf.lineString(roadFeature.geometry.coordinates);
+        const roadLength = turf.length(roadLine, { units: 'meters' });
+        
+        if (roadLength === 0) return 0;
+        
+        // Sample points along the road (every 10 meters)
+        const sampleInterval = 10; // meters
+        const numSamples = Math.max(Math.ceil(roadLength / sampleInterval), 2);
+        
+        let coveredSamples = 0;
+        
+        for (let i = 0; i < numSamples; i++) {
+            const distance = (i / (numSamples - 1)) * roadLength;
+            const point = turf.along(roadLine, distance, { units: 'meters' });
+            
+            // Check if this point is within proximity threshold of any Mapillary sequence
+            const isCovered = mapillarySequences.some(sequence => {
+                try {
+                    const sequenceLine = turf.lineString(sequence.geometry.coordinates);
+                    const nearestPoint = turf.nearestPointOnLine(sequenceLine, point);
+                    const distanceToSequence = turf.distance(point, nearestPoint, { units: 'meters' });
+                    return distanceToSequence <= proximityThreshold;
+                } catch (error) {
+                    console.warn('Error calculating distance to sequence:', error);
+                    return false;
+                }
+            });
+            
+            if (isCovered) {
+                coveredSamples++;
+            }
+        }
+        
+        const coveragePercentage = (coveredSamples / numSamples) * 100;
+        return coveragePercentage;
+    }
 }

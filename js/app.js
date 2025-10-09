@@ -146,9 +146,23 @@ export class RouteCrafterApp {
             }
         });
 
+        // Coverage threshold wheel
+        document.getElementById('coverageThreshold').addEventListener('wheel', (event) => {
+            event.preventDefault();
+            let currentValue = parseInt(event.target.value, 10);
+            if (isNaN(currentValue)) currentValue = 50;
+            const step = 5;
+            if (event.deltaY < 0) {
+                event.target.value = Math.min(currentValue + step, 100);
+            } else if (event.deltaY > 0) {
+                event.target.value = Math.max(currentValue - step, 0);
+            }
+        });
+
         // Disable zooming when hovering over inputs
         const bufferInput = document.getElementById('bufferSize');
         const consolidateToleranceInput = document.getElementById('consolidateTolerance');
+        const coverageThresholdInput = document.getElementById('coverageThreshold');
 
         bufferInput.addEventListener('mouseover', () => {
             this.mapManager.getMap().scrollWheelZoom.disable();
@@ -163,6 +177,14 @@ export class RouteCrafterApp {
         });
 
         consolidateToleranceInput.addEventListener('mouseout', () => {
+            this.mapManager.getMap().scrollWheelZoom.enable();
+        });
+
+        coverageThresholdInput.addEventListener('mouseover', () => {
+            this.mapManager.getMap().scrollWheelZoom.disable();
+        });
+
+        coverageThresholdInput.addEventListener('mouseout', () => {
             this.mapManager.getMap().scrollWheelZoom.enable();
         });
 
@@ -961,7 +983,7 @@ export class RouteCrafterApp {
                     throw new Error(errorMessage);
                 }
                 return response.json();
-            }).then(data => {
+            }).then(async data => {
                 if (data.remark && data.remark.includes('Query timed out')) {
                     throw new Error('Too many results. Please zoom into a smaller area. (Overpass query timed out after 30 seconds)');
                 }
@@ -994,6 +1016,62 @@ export class RouteCrafterApp {
                     console.log(`Trimmed ${roadFeatures.length} road segments`);
                 }
                 
+                // Apply Mapillary coverage filtering if enabled
+                const filterMapillaryCoverage = document.getElementById('filterMapillaryCoverage').checked;
+                const coverageThreshold = parseInt(document.getElementById('coverageThreshold').value, 10);
+                
+                if (filterMapillaryCoverage) {
+                    console.log('Fetching Mapillary coverage data...');
+                    try {
+                        // Calculate bounding box for all roads
+                        const allCoords = [];
+                        roadFeatures.forEach(feature => {
+                            if (feature.geometry.type === 'LineString') {
+                                allCoords.push(...feature.geometry.coordinates);
+                            }
+                        });
+                        
+                        if (allCoords.length > 0) {
+                            const bbox = {
+                                minLat: Math.min(...allCoords.map(c => c[1])),
+                                maxLat: Math.max(...allCoords.map(c => c[1])),
+                                minLng: Math.min(...allCoords.map(c => c[0])),
+                                maxLng: Math.max(...allCoords.map(c => c[0]))
+                            };
+                            
+                            // Fetch Mapillary coverage
+                            const mapillarySequences = await this.coverageManager.fetchMapillaryCoverageForBounds(bbox);
+                            
+                            // Calculate coverage for each road
+                            roadFeatures.forEach(feature => {
+                                const coveragePercent = this.coverageManager.calculateRoadCoveragePercentage(
+                                    feature, 
+                                    mapillarySequences,
+                                    20 // proximity threshold in meters
+                                );
+                                feature.properties.mapillaryCoveragePercent = Math.round(coveragePercent);
+                                feature.properties.isCovered = coveragePercent >= coverageThreshold;
+                            });
+                            
+                            console.log(`Coverage analysis complete. Threshold: ${coverageThreshold}%`);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching Mapillary coverage:', error);
+                        alert('Warning: Failed to fetch Mapillary coverage data. Continuing without coverage filtering.');
+                        // Continue without coverage data
+                        roadFeatures.forEach(feature => {
+                            feature.properties.mapillaryCoveragePercent = 0;
+                            feature.properties.isCovered = false;
+                        });
+                    }
+                } else {
+                    // No coverage filtering - mark all as uncovered
+                    roadFeatures.forEach(feature => {
+                        feature.properties.mapillaryCoveragePercent = 0;
+                        feature.properties.isCovered = false;
+                    });
+                }
+                
                 // Remove existing road layer if it exists
                 if (this.geoJsonLayer) {
                     this.mapManager.getMap().removeLayer(this.geoJsonLayer);
@@ -1004,36 +1082,65 @@ export class RouteCrafterApp {
                 
                 // Create a new GeoJSON layer for roads
                 this.geoJsonLayer = L.geoJSON(roadFeatures, {
-                    style: {
-                        color: 'red',
-                        weight: 4,
-                        opacity: 0.7
+                    style: function(feature) {
+                        // Style based on coverage status
+                        if (feature.properties.isCovered) {
+                            return {
+                                color: '#888888',
+                                weight: 4,
+                                opacity: 0.5
+                            };
+                        } else {
+                            return {
+                                color: 'red',
+                                weight: 4,
+                                opacity: 0.7
+                            };
+                        }
                     },
                     onEachFeature: function(feature, layer) {
                         // Add popup with road information
                         const props = feature.properties;
+                        const coverageInfo = props.mapillaryCoveragePercent !== undefined ? 
+                            `<strong>Mapillary Coverage:</strong> ${props.mapillaryCoveragePercent}%<br>` : '';
                         const popupContent = `
                             <strong>Road Type:</strong> ${props.highway || 'Unknown'}<br>
                             <strong>Name:</strong> ${props.name || 'Unnamed'}<br>
                             <strong>Surface:</strong> ${props.surface || 'Unknown'}<br>
                             <strong>Access:</strong> ${props.access || 'Public'}<br>
-                            <strong>Oneway:</strong> ${props.oneway || 'No'}
+                            <strong>Oneway:</strong> ${props.oneway || 'No'}<br>
+                            ${coverageInfo}
                         `;
                         layer.bindPopup(popupContent);
                     }
                 }).addTo(this.mapManager.getMap());
                 
-                // Calculate total road length
+                // Calculate total road length and coverage statistics
                 let totalLengthKm = 0;
+                let coveredLengthKm = 0;
+                let uncoveredLengthKm = 0;
+                let coveredCount = 0;
+                let uncoveredCount = 0;
+                
                 roadFeatures.forEach(feature => {
                     if (feature.geometry.type === 'LineString') {
                         const line = turf.lineString(feature.geometry.coordinates);
                         const length = turf.length(line, { units: 'kilometers' });
                         totalLengthKm += length;
+                        
+                        if (feature.properties.isCovered) {
+                            coveredLengthKm += length;
+                            coveredCount++;
+                        } else {
+                            uncoveredLengthKm += length;
+                            uncoveredCount++;
+                        }
                     }
                 });
                 
                 const totalLengthMi = totalLengthKm * 0.621371;
+                const coveredLengthMi = coveredLengthKm * 0.621371;
+                const uncoveredLengthMi = uncoveredLengthKm * 0.621371;
                 
                 // Calculate the area of the combined polygon
                 const areaInSquareMeters = turf.area(combinedPolygon);
@@ -1042,11 +1149,23 @@ export class RouteCrafterApp {
                 
                 // Update the routeLength paragraph with road statistics
                 const truncateStatus = truncateByEdge ? ' (trimmed to polygon boundary)' : '';
-                document.getElementById('routeLength').innerHTML = `
+                
+                let statsHtml = `
                     <strong>Selected Area:</strong> ${areaInSquareKm.toFixed(2)} km² (${areaInSquareMi.toFixed(2)} sq mi)<br>
                     <strong>Roads Found:</strong> ${roadFeatures.length} road segments${truncateStatus}<br>
                     <strong>Total Road Length:</strong> ${totalLengthKm.toFixed(2)} km (${totalLengthMi.toFixed(2)} mi)
                 `;
+                
+                // Add coverage statistics if filtering is enabled
+                if (filterMapillaryCoverage && (coveredCount > 0 || uncoveredCount > 0)) {
+                    statsHtml += `<br>
+                    <strong>Coverage Analysis (${coverageThreshold}% threshold):</strong><br>
+                    <span style="color: #888888;">● Covered:</span> ${coveredCount} segments, ${coveredLengthKm.toFixed(2)} km (${coveredLengthMi.toFixed(2)} mi)<br>
+                    <span style="color: red;">● Uncovered:</span> ${uncoveredCount} segments, ${uncoveredLengthKm.toFixed(2)} km (${uncoveredLengthMi.toFixed(2)} mi)
+                    `;
+                }
+                
+                document.getElementById('routeLength').innerHTML = statsHtml;
                 
                 // Fit map to show all roads
                 if (this.geoJsonLayer.getBounds().isValid()) {
@@ -1271,25 +1390,45 @@ export class RouteCrafterApp {
                 this.mapManager.getMap().removeLayer(this.geoJsonLayer);
             }
             
+            // Initialize coverage properties for uploaded data (no coverage analysis)
+            roadFeatures.forEach(feature => {
+                feature.properties.mapillaryCoveragePercent = 0;
+                feature.properties.isCovered = false;
+            });
+            
             // Create coordinate mappings for CPP export/import
             this.createCoordinateMappings(roadFeatures);
             
             // Create a new GeoJSON layer for roads
             this.geoJsonLayer = L.geoJSON(roadFeatures, {
-                style: {
-                    color: 'red',
-                    weight: 4,
-                    opacity: 0.7
+                style: function(feature) {
+                    // Style based on coverage status
+                    if (feature.properties.isCovered) {
+                        return {
+                            color: '#888888',
+                            weight: 4,
+                            opacity: 0.5
+                        };
+                    } else {
+                        return {
+                            color: 'red',
+                            weight: 4,
+                            opacity: 0.7
+                        };
+                    }
                 },
                 onEachFeature: function(feature, layer) {
                     // Add popup with road information
                     const props = feature.properties;
+                    const coverageInfo = props.mapillaryCoveragePercent !== undefined ? 
+                        `<strong>Mapillary Coverage:</strong> ${props.mapillaryCoveragePercent}%<br>` : '';
                     const popupContent = `
                         <strong>Road Type:</strong> ${props.highway || 'Unknown'}<br>
                         <strong>Name:</strong> ${props.name || 'Unnamed'}<br>
                         <strong>Surface:</strong> ${props.surface || 'Unknown'}<br>
                         <strong>Access:</strong> ${props.access || 'Public'}<br>
-                        <strong>Oneway:</strong> ${props.oneway || 'No'}
+                        <strong>Oneway:</strong> ${props.oneway || 'No'}<br>
+                        ${coverageInfo}
                     `;
                     layer.bindPopup(popupContent);
                 }
