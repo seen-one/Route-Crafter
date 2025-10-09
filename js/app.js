@@ -299,28 +299,31 @@ export class RouteCrafterApp {
             this.clearAllSelections();
         });
 
-        // Upload CPP Solution button
-        document.getElementById('uploadCPPButton').addEventListener('click', () => {
+        // Apply CPP Solution button
+        document.getElementById('applyCPPSolutionButton').addEventListener('click', () => {
             // Stop any running animation by clicking the close button
             document.getElementById('closeBtn').click();
+            
+            const solutionText = document.getElementById('oarlibSolutionTextarea').value.trim();
+            
+            if (!solutionText) {
+                alert('Please paste an OARLib solution into the text box.');
+                return;
+            }
             
             if (this.nodeIdToCoordinateMap.size === 0) {
                 const proceed = confirm(
                     'No roads have been fetched yet. The solution will be shown as a demonstration path.\n\n' +
                     'For accurate mapping:\n' +
                     '1. First select an area and click "Fetch Roads"\n' +
-                    '2. Then click "Export for Chinese Postman" to get the CSV\n' +
-                    '3. Finally upload your solution CSV here\n\n' +
+                    '2. Then click "Export OARLib Format" to get the file\n' +
+                    '3. Finally paste your solution here\n\n' +
                     'Do you want to proceed with a demonstration path?'
                 );
                 if (!proceed) return;
             }
-            document.getElementById('cppUploadInput').click();
-        });
-
-        // File upload handlers
-        document.getElementById('cppUploadInput').addEventListener('change', (event) => {
-            this.handleCPPSolutionUpload(event);
+            
+            this.handleCPPSolutionText(solutionText);
         });
 
         document.getElementById('overpassUploadInput').addEventListener('change', (event) => {
@@ -1940,45 +1943,20 @@ Line Format: x,y
         return { nodes: connectedNodes, edges };
     }
 
-    handleCPPSolutionUpload(event) {
-        const file = event.target.files[0];
-        if (!file) {
-            return;
-        }
-
-        // Accept both .txt and .csv files
-        if (!file.name.toLowerCase().endsWith('.txt') && !file.name.toLowerCase().endsWith('.csv')) {
-            alert('Please select a .txt or .csv file.');
-            event.target.value = ''; // Reset input to allow re-uploading the same file
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const fileText = e.target.result;
-                const solutionPath = this.parseOARLibSolution(fileText);
-                if (solutionPath && solutionPath.length > 0) {
-                    this.visualizeCPPSolution(solutionPath);
-                } else {
-                    alert('No valid path found in the file. Please check the format.');
-                }
-            } catch (error) {
-                console.error('Error parsing solution file:', error);
-                alert('Error parsing solution file. Please check the format and try again.');
-            } finally {
-                // Reset the input value to allow re-uploading the same file
-                event.target.value = '';
+    handleCPPSolutionText(solutionText) {
+        try {
+            const solutionPath = this.parseOARLibSolution(solutionText);
+            if (solutionPath && solutionPath.length > 0) {
+                this.visualizeCPPSolution(solutionPath);
+                // Optionally clear the textarea after successful application
+                // document.getElementById('oarlibSolutionTextarea').value = '';
+            } else {
+                alert('No valid path found in the solution text. Please check the format.');
             }
-        };
-        
-        reader.onerror = () => {
-            alert('Error reading file. Please try again.');
-            // Reset the input value to allow re-uploading the same file
-            event.target.value = '';
-        };
-        
-        reader.readAsText(file);
+        } catch (error) {
+            console.error('Error parsing solution:', error);
+            alert('Error parsing solution. Please check the format and try again.\n\nExpected format: Route with vertex IDs like [1-22-21-20-...] or one vertex ID per line.');
+        }
     }
 
     parseOARLibSolution(fileText) {
