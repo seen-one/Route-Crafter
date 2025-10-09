@@ -265,7 +265,7 @@ export class MapManager {
                         <input type="checkbox" id="truncateByEdge" checked>
                     </div>
                     <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                        <label for="filterMapillaryCoverage" style="flex: 1;">Filter roads with Mapillary coverage</label>
+                        <label for="filterMapillaryCoverage" style="flex: 1;">Filter roads with street-level coverage</label>
                         <input type="checkbox" id="filterMapillaryCoverage">
                     </div>
                     <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">

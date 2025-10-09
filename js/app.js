@@ -210,18 +210,27 @@ export class RouteCrafterApp {
             this.mapManager.getMap().scrollWheelZoom.enable();
         });
 
-        // Toggle visibility of threshold inputs based on coverage filter checkbox
+        // Toggle visibility of threshold inputs based on any coverage layer being enabled
         const filterMapillaryCoverageCheckbox = document.getElementById('filterMapillaryCoverage');
         const coverageThresholdContainer = coverageThresholdInput.parentElement;
         const proximityThresholdContainer = proximityThresholdInput.parentElement;
         
         const updateThresholdVisibility = () => {
-            if (filterMapillaryCoverageCheckbox.checked) {
+            // Check if any coverage layer is enabled
+            const anyLayerEnabled = this.coverageManager.isAnyCoverageLayerEnabled();
+            
+            if (filterMapillaryCoverageCheckbox.checked && anyLayerEnabled) {
                 coverageThresholdContainer.style.display = 'flex';
                 proximityThresholdContainer.style.display = 'flex';
             } else {
                 coverageThresholdContainer.style.display = 'none';
                 proximityThresholdContainer.style.display = 'none';
+            }
+            
+            // Update checkbox state to match layer availability
+            filterMapillaryCoverageCheckbox.disabled = !anyLayerEnabled;
+            if (!anyLayerEnabled) {
+                filterMapillaryCoverageCheckbox.checked = false;
             }
         };
         
@@ -230,6 +239,10 @@ export class RouteCrafterApp {
         
         // Add event listener for checkbox changes
         filterMapillaryCoverageCheckbox.addEventListener('change', updateThresholdVisibility);
+        
+        // Listen for layer changes to update visibility
+        this.mapManager.getMap().on('overlayadd', updateThresholdVisibility);
+        this.mapManager.getMap().on('overlayremove', updateThresholdVisibility);
 
         // Search button
         document.getElementById('searchButton').addEventListener('click', () => {
@@ -1065,7 +1078,15 @@ export class RouteCrafterApp {
                 const proximityThreshold = parseInt(document.getElementById('proximityThreshold').value, 10) || 20;
                 
                 if (filterMapillaryCoverage) {
-                    console.log('Fetching Mapillary coverage data...');
+                    // Check which coverage layers are enabled
+                    const enabledLayers = this.coverageManager.getEnabledCoverageLayers();
+                    const enabledSources = [];
+                    if (enabledLayers.mapillary) enabledSources.push('Mapillary');
+                    if (enabledLayers.panoramax) enabledSources.push('Panoramax');
+                    if (enabledLayers.mapilio) enabledSources.push('Mapilio');
+                    
+                    console.log(`Fetching coverage data from: ${enabledSources.join(', ')}`);
+                    
                     try {
                         // Calculate bounding box for all roads
                         const allCoords = [];
@@ -1083,36 +1104,54 @@ export class RouteCrafterApp {
                                 maxLng: Math.max(...allCoords.map(c => c[0]))
                             };
                             
-                            // Fetch Mapillary coverage
-                            const mapillarySequences = await this.coverageManager.fetchMapillaryCoverageForBounds(bbox);
+                            // Fetch coverage from all enabled sources
+                            const coveragePromises = [];
+                            if (enabledLayers.mapillary) {
+                                coveragePromises.push(this.coverageManager.fetchMapillaryCoverageForBounds(bbox));
+                            }
+                            if (enabledLayers.panoramax) {
+                                coveragePromises.push(this.coverageManager.fetchPanoramaxCoverageForBounds(bbox));
+                            }
+                            if (enabledLayers.mapilio) {
+                                coveragePromises.push(this.coverageManager.fetchMapilioCoverageForBounds(bbox));
+                            }
+                            
+                            const coverageResults = await Promise.all(coveragePromises);
+                            
+                            // Combine all sequences from all sources
+                            const allSequences = coverageResults.flat();
+                            console.log(`Total sequences from all sources: ${allSequences.length}`);
                             
                             // Calculate coverage for each road
                             roadFeatures.forEach(feature => {
                                 const coveragePercent = this.coverageManager.calculateRoadCoveragePercentage(
                                     feature, 
-                                    mapillarySequences,
+                                    allSequences,
                                     proximityThreshold
                                 );
-                                feature.properties.mapillaryCoveragePercent = Math.round(coveragePercent);
+                                feature.properties.coveragePercent = Math.round(coveragePercent);
                                 feature.properties.isCovered = coveragePercent >= coverageThreshold;
+                                feature.properties.coverageSources = enabledSources.join(', ');
                             });
                             
-                            console.log(`Coverage analysis complete. Threshold: ${coverageThreshold}%, Proximity: ${proximityThreshold}m`);
+                            console.log(`Coverage analysis complete. Sources: ${enabledSources.join(', ')}, Threshold: ${coverageThreshold}%, Proximity: ${proximityThreshold}m`);
                         }
                     } catch (error) {
-                        console.error('Error fetching Mapillary coverage:', error);
-                        alert('Warning: Failed to fetch Mapillary coverage data. Continuing without coverage filtering.');
+                        console.error('Error fetching coverage data:', error);
+                        alert('Warning: Failed to fetch coverage data. Continuing without coverage filtering.');
                         // Continue without coverage data
                         roadFeatures.forEach(feature => {
-                            feature.properties.mapillaryCoveragePercent = 0;
+                            feature.properties.coveragePercent = 0;
                             feature.properties.isCovered = false;
+                            feature.properties.coverageSources = 'None';
                         });
                     }
                 } else {
                     // No coverage filtering - mark all as uncovered
                     roadFeatures.forEach(feature => {
-                        feature.properties.mapillaryCoveragePercent = 0;
+                        feature.properties.coveragePercent = 0;
                         feature.properties.isCovered = false;
+                        feature.properties.coverageSources = 'None';
                     });
                 }
                 
@@ -1145,8 +1184,10 @@ export class RouteCrafterApp {
                     onEachFeature: function(feature, layer) {
                         // Add popup with road information
                         const props = feature.properties;
-                        const coverageInfo = props.mapillaryCoveragePercent !== undefined ? 
-                            `<strong>Mapillary Coverage:</strong> ${props.mapillaryCoveragePercent}%<br>` : '';
+                        let coverageInfo = '';
+                        if (props.coveragePercent !== undefined && props.coverageSources && props.coverageSources !== 'None') {
+                            coverageInfo = `<strong>Coverage:</strong> ${props.coveragePercent}% (${props.coverageSources})<br>`;
+                        }
                         const popupContent = `
                             <strong>Road Type:</strong> ${props.highway || 'Unknown'}<br>
                             <strong>Name:</strong> ${props.name || 'Unnamed'}<br>
@@ -1202,8 +1243,15 @@ export class RouteCrafterApp {
                 
                 // Add coverage statistics if filtering is enabled
                 if (filterMapillaryCoverage && (coveredCount > 0 || uncoveredCount > 0)) {
+                    // Get enabled sources
+                    const enabledLayers = this.coverageManager.getEnabledCoverageLayers();
+                    const enabledSources = [];
+                    if (enabledLayers.mapillary) enabledSources.push('Mapillary');
+                    if (enabledLayers.panoramax) enabledSources.push('Panoramax');
+                    if (enabledLayers.mapilio) enabledSources.push('Mapilio');
+                    
                     statsHtml += `<br>
-                    <strong>Coverage Analysis (${coverageThreshold}% threshold):</strong><br>
+                    <strong>Coverage Analysis (${coverageThreshold}% threshold, ${enabledSources.join('/')}):</strong><br>
                     <span style="color: #888888;">● Covered:</span> ${coveredCount} segments, ${coveredLengthKm.toFixed(2)} km (${coveredLengthMi.toFixed(2)} mi)<br>
                     <span style="color: red;">● Uncovered:</span> ${uncoveredCount} segments, ${uncoveredLengthKm.toFixed(2)} km (${uncoveredLengthMi.toFixed(2)} mi)
                     `;
@@ -1436,8 +1484,9 @@ export class RouteCrafterApp {
             
             // Initialize coverage properties for uploaded data (no coverage analysis)
             roadFeatures.forEach(feature => {
-                feature.properties.mapillaryCoveragePercent = 0;
+                feature.properties.coveragePercent = 0;
                 feature.properties.isCovered = false;
+                feature.properties.coverageSources = 'None';
             });
             
             // Create coordinate mappings for CPP export/import
@@ -1464,8 +1513,10 @@ export class RouteCrafterApp {
                 onEachFeature: function(feature, layer) {
                     // Add popup with road information
                     const props = feature.properties;
-                    const coverageInfo = props.mapillaryCoveragePercent !== undefined ? 
-                        `<strong>Mapillary Coverage:</strong> ${props.mapillaryCoveragePercent}%<br>` : '';
+                    let coverageInfo = '';
+                    if (props.coveragePercent !== undefined && props.coverageSources && props.coverageSources !== 'None') {
+                        coverageInfo = `<strong>Coverage:</strong> ${props.coveragePercent}% (${props.coverageSources})<br>`;
+                    }
                     const popupContent = `
                         <strong>Road Type:</strong> ${props.highway || 'Unknown'}<br>
                         <strong>Name:</strong> ${props.name || 'Unnamed'}<br>

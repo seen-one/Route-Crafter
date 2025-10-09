@@ -494,12 +494,32 @@ export class CoverageManager {
         this.setupEventListeners();
     }
 
+    // Check if any coverage layer is currently enabled
+    isAnyCoverageLayerEnabled() {
+        const mapillaryEnabled = this.mapillaryLayer && this.map.hasLayer(this.mapillaryLayer);
+        const panoramaxEnabled = this.panoramaxLayer && this.map.hasLayer(this.panoramaxLayer);
+        const mapilioEnabled = this.mapilioLayer && this.map.hasLayer(this.mapilioLayer);
+        
+        return mapillaryEnabled || panoramaxEnabled || mapilioEnabled;
+    }
+
+    // Get which coverage layers are currently enabled
+    getEnabledCoverageLayers() {
+        return {
+            mapillary: this.mapillaryLayer && this.map.hasLayer(this.mapillaryLayer),
+            panoramax: this.panoramaxLayer && this.map.hasLayer(this.panoramaxLayer),
+            mapilio: this.mapilioLayer && this.map.hasLayer(this.mapilioLayer)
+        };
+    }
+
     // Get active filters from the coverage menu
     getActiveFilters() {
         const startDateStr = document.getElementById('startDate').value;
         const endDateStr = document.getElementById('endDate').value;
         const imageType = document.querySelector('.image-type-btn.active')?.getAttribute('data-type') || 'all';
         const mapillaryUserIdStr = document.getElementById('mapillaryUserId').value.trim();
+        const panoramaxUsernameStr = document.getElementById('panoramaxUsername').value.trim();
+        const mapilioUserIdStr = document.getElementById('mapilioUserId').value.trim();
 
         const filters = {};
         if (startDateStr) filters.startDate = new Date(startDateStr);
@@ -509,6 +529,8 @@ export class CoverageManager {
         }
         if (imageType !== 'all') filters.imageType = imageType;
         if (mapillaryUserIdStr) filters.mapillaryUserId = parseInt(mapillaryUserIdStr, 10);
+        if (panoramaxUsernameStr) filters.panoramaxUsername = panoramaxUsernameStr;
+        if (mapilioUserIdStr) filters.mapilioUserId = parseInt(mapilioUserIdStr, 10);
 
         return filters;
     }
@@ -646,13 +668,205 @@ export class CoverageManager {
         return { lat, lng };
     }
 
-    // Calculate what percentage of a road is covered by Mapillary sequences
-    calculateRoadCoveragePercentage(roadFeature, mapillarySequences, proximityThreshold = 20) {
+    // Fetch Panoramax coverage data for a given bounding box
+    async fetchPanoramaxCoverageForBounds(bbox) {
+        const filters = this.getActiveFilters();
+        
+        // Calculate which tiles we need at zoom level 14
+        const zoom = 14;
+        const tiles = this.getTilesForBounds(bbox, zoom);
+        
+        console.log(`Fetching Panoramax coverage for ${tiles.length} tiles at zoom ${zoom}`);
+        
+        // Fetch all tiles
+        const tilePromises = tiles.map(tile => 
+            this.fetchPanoramaxTile(tile.x, tile.y, tile.z)
+        );
+        
+        try {
+            const tileResults = await Promise.all(tilePromises);
+            
+            // Combine all sequences from all tiles
+            const allSequences = [];
+            tileResults.forEach(sequences => {
+                if (sequences && sequences.length > 0) {
+                    allSequences.push(...sequences);
+                }
+            });
+            
+            console.log(`Fetched ${allSequences.length} Panoramax sequences`);
+            
+            // Apply filters to sequences
+            const filteredSequences = allSequences.filter(seq => {
+                return matchesPanoramaxFilterCriteria(seq.properties, filters, 'sequences');
+            });
+            
+            console.log(`After filtering: ${filteredSequences.length} Panoramax sequences`);
+            
+            return filteredSequences;
+        } catch (error) {
+            console.error('Error fetching Panoramax coverage:', error);
+            throw error;
+        }
+    }
+
+    // Fetch a single Panoramax tile and extract sequences
+    async fetchPanoramaxTile(x, y, z) {
+        const url = `https://api.panoramax.xyz/api/map/${z}/${x}/${y}.mvt`;
+        
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                console.warn(`Failed to fetch Panoramax tile ${z}/${x}/${y}: ${response.status}`);
+                return [];
+            }
+            
+            const arrayBuffer = await response.arrayBuffer();
+            const tile = new VectorTile(new Pbf(arrayBuffer));
+            
+            // Extract sequences from the tile
+            const sequences = [];
+            
+            // Check if sequences layer exists
+            if (tile.layers.sequences) {
+                const layer = tile.layers.sequences;
+                
+                for (let i = 0; i < layer.length; i++) {
+                    const feature = layer.feature(i);
+                    const geom = feature.loadGeometry();
+                    
+                    // Convert tile coordinates to lat/lng
+                    const coordinates = [];
+                    geom.forEach(ring => {
+                        ring.forEach(point => {
+                            const latLng = this.tilePointToLatLng(point.x, point.y, x, y, z, layer.extent);
+                            coordinates.push([latLng.lng, latLng.lat]);
+                        });
+                    });
+                    
+                    if (coordinates.length > 0) {
+                        sequences.push({
+                            type: 'Feature',
+                            geometry: {
+                                type: 'LineString',
+                                coordinates: coordinates
+                            },
+                            properties: feature.properties
+                        });
+                    }
+                }
+            }
+            
+            return sequences;
+        } catch (error) {
+            console.warn(`Error fetching Panoramax tile ${z}/${x}/${y}:`, error);
+            return [];
+        }
+    }
+
+    // Fetch Mapilio coverage data for a given bounding box
+    async fetchMapilioCoverageForBounds(bbox) {
+        const filters = this.getActiveFilters();
+        
+        // Calculate which tiles we need at zoom level 14
+        const zoom = 14;
+        const tiles = this.getTilesForBounds(bbox, zoom);
+        
+        console.log(`Fetching Mapilio coverage for ${tiles.length} tiles at zoom ${zoom}`);
+        
+        // Fetch all tiles
+        const tilePromises = tiles.map(tile => 
+            this.fetchMapilioTile(tile.x, tile.y, tile.z)
+        );
+        
+        try {
+            const tileResults = await Promise.all(tilePromises);
+            
+            // Combine all sequences from all tiles
+            const allSequences = [];
+            tileResults.forEach(sequences => {
+                if (sequences && sequences.length > 0) {
+                    allSequences.push(...sequences);
+                }
+            });
+            
+            console.log(`Fetched ${allSequences.length} Mapilio sequences`);
+            
+            // Apply filters to sequences
+            const filteredSequences = allSequences.filter(seq => {
+                return matchesMapilioFilterCriteria(seq.properties, filters);
+            });
+            
+            console.log(`After filtering: ${filteredSequences.length} Mapilio sequences`);
+            
+            return filteredSequences;
+        } catch (error) {
+            console.error('Error fetching Mapilio coverage:', error);
+            throw error;
+        }
+    }
+
+    // Fetch a single Mapilio tile and extract sequences
+    async fetchMapilioTile(x, y, z) {
+        const url = `https://geo.mapilio.com/map/${x}/${y}/${z}`;
+        
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                console.warn(`Failed to fetch Mapilio tile ${z}/${x}/${y}: ${response.status}`);
+                return [];
+            }
+            
+            const arrayBuffer = await response.arrayBuffer();
+            const tile = new VectorTile(new Pbf(arrayBuffer));
+            
+            // Extract sequences from the tile
+            const sequences = [];
+            
+            // Check if map_roads_line layer exists
+            if (tile.layers.map_roads_line) {
+                const layer = tile.layers.map_roads_line;
+                
+                for (let i = 0; i < layer.length; i++) {
+                    const feature = layer.feature(i);
+                    const geom = feature.loadGeometry();
+                    
+                    // Convert tile coordinates to lat/lng
+                    const coordinates = [];
+                    geom.forEach(ring => {
+                        ring.forEach(point => {
+                            const latLng = this.tilePointToLatLng(point.x, point.y, x, y, z, layer.extent);
+                            coordinates.push([latLng.lng, latLng.lat]);
+                        });
+                    });
+                    
+                    if (coordinates.length > 0) {
+                        sequences.push({
+                            type: 'Feature',
+                            geometry: {
+                                type: 'LineString',
+                                coordinates: coordinates
+                            },
+                            properties: feature.properties
+                        });
+                    }
+                }
+            }
+            
+            return sequences;
+        } catch (error) {
+            console.warn(`Error fetching Mapilio tile ${z}/${x}/${y}:`, error);
+            return [];
+        }
+    }
+
+    // Calculate what percentage of a road is covered by street-level imagery sequences
+    calculateRoadCoveragePercentage(roadFeature, sequences, proximityThreshold = 20) {
         if (!roadFeature || !roadFeature.geometry || roadFeature.geometry.type !== 'LineString') {
             return 0;
         }
         
-        if (!mapillarySequences || mapillarySequences.length === 0) {
+        if (!sequences || sequences.length === 0) {
             return 0;
         }
         
@@ -671,8 +885,8 @@ export class CoverageManager {
             const distance = (i / (numSamples - 1)) * roadLength;
             const point = turf.along(roadLine, distance, { units: 'meters' });
             
-            // Check if this point is within proximity threshold of any Mapillary sequence
-            const isCovered = mapillarySequences.some(sequence => {
+            // Check if this point is within proximity threshold of any sequence
+            const isCovered = sequences.some(sequence => {
                 try {
                     const sequenceLine = turf.lineString(sequence.geometry.coordinates);
                     const nearestPoint = turf.nearestPointOnLine(sequenceLine, point);
