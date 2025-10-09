@@ -159,10 +159,24 @@ export class RouteCrafterApp {
             }
         });
 
+        // Proximity threshold wheel
+        document.getElementById('proximityThreshold').addEventListener('wheel', (event) => {
+            event.preventDefault();
+            let currentValue = parseInt(event.target.value, 10);
+            if (isNaN(currentValue)) currentValue = 20;
+            const step = 5;
+            if (event.deltaY < 0) {
+                event.target.value = Math.min(currentValue + step, 100);
+            } else if (event.deltaY > 0) {
+                event.target.value = Math.max(currentValue - step, 1);
+            }
+        });
+
         // Disable zooming when hovering over inputs
         const bufferInput = document.getElementById('bufferSize');
         const consolidateToleranceInput = document.getElementById('consolidateTolerance');
         const coverageThresholdInput = document.getElementById('coverageThreshold');
+        const proximityThresholdInput = document.getElementById('proximityThreshold');
 
         bufferInput.addEventListener('mouseover', () => {
             this.mapManager.getMap().scrollWheelZoom.disable();
@@ -187,6 +201,35 @@ export class RouteCrafterApp {
         coverageThresholdInput.addEventListener('mouseout', () => {
             this.mapManager.getMap().scrollWheelZoom.enable();
         });
+
+        proximityThresholdInput.addEventListener('mouseover', () => {
+            this.mapManager.getMap().scrollWheelZoom.disable();
+        });
+
+        proximityThresholdInput.addEventListener('mouseout', () => {
+            this.mapManager.getMap().scrollWheelZoom.enable();
+        });
+
+        // Toggle visibility of threshold inputs based on coverage filter checkbox
+        const filterMapillaryCoverageCheckbox = document.getElementById('filterMapillaryCoverage');
+        const coverageThresholdContainer = coverageThresholdInput.parentElement;
+        const proximityThresholdContainer = proximityThresholdInput.parentElement;
+        
+        const updateThresholdVisibility = () => {
+            if (filterMapillaryCoverageCheckbox.checked) {
+                coverageThresholdContainer.style.display = 'flex';
+                proximityThresholdContainer.style.display = 'flex';
+            } else {
+                coverageThresholdContainer.style.display = 'none';
+                proximityThresholdContainer.style.display = 'none';
+            }
+        };
+        
+        // Set initial state
+        updateThresholdVisibility();
+        
+        // Add event listener for checkbox changes
+        filterMapillaryCoverageCheckbox.addEventListener('change', updateThresholdVisibility);
 
         // Search button
         document.getElementById('searchButton').addEventListener('click', () => {
@@ -1019,6 +1062,7 @@ export class RouteCrafterApp {
                 // Apply Mapillary coverage filtering if enabled
                 const filterMapillaryCoverage = document.getElementById('filterMapillaryCoverage').checked;
                 const coverageThreshold = parseInt(document.getElementById('coverageThreshold').value, 10);
+                const proximityThreshold = parseInt(document.getElementById('proximityThreshold').value, 10) || 20;
                 
                 if (filterMapillaryCoverage) {
                     console.log('Fetching Mapillary coverage data...');
@@ -1047,13 +1091,13 @@ export class RouteCrafterApp {
                                 const coveragePercent = this.coverageManager.calculateRoadCoveragePercentage(
                                     feature, 
                                     mapillarySequences,
-                                    20 // proximity threshold in meters
+                                    proximityThreshold
                                 );
                                 feature.properties.mapillaryCoveragePercent = Math.round(coveragePercent);
                                 feature.properties.isCovered = coveragePercent >= coverageThreshold;
                             });
                             
-                            console.log(`Coverage analysis complete. Threshold: ${coverageThreshold}%`);
+                            console.log(`Coverage analysis complete. Threshold: ${coverageThreshold}%, Proximity: ${proximityThreshold}m`);
                         }
                     } catch (error) {
                         console.error('Error fetching Mapillary coverage:', error);
