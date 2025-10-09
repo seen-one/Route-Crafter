@@ -254,16 +254,14 @@ export class RouteCrafterApp {
             this.mapManager.getMap().scrollWheelZoom.enable();
         });
 
-        // Toggle visibility of threshold inputs based on any coverage layer being enabled
+        // Toggle visibility of threshold inputs based on coverage filtering checkbox
         const filterMapillaryCoverageCheckbox = document.getElementById('filterMapillaryCoverage');
         const coverageThresholdContainer = coverageThresholdInput.parentElement;
         const proximityThresholdContainer = proximityThresholdInput.parentElement;
         
         const updateThresholdVisibility = () => {
-            // Check if any coverage layer is enabled
-            const anyLayerEnabled = this.coverageManager.isAnyCoverageLayerEnabled();
-            
-            if (filterMapillaryCoverageCheckbox.checked && anyLayerEnabled) {
+            // Show thresholds only if checkbox is checked (regardless of coverage layers)
+            if (filterMapillaryCoverageCheckbox.checked) {
                 coverageThresholdContainer.style.display = 'flex';
                 proximityThresholdContainer.style.display = 'flex';
             } else {
@@ -272,15 +270,29 @@ export class RouteCrafterApp {
             }
         };
         
-        // Set initial state
+        // Set initial state (checkbox unchecked by default, so hide)
         updateThresholdVisibility();
         
         // Add event listener for checkbox changes
         filterMapillaryCoverageCheckbox.addEventListener('change', updateThresholdVisibility);
+
+        // Toggle visibility of boundary buffer based on navigation past boundary checkbox
+        const allowNavigationPastBoundaryCheckbox = document.getElementById('allowNavigationPastBoundary');
+        const boundaryBufferContainer = boundaryBufferInput.parentElement;
         
-        // Listen for layer changes to update visibility
-        this.mapManager.getMap().on('overlayadd', updateThresholdVisibility);
-        this.mapManager.getMap().on('overlayremove', updateThresholdVisibility);
+        const updateBoundaryBufferVisibility = () => {
+            if (allowNavigationPastBoundaryCheckbox.checked) {
+                boundaryBufferContainer.style.display = 'flex';
+            } else {
+                boundaryBufferContainer.style.display = 'none';
+            }
+        };
+        
+        // Set initial state (checkbox is unchecked by default, so hide it)
+        updateBoundaryBufferVisibility();
+        
+        // Add event listener for checkbox changes
+        allowNavigationPastBoundaryCheckbox.addEventListener('change', updateBoundaryBufferVisibility);
 
         // Search button
         document.getElementById('searchButton').addEventListener('click', () => {
