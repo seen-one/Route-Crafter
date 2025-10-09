@@ -15,6 +15,7 @@ export class RouteCrafterApp {
         this.highlightedPolygons = [];
         this.previewLayer = null;
         this.geoJsonLayer = null;
+        this.gridLayer = null;
         this.cppSolutionLayer = null;
         this.coordinateToNodeIdMap = new Map();
         this.nodeIdToCoordinateMap = new Map();
@@ -52,12 +53,18 @@ export class RouteCrafterApp {
             const fetchButton = document.getElementById('fetchButton');
             const bufferContainer = document.getElementById('bufferSize').parentElement;
             
-            // Check if switching from or to draw_area
+            // Check if switching from or to draw_area or grid
             const isFromDrawArea = this.previousSearchRule === 'draw_area';
             const isToDrawArea = selectedValue === 'draw_area';
+            const isFromGrid = this.previousSearchRule === 'grid_500m' || 
+                               this.previousSearchRule === 'grid_1km' || 
+                               this.previousSearchRule === 'grid_1500m';
+            const isToGrid = selectedValue === 'grid_500m' || 
+                            selectedValue === 'grid_1km' || 
+                            selectedValue === 'grid_1500m';
             
-            // Always reset when switching from or to Draw Area
-            if (isFromDrawArea || isToDrawArea) {
+            // Always reset when switching from or to Draw Area or Grid
+            if (isFromDrawArea || isToDrawArea || isFromGrid || isToGrid) {
                 this.clearAllSelectionsWithoutResettingDropdown();
             }
             
@@ -65,7 +72,7 @@ export class RouteCrafterApp {
             this.previousSearchRule = selectedValue;
             
             // Check if grid option is selected
-            const isGrid = selectedValue === 'grid_500m' || selectedValue === 'grid_1km' || selectedValue === 'grid_1500m';
+            const isGrid = isToGrid;
             
             if (selectedValue === 'draw_area') {
                 // Hide fetch button and enable draw control
@@ -428,6 +435,7 @@ export class RouteCrafterApp {
         fetchButton.classList.add('button-loading');
         fetchButton.innerHTML = 'Finding Areas <span class="spinner"></span>';
         
+        // Remove existing area layer (but not grid layer)
         if (this.geoJsonLayer) {
             this.mapManager.getMap().removeLayer(this.geoJsonLayer);
         }
@@ -536,8 +544,8 @@ export class RouteCrafterApp {
     }
 
     generateGrid(gridSize) {
-        if (this.geoJsonLayer) {
-            this.mapManager.getMap().removeLayer(this.geoJsonLayer);
+        if (this.gridLayer) {
+            this.mapManager.getMap().removeLayer(this.gridLayer);
         }
         
         // Get current map bounds
@@ -635,7 +643,7 @@ export class RouteCrafterApp {
         }
         
         // Create GeoJSON layer with the grid
-        this.geoJsonLayer = L.geoJSON({
+        this.gridLayer = L.geoJSON({
             type: "FeatureCollection",
             features: gridFeatures
         }, {
@@ -1315,6 +1323,10 @@ export class RouteCrafterApp {
         if (this.geoJsonLayer) {
             this.mapManager.getMap().removeLayer(this.geoJsonLayer);
             this.geoJsonLayer = null;
+        }
+        if (this.gridLayer) {
+            this.mapManager.getMap().removeLayer(this.gridLayer);
+            this.gridLayer = null;
         }
         if (this.cppSolutionLayer) {
             this.mapManager.getMap().removeLayer(this.cppSolutionLayer);
