@@ -57,19 +57,31 @@ export class GraphBuilder {
                 alert('Exported MIXED OARLib format:\n\n' +
                       'All roads marked as REQUIRED.\n' +
                       'This is suitable for Chinese Postman Problem solvers.');
-            } else if (coverageFilterEnabled) {
-                const coveredCount = roadFeatures.filter(f => f.properties.isCovered).length;
-                const uncoveredCount = roadFeatures.filter(f => !f.properties.isCovered).length;
-                console.log(`OARLib WINDY format exported: ${uncoveredCount} required roads (uncovered), ${coveredCount} optional roads (covered)`);
-                alert(`Exported WINDY OARLib format:\n\n` +
-                      `✓ ${uncoveredCount} roads marked as REQUIRED (need coverage)\n` +
-                      `✓ ${coveredCount} roads marked as OPTIONAL (already covered)\n\n` +
-                      `This is suitable for Windy Rural Postman Problem solvers.`);
             } else {
-                console.log('OARLib WINDY format exported successfully (all roads required)');
-                alert('Exported WINDY OARLib format:\n\n' +
-                      'All roads marked as REQUIRED.\n' +
-                      'This is suitable for Windy Rural Postman Problem solvers.');
+                // Calculate statistics for required/optional roads
+                const requiredCount = roadFeatures.filter(f => {
+                    const isRouteRequired = f.properties.isRouteRequired !== undefined ? f.properties.isRouteRequired : true;
+                    if (coverageFilterEnabled) {
+                        return !f.properties.isCovered && isRouteRequired;
+                    } else {
+                        return isRouteRequired;
+                    }
+                }).length;
+                const optionalCount = roadFeatures.length - requiredCount;
+                
+                if (coverageFilterEnabled) {
+                    console.log(`OARLib WINDY format exported: ${requiredCount} required roads (uncovered + NOT in route filter), ${optionalCount} optional roads`);
+                    alert(`Exported WINDY OARLib format:\n\n` +
+                          `✓ ${requiredCount} roads marked as REQUIRED (uncovered AND NOT in route filter)\n` +
+                          `✓ ${optionalCount} roads marked as OPTIONAL (covered OR in route filter)\n\n` +
+                          `This is suitable for Windy Rural Postman Problem solvers.`);
+                } else {
+                    console.log(`OARLib WINDY format exported: ${requiredCount} required roads (NOT in route filter), ${optionalCount} optional roads`);
+                    alert(`Exported WINDY OARLib format:\n\n` +
+                          `✓ ${requiredCount} roads marked as REQUIRED (NOT in route filter)\n` +
+                          `✓ ${optionalCount} roads marked as OPTIONAL (in route filter)\n\n` +
+                          `This is suitable for Windy Rural Postman Problem solvers.`);
+                }
             }
         } catch (error) {
             console.error('Error exporting OARLib data:', error);
@@ -104,10 +116,12 @@ export class GraphBuilder {
 % For one-way roads, reverse cost is set to 999999 (essentially infinity)
 `;
             if (coverageFilterEnabled) {
-                content += `% Roads without coverage are REQUIRED, covered roads are OPTIONAL
+                content += `% Roads are REQUIRED if: uncovered AND NOT in route filter
+% Roads are OPTIONAL if: covered OR in route filter
 `;
             } else {
-                content += `% All roads are REQUIRED
+                content += `% Roads are REQUIRED if: NOT in route filter
+% Roads are OPTIONAL if: in route filter
 `;
             }
             content += `%
@@ -149,9 +163,16 @@ LINKS
                 // For one-way roads, set reverse cost very high (999999)
                 // For two-way roads, reverse cost equals forward cost
                 const reverseCost = edge.directed ? 999999 : edge.weight;
-                // If coverage filtering is enabled, only uncovered roads are required
-                // Otherwise, all roads are required
-                const isRequired = coverageFilterEnabled ? !edge.isCovered : true;
+                
+                // Determine if edge is required based on both coverage and route filter
+                let isRequired = true;
+                if (coverageFilterEnabled) {
+                    // If coverage filtering is enabled, road must be uncovered AND match route filter
+                    isRequired = !edge.isCovered && (edge.isRouteRequired !== undefined ? edge.isRouteRequired : true);
+                } else {
+                    // If no coverage filtering, only route filter matters
+                    isRequired = edge.isRouteRequired !== undefined ? edge.isRouteRequired : true;
+                }
                 
                 content += `${edge.source},${edge.target},${Math.round(edge.weight)},${Math.round(reverseCost)},${isRequired}\n`;
             }
@@ -338,8 +359,9 @@ Line Format: x,y
             const coordinates = feature.geometry.coordinates;
             const properties = feature.properties || {};
             
-            // Get coverage information from feature properties
+            // Get coverage information and route filter marking from feature properties
             const isCovered = properties.isCovered || false;
+            const isRouteRequired = properties.isRouteRequired !== undefined ? properties.isRouteRequired : true;
             
             // Create edges between consecutive coordinates
             for (let i = 0; i < coordinates.length - 1; i++) {
@@ -378,7 +400,8 @@ Line Format: x,y
                         directed: false,
                         roadName: roadName,
                         highwayType: highwayType,
-                        isCovered: isCovered
+                        isCovered: isCovered,
+                        isRouteRequired: isRouteRequired
                     });
                 } else {
                     // Determine if road is one-way (including roundabouts)
@@ -397,7 +420,8 @@ Line Format: x,y
                             directed: true,
                             roadName: roadName,
                             highwayType: highwayType,
-                            isCovered: isCovered
+                            isCovered: isCovered,
+                            isRouteRequired: isRouteRequired
                         });
                     } else {
                         // Two-way road - create single undirected edge for mixed graph
@@ -408,7 +432,8 @@ Line Format: x,y
                             directed: false,
                             roadName: roadName,
                             highwayType: highwayType,
-                            isCovered: isCovered
+                            isCovered: isCovered,
+                            isRouteRequired: isRouteRequired
                         });
                     }
                 }

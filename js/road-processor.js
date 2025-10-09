@@ -19,6 +19,67 @@ export class RoadProcessor {
         this.geoJsonLayer = layer;
     }
 
+    // Helper function to check if a feature matches an Overpass filter
+    checkFeatureMatchesFilter(feature, filterString) {
+        if (!filterString || filterString.trim() === '') {
+            return true; // Empty filter matches everything
+        }
+        
+        const props = feature.properties || {};
+        
+        // Parse the Overpass filter string
+        // Format: [key=value][key!=value][key!~"regex"]
+        const filterRegex = /\[([^\]]+)\]/g;
+        let match;
+        
+        while ((match = filterRegex.exec(filterString)) !== null) {
+            const condition = match[1];
+            
+            // Handle different condition types
+            if (condition.includes('!~')) {
+                // Negative regex match: key!~"value1|value2"
+                const parts = condition.split('!~');
+                const key = parts[0].trim();
+                const valuePattern = parts[1].replace(/["']/g, '').trim();
+                const values = valuePattern.split('|');
+                
+                const propValue = props[key];
+                if (propValue && values.includes(String(propValue))) {
+                    return false; // Property matches excluded pattern
+                }
+            } else if (condition.includes('!=')) {
+                // Not equal: key!=value
+                const parts = condition.split('!=');
+                const key = parts[0].trim();
+                const value = parts[1].replace(/["']/g, '').trim();
+                
+                const propValue = props[key];
+                if (propValue && String(propValue) === value) {
+                    return false; // Property equals excluded value
+                }
+            } else if (condition.includes('=')) {
+                // Equal: key=value
+                const parts = condition.split('=');
+                const key = parts[0].trim();
+                const value = parts[1].replace(/["']/g, '').trim();
+                const values = value.split('|');
+                
+                const propValue = props[key];
+                if (!propValue || !values.includes(String(propValue))) {
+                    return false; // Property doesn't match required value
+                }
+            } else {
+                // Just key existence: [key]
+                const key = condition.trim();
+                if (!props[key]) {
+                    return false; // Property doesn't exist
+                }
+            }
+        }
+        
+        return true; // All conditions passed
+    }
+
     // Helper function to convert polygon coordinates to Overpass poly format
     polygonToOverpassPoly(polygon) {
         const coordinates = polygon.geometry.coordinates[0];
@@ -224,7 +285,8 @@ export class RoadProcessor {
         }
         
         const bufferSize = parseInt(document.getElementById('bufferSize').value, 10);
-        const customFilter = document.getElementById('customFilter').value;
+        const navigationFilter = document.getElementById('navigationFilter').value;
+        const routeFilter = document.getElementById('routeFilter').value;
         
         try {
             // Create combined polygon from selected areas
@@ -245,10 +307,10 @@ export class RoadProcessor {
                 return;
             }
             
-            // Use the custom filter directly as Overpass QL format
-            let filterConditions = customFilter.trim();
+            // Use the navigation filter directly as Overpass QL format
+            let filterConditions = navigationFilter.trim();
             if (!filterConditions) {
-                console.warn('No custom filter provided, using default highway filter');
+                console.warn('No navigation filter provided, using default highway filter');
                 filterConditions = '[highway]';
             }
             
@@ -326,6 +388,21 @@ export class RoadProcessor {
                     roadFeatures = this.trimRoadsToPolygon(roadFeatures, combinedPolygon);
                     console.log(`Trimmed ${roadFeatures.length} road segments`);
                 }
+                
+                // Apply route filter marking - check if each road matches the route filter
+                // If route filter is empty, all roads are required
+                // If it matches route filter, mark as optional (NOT required)
+                // If it doesn't match route filter, mark as required
+                roadFeatures.forEach(feature => {
+                    if (!routeFilter || routeFilter.trim() === '') {
+                        // Empty filter - all roads are required
+                        feature.properties.isRouteRequired = true;
+                    } else {
+                        // Check if matches route filter
+                        const matchesRouteFilter = this.checkFeatureMatchesFilter(feature, routeFilter);
+                        feature.properties.isRouteRequired = !matchesRouteFilter;
+                    }
+                });
                 
                 // Apply Mapillary coverage filtering if enabled
                 const filterMapillaryCoverage = document.getElementById('filterMapillaryCoverage').checked;
@@ -421,8 +498,17 @@ export class RoadProcessor {
                 // Create a new GeoJSON layer for roads
                 this.geoJsonLayer = L.geoJSON(roadFeatures, {
                     style: function(feature) {
-                        // Style based on coverage status
-                        if (feature.properties.isCovered) {
+                        // Style based on route filter and coverage status
+                        // If road is marked as optional (NOT required), show in dark grey
+                        if (!feature.properties.isRouteRequired) {
+                            return {
+                                color: '#555555',
+                                weight: 4,
+                                opacity: 0.6
+                            };
+                        }
+                        // Otherwise, style based on coverage status
+                        else if (feature.properties.isCovered) {
                             return {
                                 color: '#888888',
                                 weight: 4,
@@ -455,12 +541,14 @@ export class RoadProcessor {
                     }
                 }).addTo(this.mapManager.getMap());
                 
-                // Calculate total road length and coverage statistics
+                // Calculate total road length and coverage/route filter statistics
                 let totalLengthKm = 0;
                 let coveredLengthKm = 0;
                 let uncoveredLengthKm = 0;
+                let optionalLengthKm = 0;
                 let coveredCount = 0;
                 let uncoveredCount = 0;
+                let optionalCount = 0;
                 
                 roadFeatures.forEach(feature => {
                     if (feature.geometry.type === 'LineString') {
@@ -468,7 +556,11 @@ export class RoadProcessor {
                         const length = turf.length(line, { units: 'kilometers' });
                         totalLengthKm += length;
                         
-                        if (feature.properties.isCovered) {
+                        // Check if optional (matches route filter)
+                        if (!feature.properties.isRouteRequired) {
+                            optionalLengthKm += length;
+                            optionalCount++;
+                        } else if (feature.properties.isCovered) {
                             coveredLengthKm += length;
                             coveredCount++;
                         } else {
@@ -481,6 +573,7 @@ export class RoadProcessor {
                 const totalLengthMi = totalLengthKm * 0.621371;
                 const coveredLengthMi = coveredLengthKm * 0.621371;
                 const uncoveredLengthMi = uncoveredLengthKm * 0.621371;
+                const optionalLengthMi = optionalLengthKm * 0.621371;
                 
                 // Calculate the area of the combined polygon
                 const areaInSquareMeters = turf.area(combinedPolygon);
@@ -495,6 +588,14 @@ export class RoadProcessor {
                     <strong>Roads Found:</strong> ${roadFeatures.length} road segments${truncateStatus}<br>
                     <strong>Total Road Length:</strong> ${totalLengthKm.toFixed(2)} km (${totalLengthMi.toFixed(2)} mi)
                 `;
+                
+                // Add optional roads statistics if route filter is used
+                if (optionalCount > 0) {
+                    statsHtml += `<br>
+                    <strong>Route Filter:</strong><br>
+                    <span style="color: #555555;">● Optional (in filter):</span> ${optionalCount} segments, ${optionalLengthKm.toFixed(2)} km (${optionalLengthMi.toFixed(2)} mi)
+                    `;
+                }
                 
                 // Add coverage statistics if filtering is enabled
                 if (filterMapillaryCoverage && (coveredCount > 0 || uncoveredCount > 0)) {
@@ -605,11 +706,23 @@ export class RoadProcessor {
                 this.mapManager.getMap().removeLayer(this.geoJsonLayer);
             }
             
-            // Initialize coverage properties for uploaded data (no coverage analysis)
+            // Get route filter for marking
+            const routeFilter = document.getElementById('routeFilter').value;
+            
+            // Initialize coverage properties and route filter marking for uploaded data
             roadFeatures.forEach(feature => {
                 feature.properties.coveragePercent = 0;
                 feature.properties.isCovered = false;
                 feature.properties.coverageSources = 'None';
+                
+                if (!routeFilter || routeFilter.trim() === '') {
+                    // Empty filter - all roads are required
+                    feature.properties.isRouteRequired = true;
+                } else {
+                    // Check if matches route filter
+                    const matchesRouteFilter = this.checkFeatureMatchesFilter(feature, routeFilter);
+                    feature.properties.isRouteRequired = !matchesRouteFilter;
+                }
             });
             
             // Create coordinate mappings for CPP export/import
@@ -618,8 +731,17 @@ export class RoadProcessor {
             // Create a new GeoJSON layer for roads
             this.geoJsonLayer = L.geoJSON(roadFeatures, {
                 style: function(feature) {
-                    // Style based on coverage status
-                    if (feature.properties.isCovered) {
+                    // Style based on route filter and coverage status
+                    // If road is marked as optional (NOT required), show in dark grey
+                    if (!feature.properties.isRouteRequired) {
+                        return {
+                            color: '#555555',
+                            weight: 4,
+                            opacity: 0.6
+                        };
+                    }
+                    // Otherwise, style based on coverage status
+                    else if (feature.properties.isCovered) {
                         return {
                             color: '#888888',
                             weight: 4,

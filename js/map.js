@@ -276,15 +276,19 @@ export class MapManager {
                     </div>
                     <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
                         <label for="coverageThreshold" style="flex: 1;">Coverage threshold (%):</label>
-                        <input type="number" id="coverageThreshold" min="0" max="100" value="50" style="width: 80px;">
+                        <input type="number" id="coverageThreshold" min="0" max="100" value="80" style="width: 80px;">
                     </div>
                     <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
                         <label for="proximityThreshold" style="flex: 1;">Proximity threshold (meters):</label>
                         <input type="number" id="proximityThreshold" min="1" max="100" value="20" style="width: 80px;">
                     </div>
                     <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                        <label for="customFilter" style="flex: 1;">Route filter:</label>
-                        <input type="text" id="customFilter" style="width: 100%; margin-left: 10px;" value='[highway][area!~"yes"][highway!~"bridleway|bus_guideway|construction|corridor|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path|steps"][access!~"customers|no|private"][public_transport!~"platform"][fee!~"yes"][service!~"drive-through|driveway|parking_aisle"][toll!~"yes"]'>
+                        <label for="navigationFilter" style="flex: 1;">Navigation filter (exclude from fetch):</label>
+                        <input type="text" id="navigationFilter" style="width: 100%; margin-left: 10px;" value='[highway][area!~"yes"][highway!~"bridleway|bus_guideway|construction|corridor|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path|steps"][access!~"customers|no|private"][public_transport!~"platform"][fee!~"yes"][service!~"drive-through|driveway|parking_aisle"][toll!~"yes"]'>
+                    </div>
+                    <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
+                        <label for="routeFilter" style="flex: 1;">Route filter (mark as optional):</label>
+                        <input type="text" id="routeFilter" style="width: 100%; margin-left: 10px;" value=''>
                     </div>
                     <p id="routeLength"></p>
                 </div>
