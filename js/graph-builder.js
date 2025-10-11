@@ -152,6 +152,7 @@ export class GraphBuilder {
         // Add format-specific comments
         if (graphType === 'WINDY') {
             content += `% WINDY VERSION
+% Costs are in CENTIMETERS (meters * 100) to preserve precision as integers
 % For one-way roads, reverse cost is set to 999999 (essentially infinity)
 % Roads outside the original boundary are always OPTIONAL
 `;
@@ -170,6 +171,7 @@ export class GraphBuilder {
 `;
         } else if (graphType === 'DIRECTED') {
             content += `% DIRECTED VERSION
+% Costs are in CENTIMETERS (meters * 100) to preserve precision as integers
 % Two-way roads are represented as two separate arcs
 % One-way roads are represented as a single arc
 % All roads marked as REQUIRED (Chinese Postman mode)
@@ -177,12 +179,14 @@ export class GraphBuilder {
 `;
         } else if (graphType === 'UNDIRECTED') {
             content += `% UNDIRECTED VERSION
+% Costs are in CENTIMETERS (meters * 100) to preserve precision as integers
 % All roads are treated as bidirectional edges
 % All roads marked as REQUIRED (Chinese Postman mode)
 %
 `;
         } else if (graphType === 'MIXED') {
             content += `% MIXED VERSION
+% Costs are in CENTIMETERS (meters * 100) to preserve precision as integers
 % One-way roads are directed edges, two-way roads are undirected edges
 % All roads marked as REQUIRED (Chinese Postman mode)
 %
@@ -233,18 +237,26 @@ LINKS
             if (graphType === 'MIXED') {
                 // MIXED format: V1,V2,COST,isDirected,isRequired
                 const isDirected = edge.directed === true;
-                content += `${edge.source},${edge.target},${Math.round(edge.weight)},${isDirected},${isRequired}\n`;
+                // Convert to centimeters (multiply by 100) to preserve precision as integer
+                const cost = Math.round(edge.weight * 100);
+                content += `${edge.source},${edge.target},${cost},${isDirected},${isRequired}\n`;
             } else if (graphType === 'WINDY') {
                 // WINDY format: V1,V2,COST,REVERSE_COST,isRequired
-                const reverseCost = edge.directed ? 999999 : edge.weight;
-                content += `${edge.source},${edge.target},${Math.round(edge.weight)},${Math.round(reverseCost)},${isRequired}\n`;
+                // Convert to centimeters (multiply by 100) to preserve precision as integer
+                const cost = Math.round(edge.weight * 100);
+                const reverseCost = edge.directed ? 999999 : cost;
+                content += `${edge.source},${edge.target},${cost},${reverseCost},${isRequired}\n`;
             } else if (graphType === 'DIRECTED') {
                 // DIRECTED format: V1,V2,COST,isRequired
                 // Note: edge.source and edge.target already properly oriented for directed graph
-                content += `${edge.source},${edge.target},${Math.round(edge.weight)},${isRequired}\n`;
+                // Convert to centimeters (multiply by 100) to preserve precision as integer
+                const cost = Math.round(edge.weight * 100);
+                content += `${edge.source},${edge.target},${cost},${isRequired}\n`;
             } else if (graphType === 'UNDIRECTED') {
                 // UNDIRECTED format: V1,V2,COST,isRequired
-                content += `${edge.source},${edge.target},${Math.round(edge.weight)},${isRequired}\n`;
+                // Convert to centimeters (multiply by 100) to preserve precision as integer
+                const cost = Math.round(edge.weight * 100);
+                content += `${edge.source},${edge.target},${cost},${isRequired}\n`;
             }
         });
 
