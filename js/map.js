@@ -190,10 +190,6 @@ export class MapManager {
                         <button id="uploadOverpassButton" style="width: 100%; margin: 2px 0;">Upload Overpass Response</button>
                         <button id="exportCPPButton" style="width: 100%; margin: 2px 0;">Export OARLib Format</button>
                         <button id="exportLargestComponentButton" style="width: 100%; margin: 2px 0;">Export Largest Component OARLib</button>
-                        <div style="display: flex; align-items: center; margin: 5px 0; padding: 3px 0;">
-                            <input type="checkbox" id="useMixedGraphFormat" style="margin-right: 5px;">
-                            <label for="useMixedGraphFormat" style="font-size: 12px; cursor: pointer;">Use Mixed Graph Format</label>
-                        </div>
                         <label for="oarlibSolutionTextarea" style="display: block; margin-top: 5px; font-size: 12px;">OARLib Solution:</label>
                         <textarea id="oarlibSolutionTextarea" placeholder="Paste OARLib solution here..." style="width: 100%; min-height: 80px; margin: 2px 0; padding: 5px; font-size: 11px; font-family: monospace; resize: vertical; box-sizing: border-box;"></textarea>
                         <button id="applyCPPSolutionButton" style="width: 100%; margin: 2px 0;">Apply Solution</button>
@@ -275,6 +271,17 @@ export class MapManager {
                         <input type="checkbox" id="truncateByEdge" checked>
                     </div>
                     <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
+                        <label for="exportFormatSelect" style="flex: 1;">Route Solver:</label>
+                        <select id="exportFormatSelect">
+                            <option value="windy_rural_benavent">Windy Rural (Benavent)</option>
+                            <option value="windy_rural_win">Windy Rural (Win)</option>
+                            <option value="mixed_yaoyuenyong">Mixed (Yaoyuenyong)</option>
+                            <option value="mixed_frederickson">Mixed (Frederickson)</option>
+                            <option value="undirected">Undirected</option>
+                            <option value="directed">Directed</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
                         <label for="allowNavigationPastBoundary" style="flex: 1;">Allow navigation past boundary</label>
                         <input type="checkbox" id="allowNavigationPastBoundary">
                     </div>
@@ -295,11 +302,11 @@ export class MapManager {
                         <input type="number" id="proximityThreshold" min="1" max="100" value="20" style="width: 80px;">
                     </div>
                     <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                        <label for="navigationFilter" style="flex: 1;">Navigation filter (exclude from fetch):</label>
+                        <label for="navigationFilter" style="flex: 1;">Navigation filter:</label>
                         <input type="text" id="navigationFilter" style="width: 100%; margin-left: 10px;" value='[highway][area!~"yes"][highway!~"bridleway|bus_guideway|construction|corridor|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path|steps"][access!~"customers|no|private"][public_transport!~"platform"][fee!~"yes"][service!~"drive-through|driveway|parking_aisle"][toll!~"yes"]'>
                     </div>
                     <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                        <label for="routeFilter" style="flex: 1;">Route filter (mark as optional):</label>
+                        <label for="routeFilter" style="flex: 1;">Route filter:</label>
                         <input type="text" id="routeFilter" style="width: 100%; margin-left: 10px;" value=''>
                     </div>
                     <p id="routeLength"></p>

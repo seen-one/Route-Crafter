@@ -283,11 +283,24 @@ export class RouteCrafterApp {
         // Toggle visibility of boundary buffer based on navigation past boundary checkbox
         const allowNavigationPastBoundaryCheckbox = document.getElementById('allowNavigationPastBoundary');
         const boundaryBufferContainer = boundaryBufferInput.parentElement;
+        const exportFormatSelect = document.getElementById('exportFormatSelect');
         
         const updateBoundaryBufferVisibility = () => {
-            if (allowNavigationPastBoundaryCheckbox.checked) {
-                boundaryBufferContainer.style.display = 'flex';
+            // Only show "Allow navigation past boundary" for Windy Rural Postman mode
+            const exportFormat = exportFormatSelect ? exportFormatSelect.value : 'windy_rural_benavent';
+            const allowNavContainer = allowNavigationPastBoundaryCheckbox.parentElement;
+            
+            if (exportFormat.includes('rural')) {
+                allowNavContainer.style.display = 'flex';
+                // Show boundary buffer if navigation past boundary is checked
+                if (allowNavigationPastBoundaryCheckbox.checked) {
+                    boundaryBufferContainer.style.display = 'flex';
+                } else {
+                    boundaryBufferContainer.style.display = 'none';
+                }
             } else {
+                // Hide both for non-rural modes
+                allowNavContainer.style.display = 'none';
                 boundaryBufferContainer.style.display = 'none';
             }
         };
@@ -297,6 +310,11 @@ export class RouteCrafterApp {
         
         // Add event listener for checkbox changes
         allowNavigationPastBoundaryCheckbox.addEventListener('change', updateBoundaryBufferVisibility);
+        
+        // Listen for export format changes
+        if (exportFormatSelect) {
+            exportFormatSelect.addEventListener('change', updateBoundaryBufferVisibility);
+        }
 
         // Search button
         document.getElementById('searchButton').addEventListener('click', () => {
