@@ -486,6 +486,8 @@ export class MapManager {
         console.log(`Depot set to node ${nearestNodeId} at coordinates [${nearestCoord[1]}, ${nearestCoord[0]}]`);
     }
 
+    // Selected depot getter (exports require a depot)
+
     getSelectedDepotId() {
         return this.selectedDepotId;
     }

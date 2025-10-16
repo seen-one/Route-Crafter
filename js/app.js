@@ -356,8 +356,14 @@ export class RouteCrafterApp {
             document.getElementById('overpassUploadInput').click();
         });
 
-        // Export Chinese Postman button
+        // Export CPP: require depot
         document.getElementById('exportCPPButton').addEventListener('click', () => {
+            const selectedDepot = this.mapManager.getSelectedDepotId && this.mapManager.getSelectedDepotId();
+            if (!selectedDepot) {
+                alert('Please set the starting location by right-clicking on the map (or press and hold for touch screens)');
+                return;
+            }
+
             this.graphBuilder.exportForChinesePostman(
                 this.roadProcessor.getGeoJsonLayer(),
                 this.coordinateToNodeIdMap,
@@ -365,8 +371,14 @@ export class RouteCrafterApp {
             );
         });
 
-        // Export Largest Component button
+        // Export largest component: require depot
         document.getElementById('exportLargestComponentButton').addEventListener('click', () => {
+            const selectedDepot = this.mapManager.getSelectedDepotId && this.mapManager.getSelectedDepotId();
+            if (!selectedDepot) {
+                alert('Please set the starting location by right-clicking on the map (or press and hold for touch screens)');
+                return;
+            }
+
             const mappings = this.graphBuilder.exportLargestComponentForChinesePostman(
                 this.roadProcessor.getGeoJsonLayer(),
                 this.coordinateToNodeIdMap,
