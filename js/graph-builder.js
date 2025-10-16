@@ -644,7 +644,46 @@ Line Format: x,y
             components.forEach((comp, idx) => {
                 console.log(`  Component ${idx + 1}: ${comp.size} nodes`);
             });
-            
+
+            // Determine whether all REQUIRED roads would be connected if we included OPTIONAL roads
+            // Collect node IDs used by required roads
+            const requiredNodes = new Set();
+            roadGraph.edges.forEach(edge => {
+                // treat edges as required by default unless explicitly marked false
+                const isRequired = edge.isRouteRequired !== undefined ? edge.isRouteRequired : true;
+                if (isRequired) {
+                    requiredNodes.add(edge.source);
+                    requiredNodes.add(edge.target);
+                }
+            });
+
+            // If there are required nodes, check if they all fall into a single component when OPTIONAL roads are allowed
+            let requiredConnectedWhenIncludingOptional = true;
+            if (requiredNodes.size > 0) {
+                requiredConnectedWhenIncludingOptional = false;
+                for (const comp of components) {
+                    let allInComp = true;
+                    for (const nid of requiredNodes) {
+                        if (!comp.has(nid)) {
+                            allInComp = false;
+                            break;
+                        }
+                    }
+                    if (allInComp) {
+                        requiredConnectedWhenIncludingOptional = true;
+                        break;
+                    }
+                }
+            }
+
+            // If required roads remain disconnected even when optional roads are included, warn the user
+            if (!requiredConnectedWhenIncludingOptional) {
+                const confirmed = confirm("Warning: Unable to connect all required roads even if optional roads are included. Press OK to continue with the largest road group, or choose Windy Rural format and enable 'Allow navigation past boundary' with sufficient buffer distance so optional roads can connect the network.");
+                if (!confirmed) {
+                    return null;
+                }
+            }
+
             // Find the largest component
             let largestComponent = components[0];
             for (const component of components) {
