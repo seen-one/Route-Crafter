@@ -401,22 +401,130 @@ export class RoadProcessor {
                 return turf.union(combined, feature);
             });
             
-            if (combinedPolygon.geometry.type === 'MultiPolygon') {
-                alert('Error: One or more selected areas are too far apart. You can increase the buffer to merge adjacent areas.');
+            // Check if navigation past boundary is enabled (we read these early so we can
+            // test whether applying the boundary buffer would merge distant areas)
+            const allowNavigationPastBoundary = document.getElementById('allowNavigationPastBoundary').checked;
+            const boundaryBuffer = parseInt(document.getElementById('boundaryBuffer').value, 10);
+
+            // Determine which polygon we'd use for Overpass querying if navigation past
+            // boundary is enabled — this lets us decide whether buffering will merge
+            // the areas and avoid a MultiPolygon result.
+            let queryPolygonCandidate = combinedPolygon;
+            if (allowNavigationPastBoundary && boundaryBuffer > 0) {
+                try {
+                    queryPolygonCandidate = turf.buffer(combinedPolygon, boundaryBuffer, {
+                        units: 'meters'
+                    });
+                } catch (bufErr) {
+                    console.warn('Error buffering combined polygon for boundary buffer check:', bufErr);
+                    queryPolygonCandidate = combinedPolygon;
+                }
+            }
+
+            // If the polygon we'd use for querying is a MultiPolygon then warn the
+            // user. If buffering (navigation past boundary) would produce a single
+            // polygon, then skip the warning and continue.
+            if (queryPolygonCandidate.geometry.type === 'MultiPolygon') {
+                // Try to compute the buffer distance required to merge the disjoint components.
+                let bufferNeededMeters = null;
+                try {
+                    // Build polygon components from the combined polygon (before extra buffering)
+                    const components = [];
+                    if (combinedPolygon.geometry.type === 'Polygon') {
+                        components.push(combinedPolygon);
+                    } else if (combinedPolygon.geometry.type === 'MultiPolygon') {
+                        combinedPolygon.geometry.coordinates.forEach(coords => {
+                            components.push(turf.polygon(coords));
+                        });
+                    }
+
+                    // Convert each component to a FeatureCollection of its outer-ring vertices
+                    const pointCollections = components.map(poly => {
+                        const coords = (poly.geometry.coordinates && poly.geometry.coordinates[0]) || [];
+                        const pts = coords.map(c => turf.point(c));
+                        return turf.featureCollection(pts);
+                    });
+
+                    const n = pointCollections.length;
+                    if (n > 1) {
+                        // Compute pairwise minimal gap distances (meters) between components
+                        const dist = Array.from({ length: n }, () => Array(n).fill(Infinity));
+                        for (let i = 0; i < n; i++) {
+                            for (let j = i + 1; j < n; j++) {
+                                let minD = Infinity;
+                                // iterate smaller collection against larger to slightly optimize
+                                const a = pointCollections[i];
+                                const b = pointCollections[j];
+                                // For each point in a, find nearest in b
+                                for (let p = 0; p < a.features.length; p++) {
+                                    const pt = a.features[p];
+                                    if (!pt) continue;
+                                    const nearest = turf.nearestPoint(pt, b);
+                                    if (!nearest) continue;
+                                    const d = turf.distance(pt, nearest, { units: 'meters' });
+                                    if (d < minD) minD = d;
+                                }
+                                // Also check the other direction (in case of asymmetry)
+                                for (let p = 0; p < b.features.length; p++) {
+                                    const pt = b.features[p];
+                                    if (!pt) continue;
+                                    const nearest = turf.nearestPoint(pt, a);
+                                    if (!nearest) continue;
+                                    const d = turf.distance(pt, nearest, { units: 'meters' });
+                                    if (d < minD) minD = d;
+                                }
+                                if (!isFinite(minD)) minD = 0;
+                                dist[i][j] = dist[j][i] = minD;
+                            }
+                        }
+
+                        // Compute a Minimum Spanning Tree (Prim's) and track the largest edge used
+                        const used = new Array(n).fill(false);
+                        const minEdge = new Array(n).fill(Infinity);
+                        minEdge[0] = 0;
+                        let maxEdgeInMST = 0;
+
+                        for (let k = 0; k < n; k++) {
+                            let u = -1;
+                            for (let i = 0; i < n; i++) {
+                                if (!used[i] && (u === -1 || minEdge[i] < minEdge[u])) u = i;
+                            }
+                            if (u === -1) break;
+                            used[u] = true;
+                            if (minEdge[u] !== Infinity && minEdge[u] > 0) {
+                                maxEdgeInMST = Math.max(maxEdgeInMST, minEdge[u]);
+                            }
+                            for (let v = 0; v < n; v++) {
+                                if (!used[v] && dist[u][v] < minEdge[v]) {
+                                    minEdge[v] = dist[u][v];
+                                }
+                            }
+                        }
+
+                        // Required additional buffer per-component (meters) is half the largest MST edge
+                        bufferNeededMeters = Math.ceil(maxEdgeInMST / 2);
+                    }
+                } catch (calcErr) {
+                    console.warn('Error calculating required merge buffer:', calcErr);
+                    bufferNeededMeters = null;
+                }
+
+                // Build user-facing message including a suggested buffer if available
+                if (bufferNeededMeters && bufferNeededMeters > 0) {
+                    const suggestedTotal = bufferSize + bufferNeededMeters;
+                    alert(`Error: One or more selected areas are too far apart. Increase the selected area buffer by to ${suggestedTotal} m to merge them. Alternatively, use 'Windy Rural' and enable 'Allow navigation past boundary' and set 'Boundary buffer' to at least ${bufferNeededMeters} m.`);
+                } else {
+                    alert("Error: One or more selected areas are too far apart. You can increase the buffer to merge adjacent areas. Alternatively, switch to the 'Windy Rural' map style and enable 'Allow navigation past boundary' with a sufficient 'Boundary buffer' (meters) to include nearby roads for navigation continuity.");
+                }
+
                 stopSpinner(previewGPXButton, 'Fetch Roads');
                 return;
             }
-            
-            // Check if navigation past boundary is enabled
-            const allowNavigationPastBoundary = document.getElementById('allowNavigationPastBoundary').checked;
-            const boundaryBuffer = parseInt(document.getElementById('boundaryBuffer').value, 10);
-            
-            // Create expanded polygon for fetching if navigation past boundary is enabled
+
+            // Now set the actual query polygon (use the buffered candidate if allowed)
             let queryPolygon = combinedPolygon;
             if (allowNavigationPastBoundary && boundaryBuffer > 0) {
-                queryPolygon = turf.buffer(combinedPolygon, boundaryBuffer, {
-                    units: 'meters'
-                });
+                queryPolygon = queryPolygonCandidate;
                 console.log(`Fetching roads with ${boundaryBuffer}m boundary buffer for navigation continuity`);
             }
             
