@@ -551,14 +551,22 @@ export class RoadProcessor {
             
             // Minify query to reduce URL length
             const minifiedQuery = this.minifyOverpassQuery(overpassQuery);
-            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(minifiedQuery)}`;
+
             
-            fetch(url).then(response => {
+            const overpassEndpoint = 'https://overpass-api.de/api/interpreter';
+
+            fetch(overpassEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                body: 'data=' + encodeURIComponent(minifiedQuery)
+            }).then(response => {
                 if (!response.ok) {
                     let errorMessage = '';
                     switch (response.status) {
                         case 504:
-                            errorMessage = 'Gateway Timeout (504): The server took too long to respond. Please try again or zoom into a smaller area.';
+                            errorMessage = 'Gateway Timeout (504): The server took too long to respond. Please try again.';
                             break;
                         case 502:
                             errorMessage = 'Bad Gateway (502): The server is temporarily unavailable. Please try again later.';
