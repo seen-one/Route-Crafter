@@ -789,7 +789,7 @@ export class RoadProcessor {
                         // First check if outside boundary (always optional, dashed line)
                         if (feature.properties.isOutsideBoundary) {
                             return {
-                                color: '#888888',
+                                color: '#555555',
                                 weight: 3,
                                 opacity: 0.4,
                                 dashArray: '5, 5'
