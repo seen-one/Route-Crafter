@@ -934,9 +934,24 @@ export class RoadProcessor {
                 
                 document.getElementById('routeLength').innerHTML = statsHtml;
                 
-                // Fit map to show all roads
-                if (this.geoJsonLayer.getBounds().isValid()) {
-                    this.mapManager.getMap().fitBounds(this.geoJsonLayer.getBounds());
+                // Fit map to show REQUIRED roads only (those that must be serviced).
+                // If no required roads are present, fall back to fitting all fetched roads.
+                try {
+                    const requiredFeatures = roadFeatures.filter(f => f.properties && f.properties.isRouteRequired);
+                    if (requiredFeatures.length > 0) {
+                        const requiredLayer = L.geoJSON(requiredFeatures);
+                        if (requiredLayer.getBounds().isValid()) {
+                            this.mapManager.getMap().fitBounds(requiredLayer.getBounds());
+                        }
+                    } else if (this.geoJsonLayer && this.geoJsonLayer.getBounds().isValid()) {
+                        // No required roads -> show all roads
+                        this.mapManager.getMap().fitBounds(this.geoJsonLayer.getBounds());
+                    }
+                } catch (fitErr) {
+                    console.warn('Error fitting bounds to required roads, falling back to all roads:', fitErr);
+                    if (this.geoJsonLayer && this.geoJsonLayer.getBounds().isValid()) {
+                        this.mapManager.getMap().fitBounds(this.geoJsonLayer.getBounds());
+                    }
                 }
                 
             }).catch(err => {
@@ -1121,9 +1136,23 @@ export class RoadProcessor {
                 <strong>Total Road Length:</strong> ${totalLengthKm.toFixed(2)} km (${totalLengthMi.toFixed(2)} mi)
             `;
             
-            // Fit map to show all roads
-            if (this.geoJsonLayer.getBounds().isValid()) {
-                this.mapManager.getMap().fitBounds(this.geoJsonLayer.getBounds());
+            // Fit map to show REQUIRED roads only (those that must be serviced).
+            // If none are required, fall back to all roads from the uploaded response.
+            try {
+                const requiredFeatures = roadFeatures.filter(f => f.properties && f.properties.isRouteRequired);
+                if (requiredFeatures.length > 0) {
+                    const requiredLayer = L.geoJSON(requiredFeatures);
+                    if (requiredLayer.getBounds().isValid()) {
+                        this.mapManager.getMap().fitBounds(requiredLayer.getBounds());
+                    }
+                } else if (this.geoJsonLayer && this.geoJsonLayer.getBounds().isValid()) {
+                    this.mapManager.getMap().fitBounds(this.geoJsonLayer.getBounds());
+                }
+            } catch (fitErr) {
+                console.warn('Error fitting bounds to required roads (uploaded response), falling back to all roads:', fitErr);
+                if (this.geoJsonLayer && this.geoJsonLayer.getBounds().isValid()) {
+                    this.mapManager.getMap().fitBounds(this.geoJsonLayer.getBounds());
+                }
             }
             
         } catch (err) {
