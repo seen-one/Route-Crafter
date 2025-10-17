@@ -256,6 +256,7 @@ export class MapManager {
                     <br>
                     <button id="previewGPXButton">Fetch Roads</button>
                     <button id="playRouteButton">Play Route</button>
+                    <button id="exportGPXButton">Export GPX</button>
                     <button id="clearButton">Reset</button>
                     <br>
                     <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
@@ -335,24 +336,6 @@ export class MapManager {
             return div;
         };
         this.statsContainer.addTo(this.map);
-
-        // Helper to update visibility of stats panel when its content changes
-        // Call this after you update #routeLength elsewhere in the app
-        this.updateStatsVisibility = () => {
-            try {
-                const routeEl = document.getElementById('routeLength');
-                const statsDiv = this.statsContainer && this.statsContainer.getContainer ? this.statsContainer.getContainer() : null;
-                if (!routeEl || !statsDiv) return;
-                // If routeEl is empty (no child nodes or text), hide container
-                const isEmpty = !routeEl.textContent || routeEl.textContent.trim() === '';
-                statsDiv.style.display = isEmpty ? 'none' : 'block';
-            } catch (err) {
-                console.warn('Could not update stats visibility:', err);
-            }
-        };
-
-        // Initialize visibility
-        setTimeout(() => this.updateStatsVisibility(), 50);
     }
 
     setupDrawing() {

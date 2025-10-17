@@ -936,8 +936,6 @@ export class RoadProcessor {
                 }
                 
                 document.getElementById('routeLength').innerHTML = statsHtml;
-                // Update visibility of the stats panel
-                try { this.mapManager.updateStatsVisibility(); } catch (e) { /* ignore */ }
                 
                 // Fit map to show REQUIRED roads only (those that must be serviced).
                 // If no required roads are present, fall back to fitting all fetched roads.

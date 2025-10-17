@@ -231,9 +231,6 @@ export class SolutionVisualizer {
                     } else {
                         routeLengthEl.insertAdjacentHTML('beforeend', lengthSpanHtml + efficiencyHtml);
                     }
-
-                    // Ask the map manager to update panel visibility (hide if empty)
-                    try { this.mapManager.updateStatsVisibility(); } catch (e) { /* ignore */ }
                 }
         } catch (err) {
             console.warn('Failed to insert route length:', err);

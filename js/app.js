@@ -341,6 +341,21 @@ export class RouteCrafterApp {
             );
         });
 
+        // Export GPX button
+        document.getElementById('exportGPXButton').addEventListener('click', () => {
+            // Attempt to get route points from routing manager
+            const routePoints = this.routingManager && this.routingManager.getRoutePoints ? this.routingManager.getRoutePoints() : [];
+            if (!routePoints || routePoints.length === 0) {
+                alert('No route available to export. Generate or apply a route first.');
+                return;
+            }
+
+            // Use timestamped filename
+            const now = new Date();
+            const filename = `route-${now.toISOString().replace(/[:.]/g, '-')}.gpx`;
+            this.exportRouteToGPX(routePoints, filename);
+        });
+
         // Play Route button
         document.getElementById('playRouteButton').addEventListener('click', () => {
             this.playRouteAnimation();
@@ -583,7 +598,34 @@ export class RouteCrafterApp {
         // Manually trigger change event to update UI
         searchRules.dispatchEvent(new Event('change'));
     }
-}
+        // Export route points (array of [lat, lng]) to a GPX file and trigger download
+        exportRouteToGPX(routePoints, filename = 'route.gpx') {
+            if (!routePoints || routePoints.length === 0) return;
+
+            // Build GPX content (minimal GPX 1.1 track)
+            const header = `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Route Crafter" xmlns="http://www.topografix.com/GPX/1/1">\n  <trk>\n    <name>${filename}</name>\n    <trkseg>\n`;
+            const footer = '    </trkseg>\n  </trk>\n</gpx>';
+
+            // Each point is [lat, lng]
+            const pts = routePoints.map(p => {
+                const lat = p[0];
+                const lon = p[1];
+                return `      <trkpt lat="${lat}" lon="${lon}"></trkpt>`;
+            }).join('\n');
+
+            const gpx = header + pts + '\n' + footer;
+
+            const blob = new Blob([gpx], { type: 'application/gpx+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        }
+    }
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
