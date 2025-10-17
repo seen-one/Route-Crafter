@@ -186,7 +186,7 @@ export class AreaManager {
                 let errorMessage = '';
                 switch (response.status) {
                     case 504:
-                        errorMessage = 'Gateway Timeout (504): The server took too long to respond. Please try again or zoom into a smaller area.';
+                        errorMessage = 'Gateway Timeout (504): The server took too long to respond. Please try again.';
                         break;
                     case 502:
                         errorMessage = 'Bad Gateway (502): The server is temporarily unavailable. Please try again later.';
