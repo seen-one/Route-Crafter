@@ -309,7 +309,7 @@ export class MapManager {
                         <label for="routeFilter" style="flex: 1;">Route filter:</label>
                         <input type="text" id="routeFilter" style="width: 100%; margin-left: 10px;" value=''>
                     </div>
-                    <p id="routeLength"></p>
+                    <!-- routeLength moved to a right-side stats panel for less clutter -->
                 </div>
             `;
             L.DomEvent.disableClickPropagation(div); // Prevent map interactions when interacting with the controls
@@ -321,6 +321,20 @@ export class MapManager {
         };
 
         this.controlsContainer.addTo(this.map);
+
+        // Create a dedicated stats panel on the right side to avoid cluttering main controls
+        this.statsContainer = L.control({ position: 'topright' });
+        this.statsContainer.onAdd = () => {
+            const div = L.DomUtil.create('div', 'leaflet-bar stats-panel');
+            div.innerHTML = `
+                <div id="statsPanelInner" style="padding:8px; min-width:220px;">
+                    <p id="routeLength"></p>
+                </div>
+            `;
+            L.DomEvent.disableClickPropagation(div);
+            return div;
+        };
+        this.statsContainer.addTo(this.map);
     }
 
     setupDrawing() {
