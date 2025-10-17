@@ -395,6 +395,35 @@ button:hover {
     color: #666;
 }
 
+.cpp-summary {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.cpp-summary .small-text {
+    margin-top: 4px;
+}
+
+.cpp-length {
+    margin-top: 0;
+    font-size: 13px;
+    color: #222;
+    line-height: 1.1;
+}
+
+.cpp-length strong {
+    margin-right: 6px;
+}
+
+.cpp-efficiency {
+    font-size: 13px; /* match .cpp-length */
+    color: #222; /* match .cpp-length color */
+    display: inline-block;
+    margin-top: 0;
+    margin-left: 0;
+}
+
 /* Combined Media query for smaller screens (portrait and landscape mobile) */
 @media (max-width: 600px), /* For portrait phones and small tablets */
        (max-height: 450px) and (orientation: landscape) { /* For landscape phones where height is constrained */

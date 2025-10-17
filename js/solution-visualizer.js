@@ -164,10 +164,80 @@ export class SolutionVisualizer {
         const animationNote = reconstructedPath.length > 0 ? 
             '<br><span style="color: #007bff;">🎬</span> Ready for animation - click "Play Route" to animate' : '';
         
-        document.getElementById('routeLength').innerHTML = `
-            <strong>CPP Solution (Vertex Path):</strong> ${pathDescription}${mappingNote}<br>
-            <span style="color: #ff6b00;">●</span> Orange dashed line shows the solution path${animationNote}
-        `;
+        // Compute total route length (kilometers) for the CPP solution
+        const totalKm = (function computeTotalKm(path) {
+            if (!path || path.length < 2) return 0;
+            let sum = 0;
+            for (let i = 1; i < path.length; i++) {
+                const a = path[i - 1];
+                const b = path[i];
+                // a and b are [lat, lng]
+                const R = 6371; // km
+                const dLat = (b[0] - a[0]) * Math.PI / 180;
+                const dLon = (b[1] - a[1]) * Math.PI / 180;
+                const lat1 = a[0] * Math.PI / 180;
+                const lat2 = b[0] * Math.PI / 180;
+                const sinDLat = Math.sin(dLat/2);
+                const sinDLon = Math.sin(dLon/2);
+                const c = 2 * Math.atan2(Math.sqrt(sinDLat*sinDLat + Math.cos(lat1)*Math.cos(lat2)*sinDLon*sinDLon), Math.sqrt(1 - (sinDLat*sinDLat + Math.cos(lat1)*Math.cos(lat2)*sinDLon*sinDLon)));
+                sum += R * c;
+            }
+            return sum;
+        })(reconstructedPath);
+
+        const totalKmStr = totalKm ? totalKm.toFixed(2) : '0.00';
+
+        // Insert a single-line route length (km + mi) into the stats panel without extra verbosity
+        try {
+                const routeLengthEl = document.getElementById('routeLength');
+                if (routeLengthEl) {
+                    const miles = totalKm * 0.621371;
+                    const milesStr = miles ? miles.toFixed(2) : '0.00';
+
+                    // Build inline span for length (no enclosing div as requested)
+                    const lengthSpanHtml = `<span class="cpp-length"><strong>Route Length:</strong> ${totalKmStr} km (${milesStr} mi)</span>`;
+
+                    // Efficiency: total road length / route length
+                    let efficiencyHtml = '';
+                    try {
+                        const totalRoadKm = (typeof window !== 'undefined' && window.totalRoadLengthKm) ? window.totalRoadLengthKm : null;
+                        if (totalRoadKm && totalKm > 0) {
+                            const efficiency = (totalRoadKm / totalKm) * 100;
+                            const effStr = isFinite(efficiency) ? efficiency.toFixed(1) : '0.0';
+                            efficiencyHtml = `<br><span class="cpp-efficiency"><strong>Efficiency:</strong> ${effStr}%</span>`;
+                        } else if (totalRoadKm && totalKm === 0) {
+                            efficiencyHtml = `<br><span class="cpp-efficiency"><strong>Efficiency:</strong> N/A</span>`;
+                        }
+                    } catch (err) {
+                        console.warn('Error computing efficiency:', err);
+                    }
+
+                    // Update existing length span if present, otherwise append
+                    const existing = routeLengthEl.querySelector('.cpp-length');
+                    if (existing) {
+                        // replace the span and following efficiency if present
+                        let next = existing.nextSibling;
+                        // Remove any following .cpp-efficiency nodes
+                        while (next) {
+                            if (next.nodeType === 1 && next.classList && next.classList.contains('cpp-efficiency')) {
+                                const toRemove = next;
+                                next = next.nextSibling;
+                                toRemove.remove();
+                            } else {
+                                next = next.nextSibling;
+                            }
+                        }
+                        existing.outerHTML = lengthSpanHtml + efficiencyHtml;
+                    } else {
+                        routeLengthEl.insertAdjacentHTML('beforeend', lengthSpanHtml + efficiencyHtml);
+                    }
+
+                    // Ask the map manager to update panel visibility (hide if empty)
+                    try { this.mapManager.updateStatsVisibility(); } catch (e) { /* ignore */ }
+                }
+        } catch (err) {
+            console.warn('Failed to insert route length:', err);
+        }
 
         // Set route points for animation
         this.routingManager.setRoutePoints(reconstructedPath);

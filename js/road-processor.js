@@ -891,6 +891,9 @@ export class RoadProcessor {
                 const areaInSquareKm = areaInSquareMeters / 1000000;
                 const areaInSquareMi = areaInSquareMeters / 2589988.11;
                 
+                // Expose total road length globally so other modules can compute efficiency
+                try { window.totalRoadLengthKm = totalLengthKm; } catch (e) { /* ignore */ }
+
                 // Update the routeLength paragraph with road statistics
                 const truncateStatus = truncateByEdge ? ' (trimmed to polygon boundary)' : '';
                 
@@ -933,6 +936,8 @@ export class RoadProcessor {
                 }
                 
                 document.getElementById('routeLength').innerHTML = statsHtml;
+                // Update visibility of the stats panel
+                try { this.mapManager.updateStatsVisibility(); } catch (e) { /* ignore */ }
                 
                 // Fit map to show REQUIRED roads only (those that must be serviced).
                 // If no required roads are present, fall back to fitting all fetched roads.
