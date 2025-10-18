@@ -367,6 +367,15 @@ export class RoadProcessor {
         const previewGPXButton = document.getElementById('previewGPXButton');
         previewGPXButton.classList.add('button-loading');
         previewGPXButton.innerHTML = 'Fetching Roads <span class="spinner"></span>';
+
+        // If a starting location (depot) was previously set, clear it when fetching roads again
+        try {
+            if (this.mapManager && typeof this.mapManager.clearDepotMarker === 'function') {
+                this.mapManager.clearDepotMarker();
+            }
+        } catch (e) {
+            console.warn('Failed to clear depot marker before fetching roads:', e);
+        }
         
         // Combine highlighted polygons and drawn items
         const allSelectedAreas = [...this.areaManager.getHighlightedPolygons()];
