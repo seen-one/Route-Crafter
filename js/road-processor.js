@@ -891,16 +891,22 @@ export class RoadProcessor {
                 const areaInSquareKm = areaInSquareMeters / 1000000;
                 const areaInSquareMi = areaInSquareMeters / 2589988.11;
                 
-                // Expose total road length globally so other modules can compute efficiency
+                // Expose required road length globally so other modules can compute efficiency
+                // Keep total length available for reference if needed
                 try { window.totalRoadLengthKm = totalLengthKm; } catch (e) { /* ignore */ }
+                try { window.requiredRoadLengthKm = totalLengthKm - optionalLengthKm - outsideBoundaryLengthKm; } catch (e) { /* ignore */ }
 
                 // Update the routeLength paragraph with road statistics
                 const truncateStatus = truncateByEdge ? ' (trimmed to polygon boundary)' : '';
                 
+                // Compute required road length (exclude optional and outside-boundary roads)
+                const requiredLengthKm = totalLengthKm - optionalLengthKm - outsideBoundaryLengthKm;
+                const requiredLengthMi = requiredLengthKm * 0.621371;
+
                 let statsHtml = `
                     <strong>Selected Area:</strong> ${areaInSquareKm.toFixed(2)} km² (${areaInSquareMi.toFixed(2)} sq mi)<br>
                     <strong>Roads Found:</strong> ${roadFeatures.length} road segments${truncateStatus}<br>
-                    <strong>Total Road Length:</strong> ${totalLengthKm.toFixed(2)} km (${totalLengthMi.toFixed(2)} mi)
+                    <strong>Required Road Length:</strong> ${requiredLengthKm.toFixed(2)} km (${requiredLengthMi.toFixed(2)} mi)
                 `;
                 
                 // Add outside boundary statistics if navigation past boundary is enabled

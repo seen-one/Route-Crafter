@@ -200,12 +200,17 @@ export class SolutionVisualizer {
                     // Efficiency: total road length / route length
                     let efficiencyHtml = '';
                     try {
-                        const totalRoadKm = (typeof window !== 'undefined' && window.totalRoadLengthKm) ? window.totalRoadLengthKm : null;
-                        if (totalRoadKm && totalKm > 0) {
-                            const efficiency = (totalRoadKm / totalKm) * 100;
+                        // Prefer required road length for efficiency calculation. Fall back to total length if required not available.
+                        const requiredRoadKm = (typeof window !== 'undefined' && window.requiredRoadLengthKm != null) ? window.requiredRoadLengthKm : null;
+                        const totalRoadKm = (typeof window !== 'undefined' && window.totalRoadLengthKm != null) ? window.totalRoadLengthKm : null;
+                        const baseLengthKm = (requiredRoadKm != null) ? requiredRoadKm : totalRoadKm;
+
+                        if (baseLengthKm && totalKm > 0) {
+                            const efficiency = (baseLengthKm / totalKm) * 100;
                             const effStr = isFinite(efficiency) ? efficiency.toFixed(1) : '0.0';
+                            // Use a single label 'Efficiency' regardless of which base length was used
                             efficiencyHtml = `<br><span class="cpp-efficiency"><strong>Efficiency:</strong> ${effStr}%</span>`;
-                        } else if (totalRoadKm && totalKm === 0) {
+                        } else if (baseLengthKm && totalKm === 0) {
                             efficiencyHtml = `<br><span class="cpp-efficiency"><strong>Efficiency:</strong> N/A</span>`;
                         }
                     } catch (err) {
