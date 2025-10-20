@@ -408,6 +408,16 @@ export class RouteCrafterApp {
             }
         });
 
+        // Show Vertex Markers checkbox
+        document.getElementById('showVertexMarkersCheckbox').addEventListener('change', (event) => {
+            console.log('Checkbox changed:', event.target.checked, 'Vertices:', this.nodeIdToCoordinateMap.size);
+            if (event.target.checked) {
+                this.mapManager.showVertexMarkers(this.nodeIdToCoordinateMap);
+            } else {
+                this.mapManager.hideVertexMarkers();
+            }
+        });
+
         // Clear button
         document.getElementById('clearButton').addEventListener('click', () => {
             this.clearAllSelections();

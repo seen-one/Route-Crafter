@@ -16,6 +16,7 @@ export class MapManager {
         this.hashUpdateTimeout = null;
         this.depotMarker = null;
         this.selectedDepotId = null;
+        this.vertexMarkers = [];
         
         this.init();
     }
@@ -194,6 +195,7 @@ export class MapManager {
                         <textarea id="oarlibSolutionTextarea" placeholder="Paste OARLib solution here..." style="width: 100%; min-height: 80px; margin: 2px 0; padding: 5px; font-size: 11px; font-family: monospace; resize: vertical; box-sizing: border-box;"></textarea>
                         <button id="applyCPPSolutionButton" style="width: 100%; margin: 2px 0;">Apply Solution</button>
                         <button id="applyLargestComponentSolutionButton" style="width: 100%; margin: 2px 0;">Apply Solution (Largest Component)</button>
+                        <label style="display: block; margin-top: 5px; font-size: 12px;"><input type="checkbox" id="showVertexMarkersCheckbox" style="margin-right: 5px;">Show Vertex Markers</label>
                     </div>
                 </div>
             `;
@@ -513,6 +515,28 @@ export class MapManager {
             this.depotMarker = null;
         }
         this.selectedDepotId = null;
+    }
+
+    showVertexMarkers(nodeIdToCoordinateMap) {
+        this.clearVertexMarkers();
+        let count = 0;
+        for (const [nodeId, coord] of nodeIdToCoordinateMap) {
+            if (count >= 100) break; // Limit to 100 markers for performance
+            const marker = L.marker([coord[1], coord[0]]).bindPopup(`Vertex ID: ${nodeId}`);
+            this.vertexMarkers.push(marker);
+            marker.addTo(this.map);
+            count++;
+        }
+        console.log(`Added ${count} vertex markers`);
+    }
+
+    hideVertexMarkers() {
+        this.clearVertexMarkers();
+    }
+
+    clearVertexMarkers() {
+        this.vertexMarkers.forEach(marker => this.map.removeLayer(marker));
+        this.vertexMarkers = [];
     }
 
     saveMapViewToUrlHash() {
