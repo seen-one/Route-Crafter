@@ -521,7 +521,6 @@ export class MapManager {
         this.clearVertexMarkers();
         let count = 0;
         for (const [nodeId, coord] of nodeIdToCoordinateMap) {
-            if (count >= 100) break; // Limit to 100 markers for performance
             const marker = L.marker([coord[1], coord[0]]).bindPopup(`Vertex ID: ${nodeId}`);
             this.vertexMarkers.push(marker);
             marker.addTo(this.map);
