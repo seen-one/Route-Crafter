@@ -603,9 +603,28 @@ Line Format: x,y
         return { nodes: connectedNodes, edges };
     }
 
-    exportLargestComponentForChinesePostman(geoJsonLayer, coordinateToNodeIdMap, nodeIdToCoordinateMap) {
+    exportLargestComponentForChinesePostman(geoJsonLayer, coordinateToNodeIdMap, nodeIdToCoordinateMap, options = {}) {
+        const { download = true, silent = false, confirmHandler } = options || {};
+        const showAlert = (message, level = 'info') => {
+            if (level === 'error') {
+                alert(message);
+                return;
+            }
+
+            if (silent) {
+                if (level === 'warn') {
+                    console.warn(message);
+                } else {
+                    console.info(message);
+                }
+            } else {
+                alert(message);
+            }
+        };
+        const confirmFn = typeof confirmHandler === 'function' ? confirmHandler : window.confirm;
+
         if (!geoJsonLayer) {
-            alert('No road data available. Please fetch roads first.');
+            showAlert('No road data available. Please fetch roads first.', 'error');
             return null;
         }
 
@@ -620,8 +639,8 @@ Line Format: x,y
             });
 
             if (roadFeatures.length === 0) {
-                alert('No road segments found to export.');
-                return;
+                showAlert('No road segments found to export.', 'error');
+                return null;
             }
 
             // Check if coverage filtering is enabled
@@ -678,7 +697,7 @@ Line Format: x,y
 
             // If required roads remain disconnected even when optional roads are included, warn the user
             if (!requiredConnectedWhenIncludingOptional) {
-                const confirmed = confirm("Warning: Unable to connect all required roads even if optional roads are included. Press OK to continue with the largest road group, or choose Windy Rural format and enable 'Allow navigation past boundary' with sufficient buffer distance so optional roads can connect the network.");
+                const confirmed = confirmFn("Warning: Unable to connect all required roads even if optional roads are included. Press OK to continue with the largest road group, or choose Windy Rural format and enable 'Allow navigation past boundary' with sufficient buffer distance so optional roads can connect the network.");
                 if (!confirmed) {
                     return null;
                 }
@@ -734,20 +753,22 @@ Line Format: x,y
             console.log(`Created renumbered coordinate mappings: ${newNodeIdToCoordinateMap.size} nodes`);
             
             // Generate OARLib native format with filtered graph and new coordinate maps
-            const oarLibContent = this.generateOARLibFormat(filteredGraph, roadFeatures, newCoordinateToNodeIdMap, newNodeIdToCoordinateMap, coverageFilterEnabled, exportFormat);
+            const oarlibContent = this.generateOARLibFormat(filteredGraph, roadFeatures, newCoordinateToNodeIdMap, newNodeIdToCoordinateMap, coverageFilterEnabled, exportFormat);
 
             // Download the OARLib file
-            const blob = new Blob([oarLibContent], {
-                type: 'text/plain'
-            });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.download = 'route_crafter_graph_largest_component.oarlib';
-            document.body.appendChild(a);
-            a.href = url;
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            if (download) {
+                const blob = new Blob([oarlibContent], {
+                    type: 'text/plain'
+                });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.download = 'route_crafter_graph_largest_component.oarlib';
+                document.body.appendChild(a);
+                a.href = url;
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
 
             // Calculate statistics
             const nodePercentage = ((filteredGraph.nodes.length / totalNodes) * 100).toFixed(1);
@@ -769,23 +790,47 @@ Line Format: x,y
             };
             const graphTypeStr = formatNames[exportFormat];
             
-            alert(`${componentInfo}\n\n` +
+            const summaryMessage = `${componentInfo}\n\n` +
                   `Exported largest component as ${graphTypeStr} OARLib format:\n\n` +
                   `✓ ${filteredGraph.nodes.length}/${totalNodes} nodes (${nodePercentage}%)\n` +
                   `✓ ${filteredGraph.edges.length}/${totalEdges} edges (${edgePercentage}%)\n\n` +
                   `${nodesRemoved > 0 ? `Removed ${nodesRemoved} node(s) from smaller components.` : 'All nodes included.'}\n` +
-                  `Nodes renumbered sequentially (1-${filteredGraph.nodes.length}).`);
+                  `Nodes renumbered sequentially (1-${filteredGraph.nodes.length}).`;
+
+            if (download) {
+                if (silent) {
+                    console.info(summaryMessage.replace(/\n+/g, ' '));
+                } else {
+                    alert(summaryMessage);
+                }
+            } else {
+                if (silent) {
+                    console.info(summaryMessage.replace(/\n+/g, ' '));
+                } else {
+                    showAlert(summaryMessage);
+                }
+            }
             
             console.log(`Exported largest component: ${filteredGraph.nodes.length}/${totalNodes} nodes (${nodePercentage}%), ${filteredGraph.edges.length}/${totalEdges} edges (${edgePercentage}%)`);
             
             // Return the new coordinate mappings so they can be used for applying solutions
             return {
                 coordinateToNodeIdMap: newCoordinateToNodeIdMap,
-                nodeIdToCoordinateMap: newNodeIdToCoordinateMap
+                nodeIdToCoordinateMap: newNodeIdToCoordinateMap,
+                oarlibContent,
+                stats: {
+                    totalNodes,
+                    totalEdges,
+                    filteredNodes: filteredGraph.nodes.length,
+                    filteredEdges: filteredGraph.edges.length,
+                    nodePercentage: parseFloat(nodePercentage),
+                    edgePercentage: parseFloat(edgePercentage),
+                    nodesRemoved
+                }
             };
         } catch (error) {
             console.error('Error exporting largest component:', error);
-            alert('Error exporting data. Please try again.');
+            showAlert('Error exporting data. Please try again.', 'error');
             return null;
         }
     }

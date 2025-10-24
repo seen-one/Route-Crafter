@@ -341,6 +341,10 @@ export class RouteCrafterApp {
             );
         });
 
+        document.getElementById('generateRouteButton').addEventListener('click', () => {
+            this.handleGenerateRoute();
+        });
+
         // Export GPX button
         document.getElementById('exportGPXButton').addEventListener('click', () => {
             // Attempt to get route points from routing manager
@@ -556,6 +560,275 @@ export class RouteCrafterApp {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    }
+
+    async handleGenerateRoute() {
+        const button = document.getElementById('generateRouteButton');
+        if (!button) {
+            return;
+        }
+
+        const geoJsonLayer = this.roadProcessor && this.roadProcessor.getGeoJsonLayer ? this.roadProcessor.getGeoJsonLayer() : null;
+        if (!geoJsonLayer) {
+            alert('No road data available. Please fetch roads first.');
+            return;
+        }
+
+        const selectedDepot = this.mapManager && this.mapManager.getSelectedDepotId ? this.mapManager.getSelectedDepotId() : null;
+        if (!selectedDepot) {
+            alert('Please set the starting location by right-clicking on the map (or press and hold for touch screens)');
+            return;
+        }
+
+        const solverId = this.getTeaVMSolverId();
+        if (!solverId) {
+            alert('Selected solver is not supported in TeaVM. Choose a compatible solver and try again.');
+            return;
+        }
+
+        if (typeof window.main !== 'function') {
+            alert('TeaVM runtime is not loaded. Ensure js/teavm.js is available.');
+            return;
+        }
+
+    button.disabled = true;
+    button.classList.add('button-loading');
+    button.innerHTML = 'Generating Route <span class="spinner"></span>';
+
+        try {
+            const exportResult = this.graphBuilder.exportLargestComponentForChinesePostman(
+                geoJsonLayer,
+                this.coordinateToNodeIdMap,
+                this.nodeIdToCoordinateMap,
+                { download: false, silent: true }
+            );
+
+            if (!exportResult) {
+                return;
+            }
+
+            if (!exportResult.oarlibContent) {
+                alert('Unable to export the largest component for TeaVM.');
+                return;
+            }
+
+            this.largestComponentCoordinateToNodeIdMap = exportResult.coordinateToNodeIdMap;
+            this.largestComponentNodeIdToCoordinateMap = exportResult.nodeIdToCoordinateMap;
+
+            const teaVMResult = await this.runTeaVMAndCaptureOutput(solverId, exportResult.oarlibContent);
+
+            if (!teaVMResult || !teaVMResult.success) {
+                const errorMessage = teaVMResult && teaVMResult.errorLines && teaVMResult.errorLines.length > 0
+                    ? teaVMResult.errorLines.join('\n')
+                    : null;
+                if (errorMessage) {
+                    alert(`TeaVM solver failed:\n${errorMessage}`);
+                } else {
+                    alert('TeaVM solver failed to produce a solution.');
+                }
+                return;
+            }
+
+            if (teaVMResult.errorLines.length > 0) {
+                console.warn('TeaVM reported warnings:', teaVMResult.errorLines);
+            }
+
+            console.info('TeaVM solver output:', teaVMResult.outputLines);
+
+            const solutionText = this.extractSolutionFromTeaVMOutput(teaVMResult.outputLines);
+            if (!solutionText) {
+                alert('TeaVM completed but no route was found in the output.');
+                return;
+            }
+
+            const solutionTextarea = document.getElementById('oarlibSolutionTextarea');
+            if (solutionTextarea) {
+                solutionTextarea.value = solutionText;
+            }
+
+            this.solutionVisualizer.handleCPPSolutionText(solutionText, this.largestComponentNodeIdToCoordinateMap);
+            console.info('Route generated successfully with TeaVM and applied to the map.');
+        } catch (error) {
+            console.error('Error generating route via TeaVM:', error);
+            alert('Error generating route via TeaVM. See console for details.');
+        } finally {
+            button.disabled = false;
+            stopSpinner(button, 'Generate Route');
+        }
+    }
+
+    getTeaVMSolverId() {
+        const exportSelect = document.getElementById('exportFormatSelect');
+        if (!exportSelect) {
+            return null;
+        }
+
+        const format = exportSelect.value;
+        switch (format) {
+            case 'directed':
+                return 1;
+            case 'undirected':
+                return 2;
+            case 'mixed_frederickson':
+                return 3;
+            case 'mixed_yaoyuenyong':
+                return 4;
+            case 'windy_rural_win':
+                return 5;
+            case 'windy_rural_benavent':
+                return 7;
+            default:
+                return null;
+        }
+    }
+
+    async runTeaVMAndCaptureOutput(solverId, instanceContent) {
+        const outputLines = [];
+        const errorLines = [];
+
+        const captureStdout = (message) => {
+            const text = typeof message === 'string' ? message : String(message);
+            text.split(/\r?\n/).forEach(line => {
+                const trimmed = line.trim();
+                if (trimmed.length > 0) {
+                    outputLines.push(trimmed);
+                }
+            });
+        };
+
+        const captureStderr = (message) => {
+            const text = typeof message === 'string' ? message : String(message);
+            text.split(/\r?\n/).forEach(line => {
+                const trimmed = line.trim();
+                if (trimmed.length > 0) {
+                    errorLines.push(trimmed);
+                }
+            });
+        };
+
+        const restoreConsole = this.interceptTeaVMConsole(captureStdout, captureStderr);
+
+        let encounteredError = false;
+        let capturedError = null;
+
+        try {
+            await new Promise((resolve, reject) => {
+                try {
+                    window.main([String(solverId), instanceContent], (err) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve();
+                        }
+                    });
+                } catch (error) {
+                    reject(error);
+                }
+            });
+        } catch (error) {
+            encounteredError = true;
+            capturedError = error;
+            const message = error && error.message ? error.message : String(error);
+            captureStderr(message);
+        } finally {
+            restoreConsole();
+        }
+
+        return {
+            outputLines,
+            errorLines,
+            success: !encounteredError,
+            error: capturedError
+        };
+    }
+
+    interceptTeaVMConsole(onStdout, onStderr) {
+        const originalLog = console.log;
+        const originalInfo = console.info;
+        const originalError = console.error;
+
+        const logFn = typeof originalLog === 'function' ? originalLog : () => {};
+        const infoFn = typeof originalInfo === 'function' ? originalInfo : logFn;
+        const errorFn = typeof originalError === 'function' ? originalError : logFn;
+
+        console.log = (...args) => {
+            const message = args.map(arg => this.formatConsoleArg(arg)).join(' ');
+            onStdout(message);
+            logFn.apply(console, args);
+        };
+
+        console.info = (...args) => {
+            const message = args.map(arg => this.formatConsoleArg(arg)).join(' ');
+            onStdout(message);
+            infoFn.apply(console, args);
+        };
+
+        console.error = (...args) => {
+            const message = args.map(arg => this.formatConsoleArg(arg)).join(' ');
+            onStderr(message);
+            errorFn.apply(console, args);
+        };
+
+        return () => {
+            console.log = originalLog;
+            console.info = originalInfo;
+            console.error = originalError;
+        };
+    }
+
+    formatConsoleArg(arg) {
+        if (typeof arg === 'string') {
+            return arg;
+        }
+        try {
+            return JSON.stringify(arg);
+        } catch (error) {
+            return String(arg);
+        }
+    }
+
+    extractSolutionFromTeaVMOutput(outputLines) {
+        if (!outputLines || outputLines.length === 0) {
+            return null;
+        }
+
+        const bracketRegex = /\[([^\]]+)\]/g;
+        const candidates = [];
+
+        outputLines.forEach(line => {
+            if (typeof line !== 'string') {
+                return;
+            }
+            let match;
+            while ((match = bracketRegex.exec(line)) !== null) {
+                candidates.push(match[1]);
+            }
+        });
+
+        if (candidates.length === 0) {
+            const joined = outputLines.join(' ');
+            let match;
+            while ((match = bracketRegex.exec(joined)) !== null) {
+                candidates.push(match[1]);
+            }
+        }
+
+        for (let i = candidates.length - 1; i >= 0; i--) {
+            const raw = candidates[i];
+            if (!raw) {
+                continue;
+            }
+            const normalized = raw.replace(/\s+/g, '');
+            const segments = normalized.split(',');
+            for (let j = 0; j < segments.length; j++) {
+                const segment = segments[j];
+                if (/^\d+(?:-\d+)+$/.test(segment)) {
+                    return `[${segment}]`;
+                }
+            }
+        }
+
+        return null;
     }
 
     clearAllSelectionsWithoutResettingDropdown() {

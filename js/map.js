@@ -257,6 +257,7 @@ export class MapManager {
                     <button id="fetchButton">Find Areas</button>
                     <br>
                     <button id="previewGPXButton">Fetch Roads</button>
+                    <button id="generateRouteButton">Generate Route</button>
                     <button id="playRouteButton">Play Route</button>
                     <button id="exportGPXButton">Export GPX</button>
                     <button id="clearButton">Reset</button>
