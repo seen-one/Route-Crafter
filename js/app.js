@@ -617,20 +617,14 @@ export class RouteCrafterApp {
 
             const teaVMResult = await this.runTeaVMAndCaptureOutput(solverId, exportResult.oarlibContent);
 
-            if (!teaVMResult || !teaVMResult.success) {
-                const errorMessage = teaVMResult && teaVMResult.errorLines && teaVMResult.errorLines.length > 0
-                    ? teaVMResult.errorLines.join('\n')
-                    : null;
-                if (errorMessage) {
-                    alert(`TeaVM solver failed:\n${errorMessage}`);
+            const combinedError = this.buildTeaVMErrorMessage(teaVMResult);
+            if (!teaVMResult || !teaVMResult.success || combinedError) {
+                if (combinedError) {
+                    alert(`TeaVM solver failed:\n${combinedError}`);
                 } else {
                     alert('TeaVM solver failed to produce a solution.');
                 }
                 return;
-            }
-
-            if (teaVMResult.errorLines.length > 0) {
-                console.warn('TeaVM reported warnings:', teaVMResult.errorLines);
             }
 
             console.info('TeaVM solver output:', teaVMResult.outputLines);
@@ -785,6 +779,36 @@ export class RouteCrafterApp {
         } catch (error) {
             return String(arg);
         }
+    }
+
+    buildTeaVMErrorMessage(result) {
+        if (!result) {
+            return 'Unknown TeaVM error (no result returned).';
+        }
+
+        const parts = [];
+        if (result.error) {
+            parts.push(result.error.message || String(result.error));
+        }
+
+        if (Array.isArray(result.errorLines) && result.errorLines.length > 0) {
+            result.errorLines.forEach(line => {
+                if (typeof line === 'string' && line.trim().length > 0) {
+                    parts.push(line.trim());
+                }
+            });
+        }
+
+        if (!result.success && (!parts || parts.length === 0)) {
+            parts.push('TeaVM solver reported a failure without details.');
+        }
+
+        if (parts.length === 0) {
+            return '';
+        }
+
+        const deduped = Array.from(new Set(parts));
+        return deduped.join('\n');
     }
 
     extractSolutionFromTeaVMOutput(outputLines) {

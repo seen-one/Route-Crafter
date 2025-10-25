@@ -310,7 +310,7 @@ $rt_charArrayToString = (array, offset, count) => {
     return result;
 },
 $rt_fullArrayToString = array => $rt_charArrayToString(array, 0, array.length),
-$rt_str = str => str === null ? null : jl_String__init_1(str),
+$rt_str = str => str === null ? null : jl_String__init_0(str),
 $rt_ustr = str => str === null ? null : str.$nativeString,
 $rt_stringClassInit = () => jl_String_$callClinit(),
 $rt_intern;
@@ -636,7 +636,7 @@ let jl_Throwable__init_ = $this => {
     $this.$writableStackTrace = 1;
     $this.$fillInStackTrace();
 },
-jl_Throwable__init_2 = () => {
+jl_Throwable__init_4 = () => {
     let var_0 = new jl_Throwable();
     jl_Throwable__init_(var_0);
     return var_0;
@@ -648,10 +648,23 @@ jl_Throwable__init_0 = ($this, $message) => {
     $this.$fillInStackTrace();
     $this.$message = $message;
 },
-jl_Throwable__init_1 = var_0 => {
+jl_Throwable__init_2 = var_0 => {
     let var_1 = new jl_Throwable();
     jl_Throwable__init_0(var_1, var_0);
     return var_1;
+},
+jl_Throwable__init_1 = ($this, $message, $cause) => {
+    jl_Throwable_initNativeException($this);
+    $this.$suppressionEnabled = 1;
+    $this.$writableStackTrace = 1;
+    $this.$fillInStackTrace();
+    $this.$message = $message;
+    $this.$cause = $cause;
+},
+jl_Throwable__init_3 = (var_0, var_1) => {
+    let var_2 = new jl_Throwable();
+    jl_Throwable__init_1(var_2, var_0, var_1);
+    return var_2;
 },
 jl_Throwable_fillInStackTrace = $this => {
     return $this;
@@ -709,15 +722,23 @@ jl_Exception = $rt_classWithoutFields(jl_Throwable),
 jl_Exception__init_ = $this => {
     jl_Throwable__init_($this);
 },
-jl_Exception__init_1 = () => {
+jl_Exception__init_3 = () => {
     let var_0 = new jl_Exception();
     jl_Exception__init_(var_0);
     return var_0;
 },
+jl_Exception__init_1 = ($this, $message, $cause) => {
+    jl_Throwable__init_1($this, $message, $cause);
+},
+jl_Exception__init_2 = (var_0, var_1) => {
+    let var_2 = new jl_Exception();
+    jl_Exception__init_1(var_2, var_0, var_1);
+    return var_2;
+},
 jl_Exception__init_0 = ($this, $message) => {
     jl_Throwable__init_0($this, $message);
 },
-jl_Exception__init_2 = var_0 => {
+jl_Exception__init_4 = var_0 => {
     let var_1 = new jl_Exception();
     jl_Exception__init_0(var_1, var_0);
     return var_1;
@@ -847,10 +868,10 @@ jur_AbstractCharClass__clinit_ = () => {
 };
 function jur_AbstractCharClass$LazyJavaWhitespace$1() {
     jur_AbstractCharClass.call(this);
-    this.$this$030 = null;
+    this.$this$029 = null;
 }
 let jur_AbstractCharClass$LazyJavaWhitespace$1__init_ = ($this, $this$0) => {
-    $this.$this$030 = $this$0;
+    $this.$this$029 = $this$0;
     jur_AbstractCharClass__init_($this);
 },
 jur_AbstractCharClass$LazyJavaWhitespace$1__init_0 = var_0 => {
@@ -1145,7 +1166,7 @@ function jur_AbstractSet() {
     let a = this; jl_Object.call(a);
     a.$next2 = null;
     a.$isSecondPassVisited = 0;
-    a.$index4 = null;
+    a.$index3 = null;
     a.$type0 = 0;
 }
 let jur_AbstractSet_counter = 0,
@@ -1159,7 +1180,7 @@ jur_AbstractSet__init_ = $this => {
     jl_Object__init_($this);
     var$1 = jur_AbstractSet_counter;
     jur_AbstractSet_counter = var$1 + 1 | 0;
-    $this.$index4 = jl_Integer_toString(var$1);
+    $this.$index3 = jl_Integer_toString(var$1);
 },
 jur_AbstractSet__init_0 = ($this, $n) => {
     let var$2;
@@ -1167,7 +1188,7 @@ jur_AbstractSet__init_0 = ($this, $n) => {
     jl_Object__init_($this);
     var$2 = jur_AbstractSet_counter;
     jur_AbstractSet_counter = var$2 + 1 | 0;
-    $this.$index4 = jl_Integer_toString(var$2);
+    $this.$index3 = jl_Integer_toString(var$2);
     $this.$next2 = $n;
 },
 jur_AbstractSet_find = ($this, $stringIndex, $testString, $matchResult) => {
@@ -1200,7 +1221,7 @@ jur_AbstractSet_getType = $this => {
 },
 jur_AbstractSet_getQualifiedName = $this => {
     let var$1, var$2, var$3;
-    var$1 = $this.$index4;
+    var$1 = $this.$index3;
     var$2 = $this.$getName();
     var$3 = jl_StringBuilder__init_();
     jl_StringBuilder_append0(jl_StringBuilder_append(jl_StringBuilder_append0(jl_StringBuilder_append(jl_StringBuilder_append0(var$3, 60), var$1), 58), var$2), 62);
@@ -1530,52 +1551,6 @@ jur_AbstractCharClass$LazyAlpha__init_0 = () => {
 jur_AbstractCharClass$LazyAlpha_computeValue = $this => {
     return ((jur_CharClass__init_()).$add0(97, 122)).$add0(65, 90);
 },
-ju_Iterator = $rt_classWithoutFields(0);
-function ju_PriorityQueue$1() {
-    let a = this; jl_Object.call(a);
-    a.$index1 = 0;
-    a.$knownVersion = 0;
-    a.$removeIndex = 0;
-    a.$this$0 = null;
-}
-let ju_PriorityQueue$1__init_ = ($this, $this$0) => {
-    $this.$this$0 = $this$0;
-    jl_Object__init_($this);
-    $this.$knownVersion = $this.$this$0.$version;
-    $this.$removeIndex = (-1);
-},
-ju_PriorityQueue$1__init_0 = var_0 => {
-    let var_1 = new ju_PriorityQueue$1();
-    ju_PriorityQueue$1__init_(var_1, var_0);
-    return var_1;
-},
-ju_PriorityQueue$1_hasNext = $this => {
-    if ($this.$this$0.$version != $this.$knownVersion)
-        $rt_throw(ju_ConcurrentModificationException__init_());
-    return $this.$index1 >= $this.$this$0.$size1 ? 0 : 1;
-},
-ju_PriorityQueue$1_next = $this => {
-    let var$1, var$2;
-    if ($this.$this$0.$version != $this.$knownVersion)
-        $rt_throw(ju_ConcurrentModificationException__init_());
-    if ($this.$index1 >= $this.$this$0.$size1)
-        $rt_throw(ju_NoSuchElementException__init_());
-    $this.$removeIndex = $this.$index1;
-    var$1 = $this.$this$0.$data0.data;
-    var$2 = $this.$index1;
-    $this.$index1 = var$2 + 1 | 0;
-    return var$1[var$2];
-},
-ju_PriorityQueue$1_remove = $this => {
-    if ($this.$this$0.$version != $this.$knownVersion)
-        $rt_throw(ju_ConcurrentModificationException__init_());
-    if ($this.$removeIndex < 0)
-        $rt_throw(jl_IllegalStateException__init_());
-    ju_PriorityQueue_removeAt($this.$this$0, $this.$removeIndex);
-    $this.$removeIndex = (-1);
-    $this.$index1 = $this.$index1 - 1 | 0;
-    $this.$knownVersion = $this.$this$0.$version;
-},
 jur_AbstractCharClass$LazyDigit = $rt_classWithoutFields(jur_AbstractCharClass$LazyCharClass),
 jur_AbstractCharClass$LazyDigit__init_ = $this => {
     jur_AbstractCharClass$LazyCharClass__init_($this);
@@ -1742,10 +1717,10 @@ jur_AbstractCharClass$LazyNonWord_computeValue = $this => {
 function jur_AbstractCharClass$1() {
     let a = this; jur_AbstractCharClass.call(a);
     a.$val$lHS = null;
-    a.$this$029 = null;
+    a.$this$028 = null;
 }
 let jur_AbstractCharClass$1__init_ = ($this, $this$0, var$2) => {
-    $this.$this$029 = $this$0;
+    $this.$this$028 = $this$0;
     $this.$val$lHS = var$2;
     jur_AbstractCharClass__init_($this);
 },
@@ -1763,10 +1738,10 @@ function jur_AbstractCharClass$2() {
     let a = this; jur_AbstractCharClass.call(a);
     a.$val$lHS0 = null;
     a.$val$thisClass = null;
-    a.$this$020 = null;
+    a.$this$019 = null;
 }
 let jur_AbstractCharClass$2__init_ = ($this, $this$0, var$2, var$3) => {
-    $this.$this$020 = $this$0;
+    $this.$this$019 = $this$0;
     $this.$val$lHS0 = var$2;
     $this.$val$thisClass = var$3;
     jur_AbstractCharClass__init_($this);
@@ -2138,10 +2113,10 @@ ju_MissingResourceException__init_0 = (var_0, var_1, var_2) => {
 };
 function jur_AbstractCharClass$LazyJavaLetterOrDigit$1() {
     jur_AbstractCharClass.call(this);
-    this.$this$031 = null;
+    this.$this$030 = null;
 }
 let jur_AbstractCharClass$LazyJavaLetterOrDigit$1__init_ = ($this, $this$0) => {
-    $this.$this$031 = $this$0;
+    $this.$this$030 = $this$0;
     jur_AbstractCharClass__init_($this);
 },
 jur_AbstractCharClass$LazyJavaLetterOrDigit$1__init_0 = var_0 => {
@@ -2155,10 +2130,10 @@ jur_AbstractCharClass$LazyJavaLetterOrDigit$1_contains = ($this, $ch) => {
 function jur_CharClass$18() {
     let a = this; jur_AbstractCharClass.call(a);
     a.$val$bs = null;
-    a.$this$014 = null;
+    a.$this$013 = null;
 }
 let jur_CharClass$18__init_ = ($this, $this$0, var$2) => {
-    $this.$this$014 = $this$0;
+    $this.$this$013 = $this$0;
     $this.$val$bs = var$2;
     jur_AbstractCharClass__init_($this);
 },
@@ -2569,10 +2544,10 @@ jur_UCIBackReferenceSet_getName = $this => {
 function jur_CharClass$13() {
     let a = this; jur_AbstractCharClass.call(a);
     a.$val$clazz4 = null;
-    a.$this$024 = null;
+    a.$this$023 = null;
 }
 let jur_CharClass$13__init_ = ($this, $this$0, var$2) => {
-    $this.$this$024 = $this$0;
+    $this.$this$023 = $this$0;
     $this.$val$clazz4 = var$2;
     jur_AbstractCharClass__init_($this);
 },
@@ -2587,10 +2562,10 @@ jur_CharClass$13_contains = ($this, $ch) => {
 function jur_CharClass$12() {
     let a = this; jur_AbstractCharClass.call(a);
     a.$val$clazz5 = null;
-    a.$this$034 = null;
+    a.$this$033 = null;
 }
 let jur_CharClass$12__init_ = ($this, $this$0, var$2) => {
-    $this.$this$034 = $this$0;
+    $this.$this$033 = $this$0;
     $this.$val$clazz5 = var$2;
     jur_AbstractCharClass__init_($this);
 },
@@ -2607,10 +2582,10 @@ function jur_CharClass$11() {
     a.$val$curAlt4 = 0;
     a.$val$nb2 = null;
     a.$val$clazz8 = null;
-    a.$this$015 = null;
+    a.$this$014 = null;
 }
 let jur_CharClass$11__init_ = ($this, $this$0, var$2, var$3, var$4) => {
-    $this.$this$015 = $this$0;
+    $this.$this$014 = $this$0;
     $this.$val$curAlt4 = var$2;
     $this.$val$nb2 = var$3;
     $this.$val$clazz8 = var$4;
@@ -2697,10 +2672,10 @@ function jur_CharClass$10() {
     a.$val$curAlt6 = 0;
     a.$val$nb0 = null;
     a.$val$clazz0 = null;
-    a.$this$022 = null;
+    a.$this$021 = null;
 }
 let jur_CharClass$10__init_ = ($this, $this$0, var$2, var$3, var$4) => {
-    $this.$this$022 = $this$0;
+    $this.$this$021 = $this$0;
     $this.$val$curAlt6 = var$2;
     $this.$val$nb0 = var$3;
     $this.$val$clazz0 = var$4;
@@ -2719,10 +2694,10 @@ function jur_CharClass$17() {
     a.$val$curAlt5 = 0;
     a.$val$nb1 = null;
     a.$val$clazz10 = null;
-    a.$this$019 = null;
+    a.$this$018 = null;
 }
 let jur_CharClass$17__init_ = ($this, $this$0, var$2, var$3, var$4) => {
-    $this.$this$019 = $this$0;
+    $this.$this$018 = $this$0;
     $this.$val$curAlt5 = var$2;
     $this.$val$nb1 = var$3;
     $this.$val$clazz10 = var$4;
@@ -2781,10 +2756,10 @@ function jur_CharClass$16() {
     a.$val$curAlt3 = 0;
     a.$val$nb = null;
     a.$val$clazz3 = null;
-    a.$this$026 = null;
+    a.$this$025 = null;
 }
 let jur_CharClass$16__init_ = ($this, $this$0, var$2, var$3, var$4) => {
-    $this.$this$026 = $this$0;
+    $this.$this$025 = $this$0;
     $this.$val$curAlt3 = var$2;
     $this.$val$nb = var$3;
     $this.$val$clazz3 = var$4;
@@ -2828,10 +2803,10 @@ function jur_CharClass$15() {
     let a = this; jur_AbstractCharClass.call(a);
     a.$val$clazz9 = null;
     a.$val$curAlt1 = 0;
-    a.$this$09 = null;
+    a.$this$08 = null;
 }
 let jur_CharClass$15__init_ = ($this, $this$0, var$2, var$3) => {
-    $this.$this$09 = $this$0;
+    $this.$this$08 = $this$0;
     $this.$val$clazz9 = var$2;
     $this.$val$curAlt1 = var$3;
     jur_AbstractCharClass__init_($this);
@@ -2842,14 +2817,14 @@ jur_CharClass$15__init_0 = (var_0, var_1, var_2) => {
     return var_3;
 },
 jur_CharClass$15_contains = ($this, $ch) => {
-    return $this.$val$clazz9.$contains($ch) && $this.$val$curAlt1 ^ $this.$this$09.$bits.$get0($ch) ? 1 : 0;
+    return $this.$val$clazz9.$contains($ch) && $this.$val$curAlt1 ^ $this.$this$08.$bits.$get0($ch) ? 1 : 0;
 };
 function jur_AbstractCharClass$LazyJavaDefined$1() {
     jur_AbstractCharClass.call(this);
-    this.$this$028 = null;
+    this.$this$027 = null;
 }
 let jur_AbstractCharClass$LazyJavaDefined$1__init_ = ($this, $this$0) => {
-    $this.$this$028 = $this$0;
+    $this.$this$027 = $this$0;
     jur_AbstractCharClass__init_($this);
 },
 jur_AbstractCharClass$LazyJavaDefined$1__init_0 = var_0 => {
@@ -2864,10 +2839,10 @@ function jur_CharClass$14() {
     let a = this; jur_AbstractCharClass.call(a);
     a.$val$clazz2 = null;
     a.$val$curAlt10 = 0;
-    a.$this$06 = null;
+    a.$this$05 = null;
 }
 let jur_CharClass$14__init_ = ($this, $this$0, var$2, var$3) => {
-    $this.$this$06 = $this$0;
+    $this.$this$05 = $this$0;
     $this.$val$clazz2 = var$2;
     $this.$val$curAlt10 = var$3;
     jur_AbstractCharClass__init_($this);
@@ -2878,7 +2853,7 @@ jur_CharClass$14__init_0 = (var_0, var_1, var_2) => {
     return var_3;
 },
 jur_CharClass$14_contains = ($this, $ch) => {
-    return $this.$val$clazz2.$contains($ch) && $this.$val$curAlt10 ^ $this.$this$06.$bits.$get0($ch) ? 0 : 1;
+    return $this.$val$clazz2.$contains($ch) && $this.$val$curAlt10 ^ $this.$this$05.$bits.$get0($ch) ? 0 : 1;
 };
 function jur_FSet() {
     let a = this; jur_AbstractSet.call(a);
@@ -4073,10 +4048,10 @@ jl_StringBuffer_insert0 = ($this, var$1, var$2) => {
 };
 function jur_AbstractCharClass$LazyJavaUnicodeIdentifierPart$1() {
     jur_AbstractCharClass.call(this);
-    this.$this$012 = null;
+    this.$this$011 = null;
 }
 let jur_AbstractCharClass$LazyJavaUnicodeIdentifierPart$1__init_ = ($this, $this$0) => {
-    $this.$this$012 = $this$0;
+    $this.$this$011 = $this$0;
     jur_AbstractCharClass__init_($this);
 },
 jur_AbstractCharClass$LazyJavaUnicodeIdentifierPart$1__init_0 = var_0 => {
@@ -5138,11 +5113,11 @@ oc_SingleVehicleSolver_printCurrentSol = $this => {
     $currSol = $this.$mInstance.$getSol();
     if ($currSol.$size() > 1) {
         oc_SingleVehicleSolver_$callClinit();
-        oc_SingleVehicleSolver_LOGGER.$error0($rt_s(235), jl_IllegalStateException__init_());
+        oc_SingleVehicleSolver_LOGGER.$error0($rt_s(235), jl_IllegalStateException__init_0());
     }
     if ($currSol === null) {
         oc_SingleVehicleSolver_$callClinit();
-        oc_SingleVehicleSolver_LOGGER.$error0($rt_s(236), jl_IllegalStateException__init_());
+        oc_SingleVehicleSolver_LOGGER.$error0($rt_s(236), jl_IllegalStateException__init_0());
     }
     $ans = $rt_s(237);
     var$3 = $currSol.$iterator();
@@ -5173,7 +5148,13 @@ function osi_WRPPSolver_Benavent_H1() {
     oc_SingleVehicleSolver.call(this);
     this.$exportSolToPDF = 0;
 }
-let osi_WRPPSolver_Benavent_H1__init_0 = ($this, $instance) => {
+let osi_WRPPSolver_Benavent_H1_LOGGER = null,
+osi_WRPPSolver_Benavent_H1_$callClinit = () => {
+    osi_WRPPSolver_Benavent_H1_$callClinit = $rt_eraseClinit(osi_WRPPSolver_Benavent_H1);
+    osi_WRPPSolver_Benavent_H1__clinit_();
+},
+osi_WRPPSolver_Benavent_H1__init_0 = ($this, $instance) => {
+    osi_WRPPSolver_Benavent_H1_$callClinit();
     osi_WRPPSolver_Benavent_H1__init_($this, $instance, 0);
 },
 osi_WRPPSolver_Benavent_H1__init_1 = var_0 => {
@@ -5182,6 +5163,7 @@ osi_WRPPSolver_Benavent_H1__init_1 = var_0 => {
     return var_1;
 },
 osi_WRPPSolver_Benavent_H1__init_ = ($this, $instance, $exportToPDF) => {
+    osi_WRPPSolver_Benavent_H1_$callClinit();
     oc_SingleVehicleSolver__init_($this, $instance);
     $this.$exportSolToPDF = $exportToPDF;
 },
@@ -5190,8 +5172,17 @@ osi_WRPPSolver_Benavent_H1__init_2 = (var_0, var_1) => {
     osi_WRPPSolver_Benavent_H1__init_(var_2, var_0, var_1);
     return var_2;
 },
+osi_WRPPSolver_Benavent_H1_requireEdge = ($map, $id) => {
+    let $edge;
+    osi_WRPPSolver_Benavent_H1_$callClinit();
+    $edge = $map.$get($id);
+    if ($edge !== null)
+        return $edge;
+    $rt_throw(jl_IllegalStateException__init_((((jl_StringBuilder__init_()).$append4($rt_s(244))).$append2($id)).$toString()));
+},
 osi_WRPPSolver_Benavent_H1_eulerAugment = ($fullGraph, $g, $L) => {
-    let $n, $m, $fullGraphCopy, $i, $fullGraphEdges, $temp, var$10, $dist, $path, $edgePath, $matchingGraph, var$15, $v, $oddVertices, $traverseIj, var$19, $v2, $costCandidate, $candidateKey, $e, $matchingSolution, $indexedEdges, $p, $curr, $end, var$29, $next, $nextEdge, $$je;
+    let $n, $m, $fullGraphCopy, $i, $fullGraphEdges, $temp, var$10, $dist, $path, $edgePath, $matchingGraph, var$15, $v, $oddVertices, $traverseIj, var$19, $v2, $costCandidate, $candidateKey, var$23, $e, $matchingSolution, $indexedEdges, $p, $curr, $end, var$30, $next, $nextEdge, $$je;
+    osi_WRPPSolver_Benavent_H1_$callClinit();
     a: {
         try {
             $n = ($fullGraph.$getVertices0()).$size();
@@ -5199,17 +5190,17 @@ osi_WRPPSolver_Benavent_H1_eulerAugment = ($fullGraph, $g, $L) => {
             $fullGraphCopy = ogi_WindyGraph__init_();
             $i = 1;
             while ($i <= $n) {
-                $fullGraphCopy.$addVertex(ovi_WindyVertex__init_($rt_s(244)));
+                $fullGraphCopy.$addVertex(ovi_WindyVertex__init_($rt_s(245)));
                 $i = $i + 1 | 0;
             }
             $fullGraphEdges = $fullGraph.$getInternalEdgeMap();
             $i = 1;
             while ($i <= $m) {
-                $temp = $fullGraphEdges.$get($i);
+                $temp = osi_WRPPSolver_Benavent_H1_requireEdge($fullGraphEdges, $i);
                 if (!$L.$contains0(jl_Integer_valueOf($i)))
-                    $fullGraphCopy.$addEdge((($temp.$getEndpoints()).$getFirst()).$getId(), (($temp.$getEndpoints()).$getSecond()).$getId(), $rt_s(244), $temp.$getCost(), $temp.$getReverseCost());
+                    $fullGraphCopy.$addEdge((($temp.$getEndpoints()).$getFirst()).$getId(), (($temp.$getEndpoints()).$getSecond()).$getId(), $rt_s(245), $temp.$getCost(), $temp.$getReverseCost());
                 else
-                    $fullGraphCopy.$addEdge((($temp.$getEndpoints()).$getFirst()).$getId(), (($temp.$getEndpoints()).$getSecond()).$getId(), $rt_s(244), 0, 0);
+                    $fullGraphCopy.$addEdge((($temp.$getEndpoints()).$getFirst()).$getId(), (($temp.$getEndpoints()).$getSecond()).$getId(), $rt_s(245), 0, 0);
                 $i = $i + 1 | 0;
             }
             var$10 = $n + 1 | 0;
@@ -5221,7 +5212,7 @@ osi_WRPPSolver_Benavent_H1_eulerAugment = ($fullGraph, $g, $L) => {
             while (var$15.$hasNext()) {
                 $v = var$15.$next();
                 if (($v.$getDegree() % 2 | 0) == 1)
-                    $matchingGraph.$addVertex0(ovi_UndirectedVertex__init_($rt_s(245)), $v.$getId());
+                    $matchingGraph.$addVertex0(ovi_UndirectedVertex__init_($rt_s(246)), $v.$getId());
             }
             $oddVertices = $matchingGraph.$getVertices0();
             $traverseIj = ju_HashMap__init_();
@@ -5238,13 +5229,13 @@ osi_WRPPSolver_Benavent_H1_eulerAugment = ($fullGraph, $g, $L) => {
                     $candidateKey = ogu_Pair__init_(jl_Integer_valueOf($v2.$getId()), jl_Integer_valueOf($v.$getId()));
                     if (!($traverseIj.$containsKey($candidateKey) && $costCandidate >= ($traverseIj.$get1($candidateKey)).$getCost())) {
                         $traverseIj.$remove1($candidateKey);
-                        $traverseIj.$put(ogu_Pair__init_(jl_Integer_valueOf($v.$getId()), jl_Integer_valueOf($v2.$getId())), oli_Edge__init_($rt_s(246), ogu_Pair__init_($v, $v2), 2.0 * $costCandidate | 0));
+                        $traverseIj.$put(ogu_Pair__init_(jl_Integer_valueOf($v.$getId()), jl_Integer_valueOf($v2.$getId())), oli_Edge__init_($rt_s(247), ogu_Pair__init_($v, $v2), 2.0 * $costCandidate | 0));
                     }
                 }
             }
-            var$15 = ($traverseIj.$values()).$iterator();
-            while (var$15.$hasNext()) {
-                $e = var$15.$next();
+            var$23 = ($traverseIj.$values()).$iterator();
+            while (var$23.$hasNext()) {
+                $e = var$23.$next();
                 $matchingGraph.$addEdge0($e);
             }
             $matchingSolution = ogu_CommonAlgorithms_minCostMatching($matchingGraph);
@@ -5261,11 +5252,11 @@ osi_WRPPSolver_Benavent_H1_eulerAugment = ($fullGraph, $g, $L) => {
                 }
                 ogu_CommonAlgorithms_dijkstrasAlgorithm($fullGraphCopy, $curr, $dist, $path, $edgePath);
                 while (true) {
-                    var$29 = $edgePath.data;
+                    var$30 = $edgePath.data;
                     $next = $path.data[$end];
-                    $nextEdge = var$29[$end];
-                    $temp = $indexedEdges.$get($nextEdge);
-                    $g.$addEdge1((($temp.$getEndpoints()).$getFirst()).$getId(), (($temp.$getEndpoints()).$getSecond()).$getId(), $rt_s(247), $temp.$getCost(), $temp.$getReverseCost(), $nextEdge, 0);
+                    $nextEdge = var$30[$end];
+                    $temp = osi_WRPPSolver_Benavent_H1_requireEdge($indexedEdges, $nextEdge);
+                    $g.$addEdge1((($temp.$getEndpoints()).$getFirst()).$getId(), (($temp.$getEndpoints()).$getSecond()).$getId(), $rt_s(248), $temp.$getCost(), $temp.$getReverseCost(), $nextEdge, 0);
                     if ($next == $curr)
                         break;
                     $end = $next;
@@ -5285,6 +5276,7 @@ osi_WRPPSolver_Benavent_H1_eulerAugment = ($fullGraph, $g, $L) => {
 },
 osi_WRPPSolver_Benavent_H1_buildL = ($gaux, $e1, $e2, $flowanswer) => {
     let $ans, $indexedArcs, $i, var$8, $temp, $tempMatchId;
+    osi_WRPPSolver_Benavent_H1_$callClinit();
     $ans = ju_HashSet__init_();
     $indexedArcs = $gaux.$getInternalEdgeMap();
     $i = 1;
@@ -5306,13 +5298,14 @@ osi_WRPPSolver_Benavent_H1_buildL = ($gaux, $e1, $e2, $flowanswer) => {
 },
 osi_WRPPSolver_Benavent_H1_buildGdr = ($g, $unbalancedEdges) => {
     let $ans, $n, $i, $indexedEdges, var$7, $id, $temp, $e, $$je;
+    osi_WRPPSolver_Benavent_H1_$callClinit();
     a: {
         try {
             $ans = ogi_DirectedGraph__init_();
             $n = ($g.$getVertices0()).$size();
             $i = 1;
             while ($i <= $n) {
-                $ans.$addVertex1(ovi_DirectedVertex__init_($rt_s(248)));
+                $ans.$addVertex1(ovi_DirectedVertex__init_($rt_s(249)));
                 $i = $i + 1 | 0;
             }
             $indexedEdges = $g.$getInternalEdgeMap();
@@ -5321,9 +5314,9 @@ osi_WRPPSolver_Benavent_H1_buildGdr = ($g, $unbalancedEdges) => {
                 $id = var$7.$next();
                 $temp = $indexedEdges.$get($id.$intValue());
                 if ($temp.$getCost() >= $temp.$getReverseCost())
-                    $ans.$addEdge2((($temp.$getEndpoints()).$getSecond()).$getId(), (($temp.$getEndpoints()).$getFirst()).$getId(), $rt_s(248), $temp.$getReverseCost());
+                    $ans.$addEdge2((($temp.$getEndpoints()).$getSecond()).$getId(), (($temp.$getEndpoints()).$getFirst()).$getId(), $rt_s(249), $temp.$getReverseCost());
                 else
-                    $ans.$addEdge2((($temp.$getEndpoints()).$getFirst()).$getId(), (($temp.$getEndpoints()).$getSecond()).$getId(), $rt_s(248), $temp.$getCost());
+                    $ans.$addEdge2((($temp.$getEndpoints()).$getFirst()).$getId(), (($temp.$getEndpoints()).$getSecond()).$getId(), $rt_s(249), $temp.$getCost());
             }
         } catch ($$e) {
             $$je = $rt_wrapException($$e);
@@ -5341,13 +5334,14 @@ osi_WRPPSolver_Benavent_H1_buildGdr = ($g, $unbalancedEdges) => {
 },
 osi_WRPPSolver_Benavent_H1_buildGaux = ($fullGraph, $unbalancedEdges) => {
     let $ans, $n, $i, var$6, $e, $j, $indexedEdges, $indexedVertices, var$11, $id, $temp, $tempCost, $toAdd, $$je;
+    osi_WRPPSolver_Benavent_H1_$callClinit();
     a: {
         try {
             $ans = ogi_DirectedGraph__init_();
             $n = ($fullGraph.$getVertices0()).$size();
             $i = 1;
             while ($i <= $n) {
-                $ans.$addVertex1(ovi_DirectedVertex__init_($rt_s(249)));
+                $ans.$addVertex1(ovi_DirectedVertex__init_($rt_s(250)));
                 $i = $i + 1 | 0;
             }
             var$6 = ($fullGraph.$getEdges0()).$iterator();
@@ -5355,8 +5349,8 @@ osi_WRPPSolver_Benavent_H1_buildGaux = ($fullGraph, $unbalancedEdges) => {
                 $e = var$6.$next();
                 $i = (($e.$getEndpoints()).$getFirst()).$getId();
                 $j = (($e.$getEndpoints()).$getSecond()).$getId();
-                $ans.$addEdge($i, $j, $rt_s(249), 2 * $e.$getCost() | 0, $e.$getId());
-                $ans.$addEdge($j, $i, $rt_s(249), 2 * $e.$getReverseCost() | 0, $e.$getId());
+                $ans.$addEdge($i, $j, $rt_s(250), 2 * $e.$getCost() | 0, $e.$getId());
+                $ans.$addEdge($j, $i, $rt_s(250), 2 * $e.$getReverseCost() | 0, $e.$getId());
             }
             $indexedEdges = $fullGraph.$getInternalEdgeMap();
             $indexedVertices = $ans.$getInternalVertexMap();
@@ -5368,12 +5362,12 @@ osi_WRPPSolver_Benavent_H1_buildGaux = ($fullGraph, $unbalancedEdges) => {
                 $j = (($temp.$getEndpoints()).$getSecond()).$getId();
                 if ($temp.$getCost() >= $temp.$getReverseCost()) {
                     $tempCost = $temp.$getCost() - $temp.$getReverseCost() | 0;
-                    $toAdd = oli_Arc__init_($rt_s(249), ogu_Pair__init_($indexedVertices.$get($i), $indexedVertices.$get($j)), $tempCost);
+                    $toAdd = oli_Arc__init_($rt_s(250), ogu_Pair__init_($indexedVertices.$get($i), $indexedVertices.$get($j)), $tempCost);
                     $toAdd.$setCapacity(2);
                     $ans.$addEdge3($toAdd);
                 } else {
                     $tempCost = $temp.$getReverseCost() - $temp.$getCost() | 0;
-                    $toAdd = oli_Arc__init_($rt_s(249), ogu_Pair__init_($indexedVertices.$get($j), $indexedVertices.$get($i)), $tempCost);
+                    $toAdd = oli_Arc__init_($rt_s(250), ogu_Pair__init_($indexedVertices.$get($j), $indexedVertices.$get($i)), $tempCost);
                     $toAdd.$setCapacity(2);
                     $ans.$addEdge3($toAdd);
                 }
@@ -5394,6 +5388,7 @@ osi_WRPPSolver_Benavent_H1_buildGaux = ($fullGraph, $unbalancedEdges) => {
 },
 osi_WRPPSolver_Benavent_H1_buildEdgeSets = ($e1, $e2, $windyReq, $fullGraph, $averageCost) => {
     let $threshold, var$7, $e, $costDiff, var$10;
+    osi_WRPPSolver_Benavent_H1_$callClinit();
     $threshold = 0.2 * $averageCost;
     var$7 = ($windyReq.$getEdges0()).$iterator();
     while (var$7.$hasNext()) {
@@ -5411,6 +5406,7 @@ osi_WRPPSolver_Benavent_H1_buildEdgeSets = ($e1, $e2, $windyReq, $fullGraph, $av
 },
 osi_WRPPSolver_Benavent_H1_calculateAverageCost = $g => {
     let $ans, $m, var$4, $e;
+    osi_WRPPSolver_Benavent_H1_$callClinit();
     $ans = 0.0;
     $m = 2.0 * ($g.$getEdges0()).$size();
     var$4 = ($g.$getEdges0()).$iterator();
@@ -5422,12 +5418,13 @@ osi_WRPPSolver_Benavent_H1_calculateAverageCost = $g => {
 },
 osi_WRPPSolver_Benavent_H1_calculateAveragePathCost = ($g, $i, $j, $path, $edgePath) => {
     let $ans, $indexedWindyEdges, var$8, $next, $temp;
+    osi_WRPPSolver_Benavent_H1_$callClinit();
     $ans = 0;
     $indexedWindyEdges = $g.$getInternalEdgeMap();
     while (true) {
         var$8 = $edgePath.data;
         $next = $path.data[$j];
-        $temp = $indexedWindyEdges.$get(var$8[$j]);
+        $temp = osi_WRPPSolver_Benavent_H1_requireEdge($indexedWindyEdges, var$8[$j]);
         $ans = $ans + ($temp.$getCost() + $temp.$getReverseCost() | 0) | 0;
         if ($next == $i)
             break;
@@ -5440,7 +5437,10 @@ osi_WRPPSolver_Benavent_H1_solve = $this => {
     a: {
         try {
             $copy = ($this.$mInstance.$getGraph()).$getDeepCopy();
+            osi_WRPPSolver_Benavent_H1_$callClinit();
+            osi_WRPPSolver_Benavent_H1_LOGGER.$info((((((jl_StringBuilder__init_()).$append4($rt_s(251))).$append2(($copy.$getVertices0()).$size())).$append4($rt_s(252))).$append2(($copy.$getEdges0()).$size())).$toString());
             $windyReq = osi_WRPPSolver_Win_connectRequiredComponents($copy);
+            osi_WRPPSolver_Benavent_H1_LOGGER.$info((((((jl_StringBuilder__init_()).$append4($rt_s(253))).$append2(($windyReq.$getVertices0()).$size())).$append4($rt_s(252))).$append2(($windyReq.$getEdges0()).$size())).$toString());
             $averageCost = osi_WRPPSolver_Benavent_H1_calculateAverageCost($windyReq);
             $E1 = ju_HashSet__init_();
             $E2 = ju_HashSet__init_();
@@ -5448,7 +5448,9 @@ osi_WRPPSolver_Benavent_H1_solve = $this => {
             $Gdr = osi_WRPPSolver_Benavent_H1_buildGdr($copy, $E1);
             $L = ju_HashSet__init_();
             if (!ogu_CommonAlgorithms_isEulerian($Gdr)) {
+                osi_WRPPSolver_Benavent_H1_LOGGER.$info((((((jl_StringBuilder__init_()).$append4($rt_s(254))).$append2(($Gdr.$getVertices0()).$size())).$append4($rt_s(252))).$append2(($Gdr.$getEdges0()).$size())).$toString());
                 $Gaux = osi_WRPPSolver_Benavent_H1_buildGaux($copy, $E1);
+                osi_WRPPSolver_Benavent_H1_LOGGER.$info((((((jl_StringBuilder__init_()).$append4($rt_s(255))).$append2(($Gaux.$getVertices0()).$size())).$append4($rt_s(252))).$append2(($Gaux.$getEdges0()).$size())).$toString());
                 $indexedVertices = $Gdr.$getInternalVertexMap();
                 var$10 = ($Gaux.$getVertices0()).$iterator();
                 while (var$10.$hasNext()) {
@@ -5501,7 +5503,7 @@ osi_WRPPSolver_Benavent_H1_getProblemAttributes = $this => {
     return var$1;
 },
 osi_WRPPSolver_Benavent_H1_getSolverName = $this => {
-    return $rt_s(250);
+    return $rt_s(256);
 },
 osi_WRPPSolver_Benavent_H1_checkGraphRequirements = $this => {
     let $mGraph;
@@ -5511,6 +5513,9 @@ osi_WRPPSolver_Benavent_H1_checkGraphRequirements = $this => {
     if (ogu_CommonAlgorithms_isConnected($mGraph))
         return 1;
     return 0;
+},
+osi_WRPPSolver_Benavent_H1__clinit_ = () => {
+    osi_WRPPSolver_Benavent_H1_LOGGER = ou_SimpleLogger_getLogger($rt_cls(osi_WRPPSolver_Benavent_H1));
 },
 ogu_BlossomV = $rt_classWithoutFields(),
 ogu_BlossomV_blossomV = ($n, $m, $edges, $weights) => {
@@ -5553,7 +5558,7 @@ ogu_BlossomV_blossomV = ($n, $m, $edges, $weights) => {
         a: {
             var$10 = $matched.data;
             if (!var$10[$i]) {
-                (jl_System_err()).$println1((((jl_StringBuilder__init_()).$append4($rt_s(251))).$append2($i)).$toString());
+                (jl_System_err()).$println1((((jl_StringBuilder__init_()).$append4($rt_s(257))).$append2($i)).$toString());
                 $j = $i + 1 | 0;
                 while (true) {
                     if ($j >= $n)
@@ -5703,7 +5708,7 @@ jur_DecomposedCharSet_getName = $this => {
     let var$1, var$2;
     var$1 = jur_DecomposedCharSet_getDecomposedChar($this);
     var$2 = jl_StringBuilder__init_();
-    jl_StringBuilder_append(jl_StringBuilder_append(var$2, $rt_s(252)), var$1);
+    jl_StringBuilder_append(jl_StringBuilder_append(var$2, $rt_s(258)), var$1);
     return jl_StringBuilder_toString(var$2);
 },
 jur_DecomposedCharSet_codePointAt = ($this, $strIndex, $testString, $rightBound) => {
@@ -5810,7 +5815,7 @@ ot_OARLibParser$LinkData__init_0 = () => {
     return var_0;
 },
 ot_OARLibParser$LinkData_toString = $this => {
-    return ((((((((((((((jl_StringBuilder__init_()).$append4($rt_s(253))).$append($this.$v1)).$append4($rt_s(254))).$append($this.$v2)).$append4($rt_s(255))).$append($this.$cost)).$append4($rt_s(256))).$append($this.$reverseCost)).$append4($rt_s(257))).$append($this.$isDirected0)).$append4($rt_s(258))).$append($this.$isRequired0)).$append0(125)).$toString();
+    return ((((((((((((((jl_StringBuilder__init_()).$append4($rt_s(259))).$append($this.$v1)).$append4($rt_s(260))).$append($this.$v2)).$append4($rt_s(261))).$append($this.$cost)).$append4($rt_s(262))).$append($this.$reverseCost)).$append4($rt_s(263))).$append($this.$isDirected0)).$append4($rt_s(264))).$append($this.$isRequired0)).$append0(125)).$toString();
 };
 function ogu_BlossomV$EdgeInfo() {
     let a = this; jl_Object.call(a);
@@ -5842,7 +5847,7 @@ jur_AheadFSet_matches = ($this, $stringIndex, $testString, $matchResult) => {
     return $stringIndex;
 },
 jur_AheadFSet_getName = $this => {
-    return $rt_s(259);
+    return $rt_s(265);
 },
 jur_AbstractCharClass$LazyASCII = $rt_classWithoutFields(jur_AbstractCharClass$LazyCharClass),
 jur_AbstractCharClass$LazyASCII__init_ = $this => {
@@ -5894,7 +5899,7 @@ jur_NonCapJointSet_matches = ($this, $stringIndex, $testString, $matchResult) =>
     return $shift;
 },
 jur_NonCapJointSet_getName = $this => {
-    return $rt_s(260);
+    return $rt_s(266);
 },
 jur_NonCapJointSet_hasConsumed = ($this, $matchResult) => {
     let $cons;
@@ -5930,7 +5935,7 @@ jur_AtomicJointSet_setNext = ($this, $next) => {
     $this.$next2 = $next;
 },
 jur_AtomicJointSet_getName = $this => {
-    return $rt_s(260);
+    return $rt_s(266);
 },
 jur_PositiveLookAhead = $rt_classWithoutFields(jur_AtomicJointSet),
 jur_PositiveLookAhead__init_ = ($this, $children, $fSet) => {
@@ -5958,7 +5963,7 @@ jur_PositiveLookAhead_hasConsumed = ($this, $matchResult) => {
     return 0;
 },
 jur_PositiveLookAhead_getName = $this => {
-    return $rt_s(261);
+    return $rt_s(267);
 },
 jur_NegativeLookAhead = $rt_classWithoutFields(jur_AtomicJointSet),
 jur_NegativeLookAhead__init_ = ($this, $children, $fSet) => {
@@ -5987,22 +5992,23 @@ jur_NegativeLookAhead_hasConsumed = ($this, $matchResult) => {
     return 0;
 },
 jur_NegativeLookAhead_getName = $this => {
-    return $rt_s(262);
-};
+    return $rt_s(268);
+},
+ju_Iterator = $rt_classWithoutFields(0);
 function ju_AbstractList$1() {
     let a = this; jl_Object.call(a);
-    a.$index3 = 0;
+    a.$index2 = 0;
     a.$modCount1 = 0;
     a.$size3 = 0;
-    a.$removeIndex0 = 0;
-    a.$this$01 = null;
+    a.$removeIndex = 0;
+    a.$this$00 = null;
 }
 let ju_AbstractList$1__init_ = ($this, $this$0) => {
-    $this.$this$01 = $this$0;
+    $this.$this$00 = $this$0;
     jl_Object__init_($this);
-    $this.$modCount1 = $this.$this$01.$modCount;
-    $this.$size3 = $this.$this$01.$size();
-    $this.$removeIndex0 = (-1);
+    $this.$modCount1 = $this.$this$00.$modCount;
+    $this.$size3 = $this.$this$00.$size();
+    $this.$removeIndex = (-1);
 },
 ju_AbstractList$1__init_0 = var_0 => {
     let var_1 = new ju_AbstractList$1();
@@ -6010,19 +6016,19 @@ ju_AbstractList$1__init_0 = var_0 => {
     return var_1;
 },
 ju_AbstractList$1_hasNext = $this => {
-    return $this.$index3 >= $this.$size3 ? 0 : 1;
+    return $this.$index2 >= $this.$size3 ? 0 : 1;
 },
 ju_AbstractList$1_next = $this => {
     let var$1, var$2;
     ju_AbstractList$1_checkConcurrentModification($this);
-    $this.$removeIndex0 = $this.$index3;
-    var$1 = $this.$this$01;
-    var$2 = $this.$index3;
-    $this.$index3 = var$2 + 1 | 0;
+    $this.$removeIndex = $this.$index2;
+    var$1 = $this.$this$00;
+    var$2 = $this.$index2;
+    $this.$index2 = var$2 + 1 | 0;
     return var$1.$get(var$2);
 },
 ju_AbstractList$1_checkConcurrentModification = $this => {
-    if ($this.$modCount1 >= $this.$this$01.$modCount)
+    if ($this.$modCount1 >= $this.$this$00.$modCount)
         return;
     $rt_throw(ju_ConcurrentModificationException__init_());
 };
@@ -6070,10 +6076,10 @@ oc_Graph$Type_$values = () => {
     return var$1;
 },
 oc_Graph$Type__clinit_ = () => {
-    oc_Graph$Type_DIRECTED = oc_Graph$Type__init_($rt_s(263), 0);
-    oc_Graph$Type_UNDIRECTED = oc_Graph$Type__init_($rt_s(264), 1);
-    oc_Graph$Type_MIXED = oc_Graph$Type__init_($rt_s(265), 2);
-    oc_Graph$Type_WINDY = oc_Graph$Type__init_($rt_s(266), 3);
+    oc_Graph$Type_DIRECTED = oc_Graph$Type__init_($rt_s(269), 0);
+    oc_Graph$Type_UNDIRECTED = oc_Graph$Type__init_($rt_s(270), 1);
+    oc_Graph$Type_MIXED = oc_Graph$Type__init_($rt_s(271), 2);
+    oc_Graph$Type_WINDY = oc_Graph$Type__init_($rt_s(272), 3);
     oc_Graph$Type_$VALUES = oc_Graph$Type_$values();
 };
 function ju_AbstractMap() {
@@ -6153,20 +6159,20 @@ oc_MultiEdge$EDGETYPE_$values = () => {
     return var$1;
 },
 oc_MultiEdge$EDGETYPE__clinit_ = () => {
-    oc_MultiEdge$EDGETYPE_A = oc_MultiEdge$EDGETYPE__init_($rt_s(267), 0);
-    oc_MultiEdge$EDGETYPE_B = oc_MultiEdge$EDGETYPE__init_($rt_s(268), 1);
-    oc_MultiEdge$EDGETYPE_C = oc_MultiEdge$EDGETYPE__init_($rt_s(269), 2);
+    oc_MultiEdge$EDGETYPE_A = oc_MultiEdge$EDGETYPE__init_($rt_s(273), 0);
+    oc_MultiEdge$EDGETYPE_B = oc_MultiEdge$EDGETYPE__init_($rt_s(274), 1);
+    oc_MultiEdge$EDGETYPE_C = oc_MultiEdge$EDGETYPE__init_($rt_s(275), 2);
     oc_MultiEdge$EDGETYPE_D = oc_MultiEdge$EDGETYPE__init_($rt_s(74), 3);
-    oc_MultiEdge$EDGETYPE_E = oc_MultiEdge$EDGETYPE__init_($rt_s(270), 4);
-    oc_MultiEdge$EDGETYPE_F = oc_MultiEdge$EDGETYPE__init_($rt_s(271), 5);
+    oc_MultiEdge$EDGETYPE_E = oc_MultiEdge$EDGETYPE__init_($rt_s(276), 4);
+    oc_MultiEdge$EDGETYPE_F = oc_MultiEdge$EDGETYPE__init_($rt_s(277), 5);
     oc_MultiEdge$EDGETYPE_$VALUES = oc_MultiEdge$EDGETYPE_$values();
 };
 function jur_AbstractCharClass$LazyJavaUpperCase$1() {
     jur_AbstractCharClass.call(this);
-    this.$this$013 = null;
+    this.$this$012 = null;
 }
 let jur_AbstractCharClass$LazyJavaUpperCase$1__init_ = ($this, $this$0) => {
-    $this.$this$013 = $this$0;
+    $this.$this$012 = $this$0;
     jur_AbstractCharClass__init_($this);
 },
 jur_AbstractCharClass$LazyJavaUpperCase$1__init_0 = var_0 => {
@@ -6243,18 +6249,6 @@ ju_AbstractCollection_toArray = ($this, $a) => {
     }
     return $a;
 },
-ju_AbstractCollection_remove = ($this, $o) => {
-    let $iter, $e;
-    $iter = $this.$iterator();
-    while ($iter.$hasNext()) {
-        $e = $iter.$next();
-        if (ju_Objects_equals($e, $o)) {
-            $iter.$remove2();
-            return 1;
-        }
-    }
-    return 0;
-},
 ju_AbstractCollection_addAll = ($this, $c) => {
     let $changed, $iter;
     $changed = 0;
@@ -6274,14 +6268,14 @@ ju_AbstractCollection_toString = $this => {
     if ($iter.$hasNext()) {
         $e = $iter.$next();
         if ($e === $this)
-            $e = $rt_s(272);
+            $e = $rt_s(278);
         $sb.$append($e);
     }
     while ($iter.$hasNext()) {
         $e = $iter.$next();
-        var$4 = $sb.$append4($rt_s(273));
+        var$4 = $sb.$append4($rt_s(279));
         if ($e === $this)
-            $e = $rt_s(272);
+            $e = $rt_s(278);
         var$4.$append($e);
     }
     $sb.$append0(93);
@@ -6295,14 +6289,14 @@ ju_AbstractQueue__init_ = $this => {
 ju_AbstractQueue_add = ($this, $e) => {
     if ($this.$offer($e))
         return 1;
-    $rt_throw(jl_IllegalStateException__init_());
+    $rt_throw(jl_IllegalStateException__init_0());
 };
 function ju_PriorityQueue() {
     let a = this; ju_AbstractQueue.call(a);
     a.$data0 = null;
     a.$comparator = null;
     a.$originalComparator = null;
-    a.$size1 = 0;
+    a.$size2 = 0;
     a.$version = 0;
 }
 let ju_PriorityQueue__init_ = ($this, $initialCapacity, $comparator) => {
@@ -6327,8 +6321,8 @@ ju_PriorityQueue_offer = ($this, $e) => {
     let $current, $current_0;
     if ($e === null)
         $rt_throw(jl_NullPointerException__init_());
-    ju_PriorityQueue_ensureCapacity($this, $this.$size1 + 1 | 0);
-    $current = $this.$size1;
+    ju_PriorityQueue_ensureCapacity($this, $this.$size2 + 1 | 0);
+    $current = $this.$size2;
     while ($current > 0) {
         $current_0 = ($current - 1 | 0) / 2 | 0;
         if ($this.$comparator.$compare1($e, $this.$data0.data[$current_0]) >= 0)
@@ -6337,35 +6331,32 @@ ju_PriorityQueue_offer = ($this, $e) => {
         $current = $current_0;
     }
     $this.$data0.data[$current] = $e;
-    $this.$size1 = $this.$size1 + 1 | 0;
+    $this.$size2 = $this.$size2 + 1 | 0;
     $this.$version = $this.$version + 1 | 0;
     return 1;
 },
 ju_PriorityQueue_poll = $this => {
     let $elem;
-    if (!$this.$size1)
+    if (!$this.$size2)
         return null;
     $elem = $this.$data0.data[0];
     ju_PriorityQueue_removeAt($this, 0);
     return $elem;
 },
 ju_PriorityQueue_size = $this => {
-    return $this.$size1;
-},
-ju_PriorityQueue_iterator = $this => {
-    return ju_PriorityQueue$1__init_0($this);
+    return $this.$size2;
 },
 ju_PriorityQueue_removeAt = ($this, $index) => {
     let $item, $next, $next_0, var$5, var$6;
     $this.$version = $this.$version + 1 | 0;
-    $item = $this.$data0.data[$this.$size1 - 1 | 0];
+    $item = $this.$data0.data[$this.$size2 - 1 | 0];
     a: {
         while (true) {
             $next = ($index * 2 | 0) + 1 | 0;
             $next_0 = $next + 1 | 0;
-            if ($next >= $this.$size1)
+            if ($next >= $this.$size2)
                 break;
-            if ($next_0 < $this.$size1 && $this.$comparator.$compare1($this.$data0.data[$next], $this.$data0.data[$next_0]) >= 0)
+            if ($next_0 < $this.$size2 && $this.$comparator.$compare1($this.$data0.data[$next], $this.$data0.data[$next_0]) >= 0)
                 $next = $next_0;
             if ($this.$comparator.$compare1($item, $this.$data0.data[$next]) <= 0)
                 break a;
@@ -6375,8 +6366,8 @@ ju_PriorityQueue_removeAt = ($this, $index) => {
     }
     $this.$data0.data[$index] = $item;
     var$5 = $this.$data0.data;
-    var$6 = $this.$size1 - 1 | 0;
-    $this.$size1 = var$6;
+    var$6 = $this.$size2 - 1 | 0;
+    $this.$size2 = var$6;
     var$5[var$6] = null;
 },
 ju_PriorityQueue_ensureCapacity = ($this, $capacity) => {
@@ -6464,7 +6455,7 @@ otci_IntegerUtil = $rt_classWithoutFields(),
 otci_IntegerUtil_toUnsignedLogRadixString = ($value, $radixLog2) => {
     let $radix, $mask, $sz, $chars, $pos, $target, var$9, $target_0;
     if (!$value)
-        return $rt_s(274);
+        return $rt_s(280);
     $radix = 1 << $radixLog2;
     $mask = $radix - 1 | 0;
     $sz = (((32 - jl_Integer_numberOfLeadingZeros($value) | 0) + $radixLog2 | 0) - 1 | 0) / $radixLog2 | 0;
@@ -6547,7 +6538,7 @@ ju_Locale__init_2 = (var_0, var_1, var_2) => {
 ju_Locale_toLanguageTag = $this => {
     let $result;
     $result = jl_StringBuilder__init_();
-    $result.$append4(!$this.$languageCode.$isEmpty() ? $this.$languageCode : $rt_s(275));
+    $result.$append4(!$this.$languageCode.$isEmpty() ? $this.$languageCode : $rt_s(281));
     if (!$this.$countryCode.$isEmpty()) {
         $result.$append0(45);
         $result.$append4($this.$countryCode);
@@ -6560,27 +6551,27 @@ ju_Locale_toLanguageTag = $this => {
 },
 ju_Locale__clinit_ = () => {
     let $localeName, $countryIndex;
-    ju_Locale_CANADA = ju_Locale__init_($rt_s(276), $rt_s(277));
-    ju_Locale_CANADA_FRENCH = ju_Locale__init_($rt_s(278), $rt_s(277));
-    ju_Locale_CHINA = ju_Locale__init_($rt_s(279), $rt_s(280));
-    ju_Locale_CHINESE = ju_Locale__init_($rt_s(279), $rt_s(33));
-    ju_Locale_ENGLISH = ju_Locale__init_($rt_s(276), $rt_s(33));
-    ju_Locale_FRANCE = ju_Locale__init_($rt_s(278), $rt_s(281));
-    ju_Locale_FRENCH = ju_Locale__init_($rt_s(278), $rt_s(33));
-    ju_Locale_GERMAN = ju_Locale__init_($rt_s(282), $rt_s(33));
-    ju_Locale_GERMANY = ju_Locale__init_($rt_s(282), $rt_s(283));
-    ju_Locale_ITALIAN = ju_Locale__init_($rt_s(284), $rt_s(33));
-    ju_Locale_ITALY = ju_Locale__init_($rt_s(284), $rt_s(285));
-    ju_Locale_JAPAN = ju_Locale__init_($rt_s(286), $rt_s(287));
-    ju_Locale_JAPANESE = ju_Locale__init_($rt_s(286), $rt_s(33));
-    ju_Locale_KOREA = ju_Locale__init_($rt_s(288), $rt_s(289));
-    ju_Locale_KOREAN = ju_Locale__init_($rt_s(288), $rt_s(33));
-    ju_Locale_PRC = ju_Locale__init_($rt_s(279), $rt_s(280));
-    ju_Locale_SIMPLIFIED_CHINESE = ju_Locale__init_($rt_s(279), $rt_s(280));
-    ju_Locale_TAIWAN = ju_Locale__init_($rt_s(279), $rt_s(290));
-    ju_Locale_TRADITIONAL_CHINESE = ju_Locale__init_($rt_s(279), $rt_s(290));
-    ju_Locale_UK = ju_Locale__init_($rt_s(276), $rt_s(291));
-    ju_Locale_US = ju_Locale__init_($rt_s(276), $rt_s(292));
+    ju_Locale_CANADA = ju_Locale__init_($rt_s(282), $rt_s(283));
+    ju_Locale_CANADA_FRENCH = ju_Locale__init_($rt_s(284), $rt_s(283));
+    ju_Locale_CHINA = ju_Locale__init_($rt_s(285), $rt_s(286));
+    ju_Locale_CHINESE = ju_Locale__init_($rt_s(285), $rt_s(33));
+    ju_Locale_ENGLISH = ju_Locale__init_($rt_s(282), $rt_s(33));
+    ju_Locale_FRANCE = ju_Locale__init_($rt_s(284), $rt_s(287));
+    ju_Locale_FRENCH = ju_Locale__init_($rt_s(284), $rt_s(33));
+    ju_Locale_GERMAN = ju_Locale__init_($rt_s(288), $rt_s(33));
+    ju_Locale_GERMANY = ju_Locale__init_($rt_s(288), $rt_s(289));
+    ju_Locale_ITALIAN = ju_Locale__init_($rt_s(290), $rt_s(33));
+    ju_Locale_ITALY = ju_Locale__init_($rt_s(290), $rt_s(291));
+    ju_Locale_JAPAN = ju_Locale__init_($rt_s(292), $rt_s(293));
+    ju_Locale_JAPANESE = ju_Locale__init_($rt_s(292), $rt_s(33));
+    ju_Locale_KOREA = ju_Locale__init_($rt_s(294), $rt_s(295));
+    ju_Locale_KOREAN = ju_Locale__init_($rt_s(294), $rt_s(33));
+    ju_Locale_PRC = ju_Locale__init_($rt_s(285), $rt_s(286));
+    ju_Locale_SIMPLIFIED_CHINESE = ju_Locale__init_($rt_s(285), $rt_s(286));
+    ju_Locale_TAIWAN = ju_Locale__init_($rt_s(285), $rt_s(296));
+    ju_Locale_TRADITIONAL_CHINESE = ju_Locale__init_($rt_s(285), $rt_s(296));
+    ju_Locale_UK = ju_Locale__init_($rt_s(282), $rt_s(297));
+    ju_Locale_US = ju_Locale__init_($rt_s(282), $rt_s(298));
     ju_Locale_ROOT = ju_Locale__init_($rt_s(33), $rt_s(33));
     $localeName = ((otciu_CLDRHelper_getDefaultLocale()).value !== null ? $rt_str((otciu_CLDRHelper_getDefaultLocale()).value) : null);
     $countryIndex = $localeName.$indexOf(95);
@@ -6626,10 +6617,10 @@ jur_PossessiveAltQuantifierSet_matches = ($this, $stringIndex, $testString, $mat
 };
 function jur_AbstractCharClass$LazyJavaIdentifierIgnorable$1() {
     jur_AbstractCharClass.call(this);
-    this.$this$033 = null;
+    this.$this$032 = null;
 }
 let jur_AbstractCharClass$LazyJavaIdentifierIgnorable$1__init_ = ($this, $this$0) => {
-    $this.$this$033 = $this$0;
+    $this.$this$032 = $this$0;
     jur_AbstractCharClass__init_($this);
 },
 jur_AbstractCharClass$LazyJavaIdentifierIgnorable$1__init_0 = var_0 => {
@@ -6657,52 +6648,71 @@ osi_WRPPSolver_Win__init_0 = var_0 => {
     return var_1;
 },
 osi_WRPPSolver_Win_connectRequiredComponents = $g => {
-    let $n, $m, $windyReq, $gVertices, $i, $tempVertex, $indexedWindyEdges, $mreq, $edge1, $edge2, $temp, var$13, $component, var$15, $nodei, $nodej, $e1, $e2, var$20, var$21, $e, var$23, $extraComponents, $extraVertices, var$26, $wv, $dist, $path, $edgePath, $mstGraph, $mstN, $realComponents, $minCostPathVal, $minCostPathNodes, $comp1, $j, $comp2, $averagePathCost1, $tempKey, $key, $mst, $limi, $mstEdges, $selected, $pathToAdd, $curr, $end, $next, $toAdd, $$je;
+    let $n, $m, $windyReq, $gVertices, $i, $original, $tempVertex, $indexedWindyEdges, $mreq, $edge1, $edge2, $temp, var$14, $component, var$16, $nodei, $nodej, $e1, $e2, var$21, var$22, $e, var$24, $extraComponents, $extraVertices, var$27, $wv, $dist, $path, $edgePath, $mstGraph, $mstN, $realComponents, $minCostPathVal, $minCostPathNodes, $comp1, $j, $comp2, $averagePathCost1, $tempKey, var$42, $key, $mst, $limi, $mstEdges, $selected, $pathToAdd, $curr, $end, $next, $toAdd, $$je;
     osi_WRPPSolver_Win_$callClinit();
     a: {
         try {
             $n = ($g.$getVertices0()).$size();
             $m = ($g.$getEdges0()).$size();
+            osi_WRPPSolver_Win_LOGGER.$info((((((jl_StringBuilder__init_()).$append4($rt_s(299))).$append2($n)).$append4($rt_s(300))).$append2($m)).$toString());
             $windyReq = ogi_WindyGraph__init_();
             $gVertices = $g.$getInternalVertexMap();
+            osi_WRPPSolver_Win_LOGGER.$info((((jl_StringBuilder__init_()).$append4($rt_s(301))).$append2($gVertices.$size())).$toString());
             $i = 1;
-            while ($i <= $n) {
-                $tempVertex = ovi_WindyVertex__init_($rt_s(293));
-                $tempVertex.$setCoordinates(($gVertices.$get($i)).$getX(), ($gVertices.$get($i)).$getY());
-                $windyReq.$addVertex($tempVertex);
-                $i = $i + 1 | 0;
+            b: {
+                while (true) {
+                    if ($i > $n)
+                        break b;
+                    $original = $gVertices.$get($i);
+                    if ($original === null)
+                        break;
+                    $tempVertex = ovi_WindyVertex__init_($rt_s(302));
+                    $tempVertex.$setCoordinates($original.$getX(), $original.$getY());
+                    $windyReq.$addVertex($tempVertex);
+                    $i = $i + 1 | 0;
+                }
+                $rt_throw(jl_IllegalStateException__init_((((((jl_StringBuilder__init_()).$append4($rt_s(303))).$append2($i)).$append4($rt_s(304))).$append2($n)).$toString()));
             }
             $windyReq.$setDepotId($g.$getDepotId());
             $indexedWindyEdges = $g.$getInternalEdgeMap();
+            osi_WRPPSolver_Win_LOGGER.$info((((jl_StringBuilder__init_()).$append4($rt_s(305))).$append2($indexedWindyEdges.$size())).$toString());
             $mreq = 0;
             $edge1 = ju_ArrayList__init_();
             $edge2 = ju_ArrayList__init_();
             $edge1.$add2(null);
             $edge2.$add2(null);
             $i = 1;
-            while ($i <= $m) {
-                $temp = $indexedWindyEdges.$get($i);
-                if ($temp.$isRequired()) {
-                    $mreq = $mreq + 1 | 0;
-                    $edge1.$add2(jl_Integer_valueOf((($temp.$getEndpoints()).$getFirst()).$getId()));
-                    $edge2.$add2(jl_Integer_valueOf((($temp.$getEndpoints()).$getSecond()).$getId()));
-                    $windyReq.$addEdge1((($temp.$getEndpoints()).$getFirst()).$getId(), (($temp.$getEndpoints()).$getSecond()).$getId(), $rt_s(293), $temp.$getCost(), $temp.$getReverseCost(), $i, 1);
+            c: {
+                while (true) {
+                    if ($i > $m)
+                        break c;
+                    $temp = $indexedWindyEdges.$get($i);
+                    if ($temp === null)
+                        break;
+                    if ($temp.$isRequired()) {
+                        $mreq = $mreq + 1 | 0;
+                        $edge1.$add2(jl_Integer_valueOf((($temp.$getEndpoints()).$getFirst()).$getId()));
+                        $edge2.$add2(jl_Integer_valueOf((($temp.$getEndpoints()).$getSecond()).$getId()));
+                        $windyReq.$addEdge1((($temp.$getEndpoints()).$getFirst()).$getId(), (($temp.$getEndpoints()).$getSecond()).$getId(), $rt_s(302), $temp.$getCost(), $temp.$getReverseCost(), $i, 1);
+                    }
+                    $i = $i + 1 | 0;
                 }
-                $i = $i + 1 | 0;
+                $rt_throw(jl_IllegalStateException__init_((((((jl_StringBuilder__init_()).$append4($rt_s(306))).$append2($i)).$append4($rt_s(304))).$append2($m)).$toString()));
             }
-            var$13 = $n + 1 | 0;
-            $component = $rt_createIntArray(var$13);
-            var$15 = $mreq + 1 | 0;
-            $nodei = $rt_createIntArray(var$15);
-            $nodej = $rt_createIntArray(var$15);
+            osi_WRPPSolver_Win_LOGGER.$info((((jl_StringBuilder__init_()).$append4($rt_s(307))).$append2($mreq)).$toString());
+            var$14 = $n + 1 | 0;
+            $component = $rt_createIntArray(var$14);
+            var$16 = $mreq + 1 | 0;
+            $nodei = $rt_createIntArray(var$16);
+            $nodej = $rt_createIntArray(var$16);
             $e1 = $edge1.$toArray($rt_createArray(jl_Integer, $edge1.$size()));
             $e2 = $edge2.$toArray($rt_createArray(jl_Integer, $edge2.$size()));
             $i = 1;
             while ($i <= $mreq) {
-                var$20 = $nodej.data;
-                var$21 = $e2.data;
+                var$21 = $nodej.data;
+                var$22 = $e2.data;
                 $nodei.data[$i] = $e1.data[$i].$intValue();
-                var$20[$i] = var$21[$i].$intValue();
+                var$21[$i] = var$22[$i].$intValue();
                 $i = $i + 1 | 0;
             }
         } catch ($$e) {
@@ -6714,12 +6724,13 @@ osi_WRPPSolver_Win_connectRequiredComponents = $g => {
                 throw $$e;
             }
         }
-        b: {
+        d: {
             try {
-                var$23 = $component.data;
+                var$24 = $component.data;
+                osi_WRPPSolver_Win_LOGGER.$info((((((jl_StringBuilder__init_()).$append4($rt_s(308))).$append2($n)).$append4($rt_s(309))).$append2($mreq)).$toString());
                 ogu_CommonAlgorithms_connectedComponents($n, $mreq, $nodei, $nodej, $component);
-                if (var$23[0] != 1)
-                    break b;
+                if (var$24[0] != 1)
+                    break d;
             } catch ($$e) {
                 $$je = $rt_wrapException($$e);
                 if ($$je instanceof jl_Exception) {
@@ -6734,11 +6745,11 @@ osi_WRPPSolver_Win_connectRequiredComponents = $g => {
         try {
             $extraComponents = ju_HashSet__init_();
             $extraVertices = ju_HashSet__init_();
-            var$26 = ($windyReq.$getVertices0()).$iterator();
-            while (var$26.$hasNext()) {
-                $wv = var$26.$next();
+            var$27 = ($windyReq.$getVertices0()).$iterator();
+            while (var$27.$hasNext()) {
+                $wv = var$27.$next();
                 if (!$wv.$getDegree()) {
-                    $extraComponents.$add2(jl_Integer_valueOf(var$23[$wv.$getId()]));
+                    $extraComponents.$add2(jl_Integer_valueOf(var$24[$wv.$getId()]));
                     $extraVertices.$add2(jl_Integer_valueOf($wv.$getId()));
                 }
             }
@@ -6751,15 +6762,16 @@ osi_WRPPSolver_Win_connectRequiredComponents = $g => {
                 throw $$e;
             }
         }
-        c: {
+        e: {
             try {
-                $dist = $rt_createIntArray(var$13);
-                $path = $rt_createIntArray(var$13);
-                $edgePath = $rt_createIntArray(var$13);
+                osi_WRPPSolver_Win_LOGGER.$info((((jl_StringBuilder__init_()).$append4($rt_s(310))).$append2($extraComponents.$size())).$toString());
+                $dist = $rt_createIntArray(var$14);
+                $path = $rt_createIntArray(var$14);
+                $edgePath = $rt_createIntArray(var$14);
                 $mstGraph = ogi_UndirectedGraph__init_();
-                $mstN = var$23[0] - $extraComponents.$size() | 0;
+                $mstN = var$24[0] - $extraComponents.$size() | 0;
                 if ($mstN > 1)
-                    break c;
+                    break e;
             } catch ($$e) {
                 $$je = $rt_wrapException($$e);
                 if ($$je instanceof jl_Exception) {
@@ -6774,13 +6786,14 @@ osi_WRPPSolver_Win_connectRequiredComponents = $g => {
         try {
             $i = 1;
             while ($i <= $mstN) {
-                $mstGraph.$addVertex2(ovi_UndirectedVertex__init_($rt_s(293)));
+                $mstGraph.$addVertex2(ovi_UndirectedVertex__init_($rt_s(302)));
                 $i = $i + 1 | 0;
             }
+            osi_WRPPSolver_Win_LOGGER.$info((((jl_StringBuilder__init_()).$append4($rt_s(311))).$append2($mstN)).$toString());
             $realComponents = ju_ArrayList__init_();
             $realComponents.$add2(jl_Integer_valueOf(0));
             $i = 1;
-            while ($i <= var$23[0]) {
+            while ($i <= var$24[0]) {
                 if (!$extraComponents.$contains0(jl_Integer_valueOf($i)))
                     $realComponents.$add2(jl_Integer_valueOf($i));
                 $i = $i + 1 | 0;
@@ -6789,20 +6802,20 @@ osi_WRPPSolver_Win_connectRequiredComponents = $g => {
             $minCostPathNodes = ju_HashMap__init_();
             $i = 1;
             while ($i <= $n) {
-                d: {
+                f: {
                     if (!$extraVertices.$contains0(jl_Integer_valueOf($i))) {
                         ogu_CommonAlgorithms_dijkstrasAlgorithm($g, $i, $dist, $path, $edgePath);
-                        $comp1 = $realComponents.$indexOf0(jl_Integer_valueOf(var$23[$i]));
+                        $comp1 = $realComponents.$indexOf0(jl_Integer_valueOf(var$24[$i]));
                         $j = 1;
                         while (true) {
                             if ($j > $n)
-                                break d;
+                                break f;
                             if (!$extraVertices.$contains0(jl_Integer_valueOf($j))) {
-                                $comp2 = $realComponents.$indexOf0(jl_Integer_valueOf(var$23[$j]));
-                                var$15 = $rt_compare($comp1, $comp2);
-                                if (var$15) {
+                                $comp2 = $realComponents.$indexOf0(jl_Integer_valueOf(var$24[$j]));
+                                var$14 = $rt_compare($comp1, $comp2);
+                                if (var$14) {
                                     $averagePathCost1 = jl_Double_valueOf(osi_WRPPSolver_Win_calculateAveragePathCost($g, $i, $j, $path, $edgePath));
-                                    $tempKey = var$15 >= 0 ? ogu_Pair__init_(jl_Integer_valueOf($comp2), jl_Integer_valueOf($comp1)) : ogu_Pair__init_(jl_Integer_valueOf($comp1), jl_Integer_valueOf($comp2));
+                                    $tempKey = var$14 >= 0 ? ogu_Pair__init_(jl_Integer_valueOf($comp2), jl_Integer_valueOf($comp1)) : ogu_Pair__init_(jl_Integer_valueOf($comp1), jl_Integer_valueOf($comp2));
                                     if (!($minCostPathVal.$containsKey($tempKey) && (2.0 * $averagePathCost1.$doubleValue() | 0) >= ($minCostPathVal.$get1($tempKey)).$intValue())) {
                                         $minCostPathVal.$put($tempKey, jl_Integer_valueOf(2.0 * $averagePathCost1.$doubleValue() | 0));
                                         $minCostPathNodes.$put($tempKey, ogu_Pair__init_(jl_Integer_valueOf($i), jl_Integer_valueOf($j)));
@@ -6815,19 +6828,19 @@ osi_WRPPSolver_Win_connectRequiredComponents = $g => {
                 }
                 $i = $i + 1 | 0;
             }
-            var$26 = ($minCostPathVal.$keySet()).$iterator();
-            while (var$26.$hasNext()) {
-                $key = var$26.$next();
-                $mstGraph.$addEdge2(($key.$getFirst()).$intValue(), ($key.$getSecond()).$intValue(), $rt_s(294), ($minCostPathVal.$get1($key)).$intValue());
+            var$42 = ($minCostPathVal.$keySet()).$iterator();
+            while (var$42.$hasNext()) {
+                $key = var$42.$next();
+                $mstGraph.$addEdge2(($key.$getFirst()).$intValue(), ($key.$getSecond()).$intValue(), $rt_s(312), ($minCostPathVal.$get1($key)).$intValue());
             }
             $mst = ogu_CommonAlgorithms_randomizedLowCostSpanningTree($mstGraph, 5);
-            var$23 = $mst.data;
-            $limi = var$23.length;
+            var$24 = $mst.data;
+            $limi = var$24.length;
             $mstEdges = $mstGraph.$getInternalEdgeMap();
             $i = 1;
             while ($i < $limi) {
-                e: {
-                    if (var$23[$i] == 1) {
+                g: {
+                    if (var$24[$i] == 1) {
                         $selected = $mstEdges.$get($i);
                         $comp1 = (($selected.$getEndpoints()).$getFirst()).$getId();
                         $comp2 = (($selected.$getEndpoints()).$getSecond()).$getId();
@@ -6837,12 +6850,12 @@ osi_WRPPSolver_Win_connectRequiredComponents = $g => {
                         $end = ($pathToAdd.$getSecond()).$intValue();
                         ogu_CommonAlgorithms_dijkstrasAlgorithm($g, $curr, $dist, $path, $edgePath);
                         while (true) {
-                            var$21 = $edgePath.data;
+                            var$22 = $edgePath.data;
                             $next = $path.data[$end];
-                            $toAdd = $indexedWindyEdges.$get(var$21[$end]);
-                            $windyReq.$addEdge1((($toAdd.$getEndpoints()).$getFirst()).$getId(), (($toAdd.$getEndpoints()).$getSecond()).$getId(), $rt_s(295), $toAdd.$getCost(), $toAdd.$getReverseCost(), var$21[$end], $toAdd.$isRequired());
+                            $toAdd = $indexedWindyEdges.$get(var$22[$end]);
+                            $windyReq.$addEdge1((($toAdd.$getEndpoints()).$getFirst()).$getId(), (($toAdd.$getEndpoints()).$getSecond()).$getId(), $rt_s(313), $toAdd.$getCost(), $toAdd.$getReverseCost(), var$22[$end], $toAdd.$isRequired());
                             if ($next == $curr)
-                                break e;
+                                break g;
                             $end = $next;
                         }
                     }
@@ -6930,7 +6943,7 @@ osi_WRPPSolver_Win_eliminateRedundantCycles = ($ans, $windyReq, $orig) => {
             $flowGraph = ogi_DirectedGraph__init_();
             $i = 1;
             while ($i <= $n) {
-                $flowGraph.$addVertex1(ovi_DirectedVertex__init_($rt_s(296)));
+                $flowGraph.$addVertex1(ovi_DirectedVertex__init_($rt_s(314)));
                 $i = $i + 1 | 0;
             }
             $i = 1;
@@ -6945,17 +6958,17 @@ osi_WRPPSolver_Win_eliminateRedundantCycles = ($ans, $windyReq, $orig) => {
                     $xij = $vdvConnections.$size();
                     $tempCost = ($vdvConnections.$get(0)).$getCost();
                     if ($xij >= 3 && $isReq) {
-                        $temp = $flowGraph.$constructEdge($dv.$getId(), $v.$getId(), $rt_s(297), (-2) * $tempCost | 0);
+                        $temp = $flowGraph.$constructEdge($dv.$getId(), $v.$getId(), $rt_s(315), (-2) * $tempCost | 0);
                         $temp.$setCapacity(jl_Math_floor(($xij - 1 | 0) / 2.0) | 0);
                         $flowGraph.$addEdge3($temp);
                     } else if ($xij >= 2 && !$isReq) {
-                        $temp = $flowGraph.$constructEdge($dv.$getId(), $v.$getId(), $rt_s(298), (-2) * $tempCost | 0);
+                        $temp = $flowGraph.$constructEdge($dv.$getId(), $v.$getId(), $rt_s(316), (-2) * $tempCost | 0);
                         $temp.$setCapacity(jl_Math_floor($xij / 2.0) | 0);
                         $flowGraph.$addEdge3($temp);
                     } else if ($xij > 0) {
                         $windyReqTemp = $windyReqEdges.$get(($vdvConnections.$get(0)).$getMatchId());
                         var$30 = $windyReqTemp.$getCost() != $tempCost ? $windyReqTemp.$getCost() - $tempCost | 0 : $windyReqTemp.$getReverseCost() - $tempCost | 0;
-                        $temp = $flowGraph.$constructEdge($dv.$getId(), $v.$getId(), $rt_s(299), var$30);
+                        $temp = $flowGraph.$constructEdge($dv.$getId(), $v.$getId(), $rt_s(317), var$30);
                         $temp.$setMatchId(($vdvConnections.$get(0)).$getMatchId());
                         $temp.$setCapacity($xij);
                         $flowGraph.$addEdge3($temp);
@@ -6974,7 +6987,7 @@ osi_WRPPSolver_Win_eliminateRedundantCycles = ($ans, $windyReq, $orig) => {
                     $temp = $flowArcs.$get($i);
                     $u1 = $ansVertices.$get(($temp.$getTail()).$getId());
                     $u2 = $ansVertices.$get(($temp.$getHead()).$getId());
-                    if (!(!($temp.$getLabel()).$equals($rt_s(297)) && !($temp.$getLabel()).$equals($rt_s(298)))) {
+                    if (!(!($temp.$getLabel()).$equals($rt_s(315)) && !($temp.$getLabel()).$equals($rt_s(316)))) {
                         $removeCandidates = ($u2.$getNeighbors0()).$get1($u1);
                         $j = 0;
                         while ($j < var$33[$i]) {
@@ -6995,14 +7008,14 @@ osi_WRPPSolver_Win_eliminateRedundantCycles = ($ans, $windyReq, $orig) => {
                         $replaceDir = $windyReqEdges.$get($changeDir.$getMatchId());
                         $cost = $changeDir.$getCost() != $replaceDir.$getCost() ? $replaceDir.$getCost() : $replaceDir.$getReverseCost();
                         if ($changeDir.$getSecondEndpointId() == 2 && $changeDir.$getFirstEndpointId() == 8)
-                            (jl_System_out()).$println1($rt_s(300));
-                        $ans.$addEdge4(($changeDir.$getHead()).$getId(), ($changeDir.$getTail()).$getId(), $rt_s(301), $cost, $replaceDir.$isRequired());
+                            (jl_System_out()).$println1($rt_s(318));
+                        $ans.$addEdge4(($changeDir.$getHead()).$getId(), ($changeDir.$getTail()).$getId(), $rt_s(319), $cost, $replaceDir.$isRequired());
                         $ans.$removeEdge($removeCandidates.$get(0));
                         $j = 1;
                         while (true) {
                             if ($j >= var$33[$i])
                                 break b;
-                            $ans.$addEdge4(($changeDir.$getHead()).$getId(), ($changeDir.$getTail()).$getId(), $rt_s(301), $cost, 0);
+                            $ans.$addEdge4(($changeDir.$getHead()).$getId(), ($changeDir.$getTail()).$getId(), $rt_s(319), $cost, 0);
                             $ans.$removeEdge($removeCandidates.$get(0));
                             $j = $j + 1 | 0;
                         }
@@ -7030,19 +7043,19 @@ osi_WRPPSolver_Win_eliminateRedundantCycles = ($ans, $windyReq, $orig) => {
                     $connectMe = ogi_WindyGraph__init_();
                     $i = 1;
                     while ($i <= $n) {
-                        $connectMe.$addVertex(ovi_WindyVertex__init_($rt_s(302)));
+                        $connectMe.$addVertex(ovi_WindyVertex__init_($rt_s(320)));
                         $i = $i + 1 | 0;
                     }
                     var$13 = ($ans.$getEdges0()).$iterator();
                     while (var$13.$hasNext()) {
                         $a = var$13.$next();
-                        $connectMe.$addEdge6(($a.$getTail()).$getId(), ($a.$getHead()).$getId(), $rt_s(302), 100 * $a.$getCost() | 0, 100 * $a.$getCost() | 0, 1);
+                        $connectMe.$addEdge6(($a.$getTail()).$getId(), ($a.$getHead()).$getId(), $rt_s(320), 100 * $a.$getCost() | 0, 100 * $a.$getCost() | 0, 1);
                     }
                     var$13 = ($orig.$getEdges0()).$iterator();
                     while (var$13.$hasNext()) {
                         $we = var$13.$next();
                         if (!$we.$isRequired())
-                            $connectMe.$addEdge6((($we.$getEndpoints()).$getFirst()).$getId(), (($we.$getEndpoints()).$getSecond()).$getId(), $rt_s(303), $we.$getCost(), $we.$getReverseCost(), $we.$isRequired());
+                            $connectMe.$addEdge6((($we.$getEndpoints()).$getFirst()).$getId(), (($we.$getEndpoints()).$getSecond()).$getId(), $rt_s(321), $we.$getCost(), $we.$getReverseCost(), $we.$isRequired());
                     }
                     $windyReq2 = osi_WRPPSolver_Win_connectRequiredComponents($connectMe);
                     var$13 = ($windyReq2.$getEdges0()).$iterator();
@@ -7051,8 +7064,8 @@ osi_WRPPSolver_Win_eliminateRedundantCycles = ($ans, $windyReq, $orig) => {
                             break c;
                         $we = var$13.$next();
                         if (!$we.$isRequired()) {
-                            $ans.$addEdge4((($we.$getEndpoints()).$getFirst()).$getId(), (($we.$getEndpoints()).$getSecond()).$getId(), $rt_s(304), $we.$getCost(), 0);
-                            $ans.$addEdge4((($we.$getEndpoints()).$getSecond()).$getId(), (($we.$getEndpoints()).$getFirst()).$getId(), $rt_s(305), $we.$getReverseCost(), 0);
+                            $ans.$addEdge4((($we.$getEndpoints()).$getFirst()).$getId(), (($we.$getEndpoints()).$getSecond()).$getId(), $rt_s(322), $we.$getCost(), 0);
+                            $ans.$addEdge4((($we.$getEndpoints()).$getSecond()).$getId(), (($we.$getEndpoints()).$getFirst()).$getId(), $rt_s(323), $we.$getReverseCost(), 0);
                         }
                     }
                 }
@@ -7089,7 +7102,7 @@ osi_WRPPSolver_Win_eliminateRedundantCycles = ($ans, $windyReq, $orig) => {
                                     $nextEdge = var$60[var$59];
                                     $origTemp = $origEdges.$get($nextEdge);
                                     $cost = (($origTemp.$getEndpoints()).$getFirst()).$getId() == $next ? $origTemp.$getCost() : $origTemp.$getReverseCost();
-                                    $ans.$addEdge4($next, var$59, $rt_s(306), $cost, 0);
+                                    $ans.$addEdge4($next, var$59, $rt_s(324), $cost, 0);
                                     if ($next == $startId)
                                         break d;
                                     var$59 = $next;
@@ -7109,7 +7122,7 @@ osi_WRPPSolver_Win_eliminateRedundantCycles = ($ans, $windyReq, $orig) => {
                                 $nextEdge = var$60[var$30];
                                 $origTemp = $origEdges.$get($nextEdge);
                                 $cost = (($origTemp.$getEndpoints()).$getFirst()).$getId() == $next ? $origTemp.$getCost() : $origTemp.$getReverseCost();
-                                $ans.$addEdge4($next, var$30, $rt_s(306), $cost, 0);
+                                $ans.$addEdge4($next, var$30, $rt_s(324), $cost, 0);
                                 if ($next == $startId)
                                     break e;
                                 var$30 = $next;
@@ -7130,7 +7143,7 @@ osi_WRPPSolver_Win_eliminateRedundantCycles = ($ans, $windyReq, $orig) => {
                                     $nextEdge = var$60[var$59];
                                     $origTemp = $origEdges.$get($nextEdge);
                                     $cost = (($origTemp.$getEndpoints()).$getFirst()).$getId() == $next ? $origTemp.$getCost() : $origTemp.$getReverseCost();
-                                    $ans.$addEdge4($next, var$59, $rt_s(306), $cost, 0);
+                                    $ans.$addEdge4($next, var$59, $rt_s(324), $cost, 0);
                                     if ($next == $startId)
                                         break f;
                                     var$59 = $next;
@@ -7178,23 +7191,23 @@ osi_WRPPSolver_Win_constructOptimalWindyTour = $g => {
                 $e = $windyEdges.$get($i);
                 $tempCost = jl_Math_abs($e.$getCost() - $e.$getReverseCost() | 0);
                 if ($e.$getCost() <= $e.$getReverseCost()) {
-                    $temp = oli_Arc__init_($rt_s(244), ogu_Pair__init_($flowVertices.$get((($e.$getEndpoints()).$getSecond()).$getId()), $flowVertices.$get((($e.$getEndpoints()).$getFirst()).$getId())), $tempCost);
+                    $temp = oli_Arc__init_($rt_s(245), ogu_Pair__init_($flowVertices.$get((($e.$getEndpoints()).$getSecond()).$getId()), $flowVertices.$get((($e.$getEndpoints()).$getFirst()).$getId())), $tempCost);
                     $temp.$setCapacity(2);
                     $temp.$setRequired($e.$isRequired());
                     $temp.$setMatchId($e.$getId());
                     $flowGraph.$addEdge3($temp);
                     var$11 = $temp.$getId();
                 } else {
-                    $temp = oli_Arc__init_($rt_s(244), ogu_Pair__init_($flowVertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $flowVertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), $tempCost);
+                    $temp = oli_Arc__init_($rt_s(245), ogu_Pair__init_($flowVertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $flowVertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), $tempCost);
                     $temp.$setCapacity(2);
                     $temp.$setRequired($e.$isRequired());
                     $temp.$setMatchId($e.$getId());
                     $flowGraph.$addEdge3($temp);
                     var$11 = $temp.$getId();
                 }
-                $flowGraph.$addEdge7(oli_Arc__init_($rt_s(244), ogu_Pair__init_($flowVertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $flowVertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), 2 * $e.$getCost() | 0), var$11);
+                $flowGraph.$addEdge7(oli_Arc__init_($rt_s(245), ogu_Pair__init_($flowVertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $flowVertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), 2 * $e.$getCost() | 0), var$11);
                 if ($e.$getFirstEndpointId() != $e.$getSecondEndpointId())
-                    $flowGraph.$addEdge7(oli_Arc__init_($rt_s(244), ogu_Pair__init_($flowVertices.$get((($e.$getEndpoints()).$getSecond()).$getId()), $flowVertices.$get((($e.$getEndpoints()).$getFirst()).$getId())), 2 * $e.$getReverseCost() | 0), var$11);
+                    $flowGraph.$addEdge7(oli_Arc__init_($rt_s(245), ogu_Pair__init_($flowVertices.$get((($e.$getEndpoints()).$getSecond()).$getId()), $flowVertices.$get((($e.$getEndpoints()).$getFirst()).$getId())), 2 * $e.$getReverseCost() | 0), var$11);
                 $i = $i + 1 | 0;
             }
         } catch ($$e) {
@@ -7216,9 +7229,9 @@ osi_WRPPSolver_Win_constructOptimalWindyTour = $g => {
                 while ($i <= $m) {
                     $e = $windyEdges.$get($i);
                     if ($e.$getCost() <= $e.$getReverseCost())
-                        $ans.$addEdge6((($e.$getEndpoints()).$getFirst()).$getId(), (($e.$getEndpoints()).$getSecond()).$getId(), $rt_s(307), $e.$getCost(), $e.$getId(), $e.$isRequired());
+                        $ans.$addEdge6((($e.$getEndpoints()).$getFirst()).$getId(), (($e.$getEndpoints()).$getSecond()).$getId(), $rt_s(325), $e.$getCost(), $e.$getId(), $e.$isRequired());
                     else
-                        $ans.$addEdge6((($e.$getEndpoints()).$getSecond()).$getId(), (($e.$getEndpoints()).$getFirst()).$getId(), $rt_s(307), $e.$getReverseCost(), $e.$getId(), $e.$isRequired());
+                        $ans.$addEdge6((($e.$getEndpoints()).$getSecond()).$getId(), (($e.$getEndpoints()).$getFirst()).$getId(), $rt_s(325), $e.$getReverseCost(), $e.$getId(), $e.$isRequired());
                     $i = $i + 1 | 0;
                 }
             } catch ($$e) {
@@ -7245,7 +7258,7 @@ osi_WRPPSolver_Win_constructOptimalWindyTour = $g => {
             $ans = ogi_DirectedGraph__init_();
             $i = 1;
             while ($i <= $n) {
-                $tempVertex = ovi_DirectedVertex__init_($rt_s(307));
+                $tempVertex = ovi_DirectedVertex__init_($rt_s(325));
                 $tempVertex.$setCoordinates(($gVertices.$get($i)).$getX(), ($gVertices.$get($i)).$getY());
                 $ans.$addVertex1($tempVertex);
                 $i = $i + 1 | 0;
@@ -7261,19 +7274,19 @@ osi_WRPPSolver_Win_constructOptimalWindyTour = $g => {
                     if (!$temp.$isCapacitySet()) {
                         $artificial = $flowEdges.$get($temp.$getMatchId());
                         if (($artificial.$getHead()).$getId() == ($temp.$getHead()).$getId() && var$19[$temp.$getMatchId()] == 2) {
-                            $ans.$addEdge6(($temp.$getTail()).$getId(), ($temp.$getHead()).$getId(), $rt_s(307), $temp.$getCost() / 2 | 0, $artificial.$getMatchId(), $artificial.$isRequired());
+                            $ans.$addEdge6(($temp.$getTail()).$getId(), ($temp.$getHead()).$getId(), $rt_s(325), $temp.$getCost() / 2 | 0, $artificial.$getMatchId(), $artificial.$isRequired());
                             $j = 1;
                             while ($j <= var$19[$i]) {
-                                $ans.$addEdge6(($temp.$getTail()).$getId(), ($temp.$getHead()).$getId(), $rt_s(307), $temp.$getCost() / 2 | 0, $artificial.$getMatchId(), 0);
+                                $ans.$addEdge6(($temp.$getTail()).$getId(), ($temp.$getHead()).$getId(), $rt_s(325), $temp.$getCost() / 2 | 0, $artificial.$getMatchId(), 0);
                                 $j = $j + 1 | 0;
                             }
                         } else if (($artificial.$getHead()).$getId() == ($temp.$getTail()).$getId() && !var$19[$temp.$getMatchId()]) {
-                            $ans.$addEdge6(($temp.$getTail()).$getId(), ($temp.$getHead()).$getId(), $rt_s(307), $temp.$getCost() / 2 | 0, $artificial.$getMatchId(), $artificial.$isRequired());
+                            $ans.$addEdge6(($temp.$getTail()).$getId(), ($temp.$getHead()).$getId(), $rt_s(325), $temp.$getCost() / 2 | 0, $artificial.$getMatchId(), $artificial.$isRequired());
                             $j = 1;
                             while (true) {
                                 if ($j > var$19[$i])
                                     break c;
-                                $ans.$addEdge6(($temp.$getTail()).$getId(), ($temp.$getHead()).$getId(), $rt_s(307), $temp.$getCost() / 2 | 0, $artificial.$getMatchId(), 0);
+                                $ans.$addEdge6(($temp.$getTail()).$getId(), ($temp.$getHead()).$getId(), $rt_s(325), $temp.$getCost() / 2 | 0, $artificial.$getMatchId(), 0);
                                 $j = $j + 1 | 0;
                             }
                         }
@@ -7282,7 +7295,7 @@ osi_WRPPSolver_Win_constructOptimalWindyTour = $g => {
                 $i = $i + 1 | 0;
             }
             if (!ogu_CommonAlgorithms_isEulerian($ans)) {
-                osi_WRPPSolver_Win_LOGGER.$error($rt_s(308));
+                osi_WRPPSolver_Win_LOGGER.$error($rt_s(326));
                 ogu_CommonAlgorithms_isEulerian($ans);
             }
             $arcSet = $ans.$getEdges0();
@@ -7292,7 +7305,7 @@ osi_WRPPSolver_Win_constructOptimalWindyTour = $g => {
                 $a = var$13.$next();
                 $cost = $cost + $a.$getCost() | 0;
             }
-            osi_WRPPSolver_Win_LOGGER.$debug((((jl_StringBuilder__init_()).$append4($rt_s(309))).$append2($cost)).$toString());
+            osi_WRPPSolver_Win_LOGGER.$debug((((jl_StringBuilder__init_()).$append4($rt_s(327))).$append2($cost)).$toString());
         } catch ($$e) {
             $$je = $rt_wrapException($$e);
             if ($$je instanceof jl_Exception) {
@@ -7322,7 +7335,7 @@ osi_WRPPSolver_Win_eulerAugment = ($fullGraph, $g) => {
             while (var$9.$hasNext()) {
                 $v = var$9.$next();
                 if (($v.$getDegree() % 2 | 0) == 1)
-                    $matchingGraph.$addVertex0(ovi_UndirectedVertex__init_($rt_s(245)), $v.$getId());
+                    $matchingGraph.$addVertex0(ovi_UndirectedVertex__init_($rt_s(246)), $v.$getId());
             }
             $oddVertices = $matchingGraph.$getVertices0();
             $traverseIj = ju_HashMap__init_();
@@ -7339,7 +7352,7 @@ osi_WRPPSolver_Win_eulerAugment = ($fullGraph, $g) => {
                     $candidateKey = ogu_Pair__init_(jl_Integer_valueOf($v2.$getId()), jl_Integer_valueOf($v.$getId()));
                     if (!($traverseIj.$containsKey($candidateKey) && $costCandidate >= ($traverseIj.$get1($candidateKey)).$getCost())) {
                         $traverseIj.$remove1($candidateKey);
-                        $traverseIj.$put(ogu_Pair__init_(jl_Integer_valueOf($v.$getId()), jl_Integer_valueOf($v2.$getId())), oli_Edge__init_($rt_s(246), ogu_Pair__init_($v, $v2), 2.0 * $costCandidate | 0));
+                        $traverseIj.$put(ogu_Pair__init_(jl_Integer_valueOf($v.$getId()), jl_Integer_valueOf($v2.$getId())), oli_Edge__init_($rt_s(247), ogu_Pair__init_($v, $v2), 2.0 * $costCandidate | 0));
                     }
                 }
             }
@@ -7366,14 +7379,14 @@ osi_WRPPSolver_Win_eulerAugment = ($fullGraph, $g) => {
                     $next = $path.data[$end];
                     $nextEdge = var$25[$end];
                     $temp = $indexedEdges.$get($nextEdge);
-                    $g.$addEdge1((($temp.$getEndpoints()).$getFirst()).$getId(), (($temp.$getEndpoints()).$getSecond()).$getId(), $rt_s(247), $temp.$getCost(), $temp.$getReverseCost(), $nextEdge, $temp.$isRequired());
+                    $g.$addEdge1((($temp.$getEndpoints()).$getFirst()).$getId(), (($temp.$getEndpoints()).$getSecond()).$getId(), $rt_s(248), $temp.$getCost(), $temp.$getReverseCost(), $nextEdge, $temp.$isRequired());
                     if ($next == $curr)
                         break;
                     $end = $next;
                 }
             }
             if (!ogu_CommonAlgorithms_isEulerian0($g))
-                osi_WRPPSolver_Win_LOGGER.$error($rt_s(310));
+                osi_WRPPSolver_Win_LOGGER.$error($rt_s(328));
             break a;
         } catch ($$e) {
             $$je = $rt_wrapException($$e);
@@ -7443,7 +7456,7 @@ osi_WRPPSolver_Win_solvePseudoMinCostFlow = $g => {
                         var$5 = $temp.$getMatchId();
                         var$22[var$5] = var$22[var$5] - $maxFlow | 0;
                         if (!var$21[$temp.$getMatchId()]) {
-                            $temp2 = oli_Arc__init_($rt_s(311), ogu_Pair__init_($temp.$getHead(), $temp.$getTail()),  -$temp.$getCost() | 0);
+                            $temp2 = oli_Arc__init_($rt_s(329), ogu_Pair__init_($temp.$getHead(), $temp.$getTail()),  -$temp.$getCost() | 0);
                             $temp2.$setCapacity($maxFlow);
                             $copy.$addEdge7($temp2, $temp.$getMatchId());
                             var$21[$temp.$getMatchId()] = $temp2.$getId();
@@ -7460,7 +7473,7 @@ osi_WRPPSolver_Win_solvePseudoMinCostFlow = $g => {
                     } else {
                         var$21 = $realIds.data;
                         if (var$21[$temp.$getMatchId()] != $temp.$getId())
-                            osi_WRPPSolver_Win_LOGGER.$error($rt_s(312));
+                            osi_WRPPSolver_Win_LOGGER.$error($rt_s(330));
                         else {
                             var$22 = $ans.data;
                             var$5 = $temp.$getMatchId();
@@ -7469,7 +7482,7 @@ osi_WRPPSolver_Win_solvePseudoMinCostFlow = $g => {
                                 $temp2 = $flowArcs.$get(var$20[$temp.$getMatchId()]);
                                 $temp2.$setCapacity($temp2.$getCapacity() + $maxFlow | 0);
                             } else {
-                                $temp2 = oli_Arc__init_($rt_s(311), ogu_Pair__init_($temp.$getHead(), $temp.$getTail()),  -$temp.$getCost() | 0);
+                                $temp2 = oli_Arc__init_($rt_s(329), ogu_Pair__init_($temp.$getHead(), $temp.$getTail()),  -$temp.$getCost() | 0);
                                 $temp2.$setCapacity($maxFlow);
                                 $copy.$addEdge7($temp2, $temp.$getMatchId());
                                 var$20[$temp.$getMatchId()] = $temp2.$getId();
@@ -7559,14 +7572,26 @@ osi_WRPPSolver_Win_repairSolution = ($dg, $wg) => {
     $e.$printStackTrace0();
 },
 osi_WRPPSolver_Win_calculateAveragePathCost = ($g, $i, $j, $path, $edgePath) => {
-    let $ans, $indexedWindyEdges, var$8, $next, $temp;
+    let $ans, $indexedWindyEdges, $next, $edgeId, $temp;
     osi_WRPPSolver_Win_$callClinit();
     $ans = 0;
     $indexedWindyEdges = $g.$getInternalEdgeMap();
     while (true) {
-        var$8 = $edgePath.data;
         $next = $path.data[$j];
-        $temp = $indexedWindyEdges.$get(var$8[$j]);
+        if ($next <= 0 && $j != $i) {
+            osi_WRPPSolver_Win_LOGGER.$error((((((((jl_StringBuilder__init_()).$append4($rt_s(331))).$append2($i)).$append4($rt_s(332))).$append2($j)).$append4($rt_s(333))).$append2($next)).$toString());
+            $rt_throw(jl_IllegalStateException__init_($rt_s(334)));
+        }
+        $edgeId = $edgePath.data[$j];
+        if ($edgeId <= 0) {
+            osi_WRPPSolver_Win_LOGGER.$error((((((((((jl_StringBuilder__init_()).$append4($rt_s(335))).$append2($i)).$append4($rt_s(332))).$append2($j)).$append4($rt_s(333))).$append2($next)).$append4($rt_s(336))).$append2($edgeId)).$toString());
+            $rt_throw(jl_IllegalStateException__init_($rt_s(337)));
+        }
+        $temp = $indexedWindyEdges.$get($edgeId);
+        if ($temp === null) {
+            osi_WRPPSolver_Win_LOGGER.$error((((((((jl_StringBuilder__init_()).$append4($rt_s(338))).$append2($edgeId)).$append4($rt_s(339))).$append2($i)).$append4($rt_s(332))).$append2($j)).$toString());
+            $rt_throw(jl_IllegalStateException__init_((((jl_StringBuilder__init_()).$append4($rt_s(340))).$append2($edgeId)).$toString()));
+        }
         $ans = $ans + ($temp.$getCost() + $temp.$getReverseCost() | 0) | 0;
         if ($next == $i)
             break;
@@ -7622,7 +7647,7 @@ osi_WRPPSolver_Win_getProblemAttributes = $this => {
     return var$1;
 },
 osi_WRPPSolver_Win_getSolverName = $this => {
-    return $rt_s(313);
+    return $rt_s(341);
 },
 osi_WRPPSolver_Win_checkGraphRequirements = $this => {
     let $mGraph;
@@ -7730,10 +7755,10 @@ gt_TIntArrayList_sort = $this => {
 };
 function jur_AbstractCharClass$LazyJavaLetter$1() {
     jur_AbstractCharClass.call(this);
-    this.$this$027 = null;
+    this.$this$026 = null;
 }
 let jur_AbstractCharClass$LazyJavaLetter$1__init_ = ($this, $this$0) => {
-    $this.$this$027 = $this$0;
+    $this.$this$026 = $this$0;
     jur_AbstractCharClass__init_($this);
 },
 jur_AbstractCharClass$LazyJavaLetter$1__init_0 = var_0 => {
@@ -7771,10 +7796,10 @@ jur_ReluctantQuantifierSet_matches = ($this, $stringIndex, $testString, $matchRe
 otji_JS = $rt_classWithoutFields();
 function jur_AbstractCharClass$LazyJavaUnicodeIdentifierStart$1() {
     jur_AbstractCharClass.call(this);
-    this.$this$037 = null;
+    this.$this$036 = null;
 }
 let jur_AbstractCharClass$LazyJavaUnicodeIdentifierStart$1__init_ = ($this, $this$0) => {
-    $this.$this$037 = $this$0;
+    $this.$this$036 = $this$0;
     jur_AbstractCharClass__init_($this);
 },
 jur_AbstractCharClass$LazyJavaUnicodeIdentifierStart$1__init_0 = var_0 => {
@@ -8133,7 +8158,7 @@ jur_PositiveLookBehind_hasConsumed = ($this, $matchResult) => {
     return 0;
 },
 jur_PositiveLookBehind_getName = $this => {
-    return $rt_s(314);
+    return $rt_s(342);
 },
 ju_Comparator$NaturalOrder = $rt_classWithoutFields(),
 ju_Comparator$NaturalOrder_INSTANCE = null,
@@ -8221,7 +8246,7 @@ jur_SequenceSet_getName = $this => {
     let var$1, var$2;
     var$1 = $this.$string;
     var$2 = jl_StringBuilder__init_();
-    jl_StringBuilder_append(jl_StringBuilder_append(var$2, $rt_s(315)), var$1);
+    jl_StringBuilder_append(jl_StringBuilder_append(var$2, $rt_s(343)), var$1);
     return jl_StringBuilder_toString(var$2);
 },
 jur_SequenceSet_first = ($this, $set) => {
@@ -8349,7 +8374,7 @@ jur_EOISet_hasConsumed = ($this, $matchResult) => {
     return 0;
 },
 jur_EOISet_getName = $this => {
-    return $rt_s(316);
+    return $rt_s(344);
 },
 oe_GraphInfeasibleException = $rt_classWithoutFields(jl_Exception),
 oe_GraphInfeasibleException__init_ = $this => {
@@ -8497,7 +8522,7 @@ jur_MatchResultImpl_setEnterCounter = ($this, $setCounter, $value) => {
 },
 jur_MatchResultImpl_checkGroup = ($this, $group) => {
     if (!$this.$valid)
-        $rt_throw(jl_IllegalStateException__init_());
+        $rt_throw(jl_IllegalStateException__init_0());
     if ($group >= 0 && $group < $this.$groupCount0)
         return;
     $rt_throw(jl_IndexOutOfBoundsException__init_2(jl_String_valueOf0($group)));
@@ -8595,7 +8620,7 @@ ju_HashMap$AbstractMapIterator_makeNext = $this => {
     let var$1, var$2;
     ju_HashMap$AbstractMapIterator_checkConcurrentMod($this);
     if (!$this.$hasNext())
-        $rt_throw(ju_NoSuchElementException__init_());
+        $rt_throw(ju_NoSuchElementException__init_0());
     if ($this.$futureEntry === null) {
         var$1 = $this.$associatedMap.$elementData.data;
         var$2 = $this.$position;
@@ -8649,8 +8674,8 @@ osi_MCPPSolver_Frederickson_largeCycles = ($input, $U) => {
             $inputN = ($input.$getVertices0()).$size();
             $i = 1;
             while ($i <= $inputN) {
-                $G1.$addVertex0(ovi_UndirectedVertex__init_($rt_s(317)), $i);
-                $G2.$addVertex0(ovi_UndirectedVertex__init_($rt_s(317)), $i);
+                $G1.$addVertex0(ovi_UndirectedVertex__init_($rt_s(345)), $i);
+                $G2.$addVertex0(ovi_UndirectedVertex__init_($rt_s(345)), $i);
                 $i = $i + 1 | 0;
             }
             $g1Vertices = $G1.$getInternalVertexMap();
@@ -8659,7 +8684,7 @@ osi_MCPPSolver_Frederickson_largeCycles = ($input, $U) => {
             $i = 0;
             while ($i < $uSize) {
                 $e = $U.$get($i);
-                $G1.$addEdge0(oli_Edge__init_($rt_s(306), ogu_Pair__init_($g1Vertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $g1Vertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), $e.$getCost()));
+                $G1.$addEdge0(oli_Edge__init_($rt_s(324), ogu_Pair__init_($g1Vertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $g1Vertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), $e.$getCost()));
                 $i = $i + 1 | 0;
             }
             $inputEdges = $input.$getInternalEdgeMap();
@@ -8668,7 +8693,7 @@ osi_MCPPSolver_Frederickson_largeCycles = ($input, $U) => {
             while ($i <= $edgesSize) {
                 $e = $inputEdges.$get($i);
                 if (!$e.$isDirected()) {
-                    $G2.$addEdge0(oli_Edge__init_($rt_s(306), ogu_Pair__init_($g2Vertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $g2Vertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), $e.$getCost()));
+                    $G2.$addEdge0(oli_Edge__init_($rt_s(324), ogu_Pair__init_($g2Vertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $g2Vertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), $e.$getCost()));
                     $maxCost = $maxCost + $e.$getCost() | 0;
                 }
                 $i = $i + 1 | 0;
@@ -8688,7 +8713,7 @@ osi_MCPPSolver_Frederickson_largeCycles = ($input, $U) => {
             $matchingGraph = ogi_UndirectedGraph__init_();
             $i = 0;
             while ($i < $oddVertexIndices.$size()) {
-                $matchingGraph.$addVertex0(ovi_UndirectedVertex__init_($rt_s(318)), ($oddVertexIndices.$get($i)).$intValue());
+                $matchingGraph.$addVertex0(ovi_UndirectedVertex__init_($rt_s(346)), ($oddVertexIndices.$get($i)).$intValue());
                 $i = $i + 1 | 0;
             }
             $matchingVertices = $matchingGraph.$getInternalVertexMap();
@@ -8705,9 +8730,9 @@ osi_MCPPSolver_Frederickson_largeCycles = ($input, $U) => {
                         var$27 = $dist.data;
                         $u2 = $matchingVertices.$get($j);
                         if (var$27[$u1.$getMatchId()].data[$u2.$getMatchId()] == 2147483647)
-                            $matchingGraph.$addEdge0(oli_Edge__init_($rt_s(319), ogu_Pair__init_($u1, $u2), $maxCost));
+                            $matchingGraph.$addEdge0(oli_Edge__init_($rt_s(347), ogu_Pair__init_($u1, $u2), $maxCost));
                         else
-                            $matchingGraph.$addEdge0(oli_Edge__init_($rt_s(319), ogu_Pair__init_($u1, $u2), var$27[$u1.$getMatchId()].data[$u2.$getMatchId()]));
+                            $matchingGraph.$addEdge0(oli_Edge__init_($rt_s(347), ogu_Pair__init_($u1, $u2), var$27[$u1.$getMatchId()].data[$u2.$getMatchId()]));
                     }
                     $j = $j + 1 | 0;
                 }
@@ -8725,7 +8750,7 @@ osi_MCPPSolver_Frederickson_largeCycles = ($input, $U) => {
                     var$34 = var$33[$curr].data[var$18];
                     $u = ($input.$getInternalVertexMap()).$get($curr);
                     $v = ($input.$getInternalVertexMap()).$get(var$18);
-                    $U.$add2(oli_MixedEdge__init_($rt_s(320), ogu_Pair__init_($u, $v), var$34, 0));
+                    $U.$add2(oli_MixedEdge__init_($rt_s(348), ogu_Pair__init_($u, $v), var$34, 0));
                     if (var$18 == $end)
                         break;
                     $curr = var$18;
@@ -8753,14 +8778,14 @@ osi_MCPPSolver_Frederickson_evenParity = ($input, $U, $M, $inMdubPrime) => {
             $temp = ogi_MixedGraph__init_();
             $i = 1;
             while ($i <= ($input.$getVertices0()).$size()) {
-                $temp.$addVertex0(ovi_MixedVertex__init_($rt_s(321)), $i);
+                $temp.$addVertex0(ovi_MixedVertex__init_($rt_s(349)), $i);
                 $i = $i + 1 | 0;
             }
             $tempVertices = $temp.$getInternalVertexMap();
             $i = 0;
             while ($i < $U.$size()) {
                 $e = $U.$get($i);
-                $temp.$addEdge7(oli_MixedEdge__init_($rt_s(322), ogu_Pair__init_($tempVertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $tempVertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), $e.$getCost(), 0), $i);
+                $temp.$addEdge7(oli_MixedEdge__init_($rt_s(350), ogu_Pair__init_($tempVertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $tempVertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), $e.$getCost(), 0), $i);
                 $i = $i + 1 | 0;
             }
             $Vprime = ju_ArrayList__init_();
@@ -8774,14 +8799,14 @@ osi_MCPPSolver_Frederickson_evenParity = ($input, $U, $M, $inMdubPrime) => {
             $temp2Vertices = $temp2.$getInternalVertexMap();
             $i = 1;
             while ($i <= ($input.$getVertices0()).$size()) {
-                $temp2.$addVertex0(ovi_MixedVertex__init_($rt_s(321)), $i);
+                $temp2.$addVertex0(ovi_MixedVertex__init_($rt_s(349)), $i);
                 $i = $i + 1 | 0;
             }
             $i = 0;
             while ($i < $M.$size()) {
                 if (($inMdubPrime.$get($i)).$booleanValue()) {
                     $e = $M.$get($i);
-                    $temp2.$addEdge7(oli_MixedEdge__init_($rt_s(323), ogu_Pair__init_($temp2Vertices.$get(($e.$getTail0()).$getId()), $temp2Vertices.$get(($e.$getHead0()).$getId())), $e.$getCost(), 0), $i);
+                    $temp2.$addEdge7(oli_MixedEdge__init_($rt_s(351), ogu_Pair__init_($temp2Vertices.$get(($e.$getTail0()).$getId()), $temp2Vertices.$get(($e.$getHead0()).$getId())), $e.$getCost(), 0), $i);
                 }
                 $i = $i + 1 | 0;
             }
@@ -8804,7 +8829,7 @@ osi_MCPPSolver_Frederickson_evenParity = ($input, $U, $M, $inMdubPrime) => {
                                 $temp2.$removeEdge0($currEdge);
                                 continue;
                             }
-                            $Mprime.$add2(oli_MixedEdge__init_($rt_s(324), ogu_Pair__init_($inputVertices.$get((($currEdge.$getEndpoints()).$getFirst()).$getId()), $inputVertices.$get((($currEdge.$getEndpoints()).$getSecond()).$getId())), $currEdge.$getCost(), 1));
+                            $Mprime.$add2(oli_MixedEdge__init_($rt_s(352), ogu_Pair__init_($inputVertices.$get((($currEdge.$getEndpoints()).$getFirst()).$getId()), $inputVertices.$get((($currEdge.$getEndpoints()).$getSecond()).$getId())), $currEdge.$getCost(), 1));
                             var$12 = ($currEdge.$getEndpoints()).$getSecond();
                             $temp2.$removeEdge0($currEdge);
                         }
@@ -8816,12 +8841,12 @@ osi_MCPPSolver_Frederickson_evenParity = ($input, $U, $M, $inMdubPrime) => {
                             $currEdge = ((($currNeighbors.$values()).$iterator()).$next()).$get(0);
                             $U.$set0($currEdge.$getMatchId(), null);
                             if (!$curr.$equals(($currEdge.$getEndpoints()).$getFirst())) {
-                                $Mprime.$add2(oli_MixedEdge__init_($rt_s(325), ogu_Pair__init_($inputVertices.$get((($currEdge.$getEndpoints()).$getSecond()).$getId()), $inputVertices.$get((($currEdge.$getEndpoints()).$getFirst()).$getId())), $currEdge.$getCost(), 1));
+                                $Mprime.$add2(oli_MixedEdge__init_($rt_s(353), ogu_Pair__init_($inputVertices.$get((($currEdge.$getEndpoints()).$getSecond()).$getId()), $inputVertices.$get((($currEdge.$getEndpoints()).$getFirst()).$getId())), $currEdge.$getCost(), 1));
                                 $curr = ($currEdge.$getEndpoints()).$getFirst();
                                 $temp.$removeEdge0($currEdge);
                                 continue;
                             }
-                            $Mprime.$add2(oli_MixedEdge__init_($rt_s(325), ogu_Pair__init_($inputVertices.$get((($currEdge.$getEndpoints()).$getFirst()).$getId()), $inputVertices.$get((($currEdge.$getEndpoints()).$getSecond()).$getId())), $currEdge.$getCost(), 1));
+                            $Mprime.$add2(oli_MixedEdge__init_($rt_s(353), ogu_Pair__init_($inputVertices.$get((($currEdge.$getEndpoints()).$getFirst()).$getId()), $inputVertices.$get((($currEdge.$getEndpoints()).$getSecond()).$getId())), $currEdge.$getCost(), 1));
                             $curr = ($currEdge.$getEndpoints()).$getSecond();
                             $temp.$removeEdge0($currEdge);
                         }
@@ -8871,14 +8896,14 @@ osi_MCPPSolver_Frederickson_evenDegree = $input => {
             $setup = ogi_UndirectedGraph__init_();
             $i = 1;
             while ($i < (($input.$getVertices0()).$size() + 1 | 0)) {
-                $setup.$addVertex0(ovi_UndirectedVertex__init_($rt_s(326)), $i);
+                $setup.$addVertex0(ovi_UndirectedVertex__init_($rt_s(354)), $i);
                 $i = $i + 1 | 0;
             }
             $indexedVertices = $setup.$getInternalVertexMap();
             var$5 = ($input.$getEdges0()).$iterator();
             while (var$5.$hasNext()) {
                 $e = var$5.$next();
-                $setup.$addEdge7(oli_Edge__init_($rt_s(326), ogu_Pair__init_($indexedVertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $indexedVertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), $e.$getCost()), $e.$getId());
+                $setup.$addEdge7(oli_Edge__init_($rt_s(354), ogu_Pair__init_($indexedVertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $indexedVertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), $e.$getCost()), $e.$getId());
             }
             $n = ($setup.$getVertices0()).$size();
             var$8 = $n + 1 | 0;
@@ -8891,7 +8916,7 @@ osi_MCPPSolver_Frederickson_evenDegree = $input => {
             while (var$5.$hasNext()) {
                 $v = var$5.$next();
                 if (($v.$getDegree() % 2 | 0) == 1)
-                    $matchingGraph.$addVertex0(ovi_UndirectedVertex__init_($rt_s(245)), $v.$getId());
+                    $matchingGraph.$addVertex0(ovi_UndirectedVertex__init_($rt_s(246)), $v.$getId());
             }
             $oddVertices = $matchingGraph.$getVertices0();
             var$15 = $oddVertices.$iterator();
@@ -8903,7 +8928,7 @@ osi_MCPPSolver_Frederickson_evenDegree = $input => {
                     if ($v.$getId() <= $v2.$getId())
                         continue;
                     var$18 = $dist.data;
-                    $matchingGraph.$addEdge0(oli_Edge__init_($rt_s(246), ogu_Pair__init_($v, $v2), var$18[$v.$getMatchId()].data[$v2.$getMatchId()]));
+                    $matchingGraph.$addEdge0(oli_Edge__init_($rt_s(247), ogu_Pair__init_($v, $v2), var$18[$v.$getMatchId()].data[$v2.$getMatchId()]));
                 }
             }
             $matchingSolution = ogu_CommonAlgorithms_minCostMatching($matchingGraph);
@@ -8918,7 +8943,7 @@ osi_MCPPSolver_Frederickson_evenDegree = $input => {
                     var$8 = $path.data[$curr].data[$end];
                     var$26 = var$25[$curr].data[$end];
                     $e = ($input.$getInternalEdgeMap()).$get(($setupEdges.$get(var$26)).$getMatchId());
-                    $input.$addEdge8(oli_MixedEdge__init_($rt_s(327), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), $e.$getCost(), $e.$isDirected()));
+                    $input.$addEdge8(oli_MixedEdge__init_($rt_s(355), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), $e.$getCost(), $e.$isDirected()));
                     if (var$8 == $end)
                         break;
                     $curr = var$8;
@@ -8945,7 +8970,7 @@ osi_MCPPSolver_Frederickson_inOutDegree = ($input, $U, $M, $inMdubPrime) => {
             $n = ($input.$getVertices0()).$size();
             $i = 1;
             while ($i < ($n + 1 | 0)) {
-                $setup.$addVertex0(ovi_DirectedVertex__init_($rt_s(317)), $i);
+                $setup.$addVertex0(ovi_DirectedVertex__init_($rt_s(345)), $i);
                 $i = $i + 1 | 0;
             }
             $inputEdges = $input.$getInternalEdgeMap();
@@ -8960,14 +8985,14 @@ osi_MCPPSolver_Frederickson_inOutDegree = ($input, $U, $M, $inMdubPrime) => {
                     break;
                 $e = $inputEdges.$get($i);
                 if ($e.$isDirected())
-                    $setup.$addEdge7(oli_Arc__init_($rt_s(317), ogu_Pair__init_($setupVertices.$get(($e.$getTail0()).$getId()), $setupVertices.$get(($e.$getHead0()).$getId())), $e.$getCost()), $e.$getId());
+                    $setup.$addEdge7(oli_Arc__init_($rt_s(345), ogu_Pair__init_($setupVertices.$get(($e.$getTail0()).$getId()), $setupVertices.$get(($e.$getHead0()).$getId())), $e.$getCost()), $e.$getId());
                 else {
-                    $setup.$addEdge7(oli_Arc__init_($rt_s(317), ogu_Pair__init_($setupVertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $setupVertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), $e.$getCost()), $e.$getId());
-                    $setup.$addEdge7(oli_Arc__init_($rt_s(317), ogu_Pair__init_($setupVertices.$get((($e.$getEndpoints()).$getSecond()).$getId()), $setupVertices.$get((($e.$getEndpoints()).$getFirst()).$getId())), $e.$getCost()), $e.$getId());
-                    $a = oli_Arc__init_($rt_s(317), ogu_Pair__init_($setupVertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $setupVertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), 0);
+                    $setup.$addEdge7(oli_Arc__init_($rt_s(345), ogu_Pair__init_($setupVertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $setupVertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), $e.$getCost()), $e.$getId());
+                    $setup.$addEdge7(oli_Arc__init_($rt_s(345), ogu_Pair__init_($setupVertices.$get((($e.$getEndpoints()).$getSecond()).$getId()), $setupVertices.$get((($e.$getEndpoints()).$getFirst()).$getId())), $e.$getCost()), $e.$getId());
+                    $a = oli_Arc__init_($rt_s(345), ogu_Pair__init_($setupVertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $setupVertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), 0);
                     $a.$setCapacity(1);
                     $setup.$addEdge7($a, $e.$getId());
-                    var$16 = oli_Arc__init_($rt_s(317), ogu_Pair__init_($setupVertices.$get((($e.$getEndpoints()).$getSecond()).$getId()), $setupVertices.$get((($e.$getEndpoints()).$getFirst()).$getId())), 0);
+                    var$16 = oli_Arc__init_($rt_s(345), ogu_Pair__init_($setupVertices.$get((($e.$getEndpoints()).$getSecond()).$getId()), $setupVertices.$get((($e.$getEndpoints()).$getFirst()).$getId())), 0);
                     var$16.$setCapacity(1);
                     $setup.$addEdge7(var$16, $e.$getId());
                 }
@@ -8989,19 +9014,19 @@ osi_MCPPSolver_Frederickson_inOutDegree = ($input, $U, $M, $inMdubPrime) => {
                 $a = $setupEdges.$get($i);
                 if ($e.$isDirected()) {
                     var$22 = $undirTraversals.data;
-                    $M.$add2(oli_MixedEdge__init_($rt_s(328), ogu_Pair__init_($e.$getTail0(), $e.$getHead0()), $e.$getCost(), 1));
+                    $M.$add2(oli_MixedEdge__init_($rt_s(356), ogu_Pair__init_($e.$getTail0(), $e.$getHead0()), $e.$getCost(), 1));
                     $inMdubPrime.$add2(jl_Boolean_valueOf(0));
                     var$22[$e.$getId()] = 2;
                     $j = 0;
                     while ($j < $flowanswer.data[$i]) {
-                        $M.$add2(oli_MixedEdge__init_($rt_s(328), ogu_Pair__init_($e.$getTail0(), $e.$getHead0()), $e.$getCost(), 1));
+                        $M.$add2(oli_MixedEdge__init_($rt_s(356), ogu_Pair__init_($e.$getTail0(), $e.$getHead0()), $e.$getCost(), 1));
                         $inMdubPrime.$add2(jl_Boolean_valueOf(1));
                         $j = $j + 1 | 0;
                     }
                 } else if (!$a.$isCapacitySet()) {
                     $j = 0;
                     while ($j < $flowanswer.data[$i]) {
-                        $M.$add2(oli_MixedEdge__init_($rt_s(328), ogu_Pair__init_($inputVertices.$get(($a.$getTail()).$getId()), $inputVertices.$get(($a.$getHead()).$getId())), $e.$getCost(), 1));
+                        $M.$add2(oli_MixedEdge__init_($rt_s(356), ogu_Pair__init_($inputVertices.$get(($a.$getTail()).$getId()), $inputVertices.$get(($a.$getHead()).$getId())), $e.$getCost(), 1));
                         $inMdubPrime.$add2(jl_Boolean_valueOf(1));
                         $j = $j + 1 | 0;
                     }
@@ -9012,7 +9037,7 @@ osi_MCPPSolver_Frederickson_inOutDegree = ($input, $U, $M, $inMdubPrime) => {
                         if (!var$22[$e.$getId()])
                             var$22[$e.$getId()] = (-1);
                         else {
-                            $U.$add2(oli_MixedEdge__init_($rt_s(328), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), $e.$getCost(), 0));
+                            $U.$add2(oli_MixedEdge__init_($rt_s(356), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), $e.$getCost(), 0));
                             var$22[$e.$getId()] = 2;
                         }
                     } else {
@@ -9020,7 +9045,7 @@ osi_MCPPSolver_Frederickson_inOutDegree = ($input, $U, $M, $inMdubPrime) => {
                         if (!var$22[$e.$getId()])
                             var$22[$e.$getId()] = 1;
                         else {
-                            $U.$add2(oli_MixedEdge__init_($rt_s(328), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), $e.$getCost(), 0));
+                            $U.$add2(oli_MixedEdge__init_($rt_s(356), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), $e.$getCost(), 0));
                             var$22[$e.$getId()] = 2;
                         }
                     }
@@ -9033,12 +9058,12 @@ osi_MCPPSolver_Frederickson_inOutDegree = ($input, $U, $M, $inMdubPrime) => {
             while ($i < $undirLength) {
                 $e = $inputEdges.$get($i);
                 if (!var$22[$i])
-                    $U.$add2(oli_MixedEdge__init_($rt_s(328), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), $e.$getCost(), 0));
+                    $U.$add2(oli_MixedEdge__init_($rt_s(356), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), $e.$getCost(), 0));
                 else if (var$22[$i] == 1) {
-                    $M.$add2(oli_MixedEdge__init_($rt_s(328), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), $e.$getCost(), 1));
+                    $M.$add2(oli_MixedEdge__init_($rt_s(356), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), $e.$getCost(), 1));
                     $inMdubPrime.$add2(jl_Boolean_valueOf(0));
                 } else if (var$22[$i] == (-1)) {
-                    $M.$add2(oli_MixedEdge__init_($rt_s(328), ogu_Pair__init_(($e.$getEndpoints()).$getSecond(), ($e.$getEndpoints()).$getFirst()), $e.$getCost(), 1));
+                    $M.$add2(oli_MixedEdge__init_($rt_s(356), ogu_Pair__init_(($e.$getEndpoints()).$getSecond(), ($e.$getEndpoints()).$getFirst()), $e.$getCost(), 1));
                     $inMdubPrime.$add2(jl_Boolean_valueOf(0));
                 }
                 $i = $i + 1 | 0;
@@ -9100,7 +9125,7 @@ osi_MCPPSolver_Frederickson_solve = $this => {
             b: {
                 $eulerTour = ori_Tour__init_();
                 if ($cost1 > $cost2) {
-                    osi_MCPPSolver_Frederickson_LOGGER.$debug((((jl_StringBuilder__init_()).$append4($rt_s(329))).$append16(ogu_CommonAlgorithms_isStronglyConnected($ans2))).$toString());
+                    osi_MCPPSolver_Frederickson_LOGGER.$debug((((jl_StringBuilder__init_()).$append4($rt_s(357))).$append16(ogu_CommonAlgorithms_isStronglyConnected($ans2))).$toString());
                     $tour = ogu_CommonAlgorithms_tryHierholzer0($ans2);
                     $indexedEdges = $ans2.$getInternalEdgeMap();
                     $tourSize = $tour.$size();
@@ -9112,7 +9137,7 @@ osi_MCPPSolver_Frederickson_solve = $this => {
                         $i = $i + 1 | 0;
                     }
                 }
-                osi_MCPPSolver_Frederickson_LOGGER.$debug((((jl_StringBuilder__init_()).$append4($rt_s(330))).$append16(ogu_CommonAlgorithms_isStronglyConnected($ans1))).$toString());
+                osi_MCPPSolver_Frederickson_LOGGER.$debug((((jl_StringBuilder__init_()).$append4($rt_s(358))).$append16(ogu_CommonAlgorithms_isStronglyConnected($ans1))).$toString());
                 $tour = ogu_CommonAlgorithms_tryHierholzer0($ans1);
                 $indexedEdges = $ans1.$getInternalEdgeMap();
                 $tourSize = $tour.$size();
@@ -9153,7 +9178,7 @@ osi_MCPPSolver_Frederickson_getProblemAttributes = $this => {
     return var$1;
 },
 osi_MCPPSolver_Frederickson_getSolverName = $this => {
-    return $rt_s(331);
+    return $rt_s(359);
 },
 osi_MCPPSolver_Frederickson_checkGraphRequirements = $this => {
     let $mGraph;
@@ -9193,7 +9218,7 @@ jur_UCIRangeSet_getName = $this => {
     var$1 = !$this.$alt3 ? $rt_s(29) : $rt_s(30);
     var$2 = $this.$chars1.$toString();
     var$3 = jl_StringBuilder__init_();
-    jl_StringBuilder_append(jl_StringBuilder_append(jl_StringBuilder_append(var$3, $rt_s(332)), var$1), var$2);
+    jl_StringBuilder_append(jl_StringBuilder_append(jl_StringBuilder_append(var$3, $rt_s(360)), var$1), var$2);
     return jl_StringBuilder_toString(var$3);
 },
 jl_AutoCloseable = $rt_classWithoutFields(0),
@@ -9347,7 +9372,7 @@ oc_MultiEdge_directForward = $this => {
     } else {
         if ($this.$myType !== oc_MultiEdge$EDGETYPE_D) {
             oc_MultiEdge_$callClinit();
-            oc_MultiEdge_LOGGER.$error($rt_s(333));
+            oc_MultiEdge_LOGGER.$error($rt_s(361));
             $rt_throw(oe_WrongEdgeTypeException__init_());
         }
         $this.$myType = oc_MultiEdge$EDGETYPE_B;
@@ -9367,7 +9392,7 @@ oc_MultiEdge_directBackward = $this => {
     } else {
         if ($this.$myType !== oc_MultiEdge$EDGETYPE_D) {
             oc_MultiEdge_$callClinit();
-            oc_MultiEdge_LOGGER.$error($rt_s(333));
+            oc_MultiEdge_LOGGER.$error($rt_s(361));
             $rt_throw(oe_WrongEdgeTypeException__init_());
         }
         $this.$myType = oc_MultiEdge$EDGETYPE_B;
@@ -9382,12 +9407,12 @@ oc_MultiEdge_addCopy = $this => {
     oc_MultiEdge$EDGETYPE_$callClinit();
     if (var$1 === oc_MultiEdge$EDGETYPE_A) {
         oc_MultiEdge_$callClinit();
-        oc_MultiEdge_LOGGER.$error($rt_s(334));
+        oc_MultiEdge_LOGGER.$error($rt_s(362));
         $rt_throw(oe_WrongEdgeTypeException__init_());
     }
     if ($this.$myType === oc_MultiEdge$EDGETYPE_D) {
         oc_MultiEdge_$callClinit();
-        oc_MultiEdge_LOGGER.$error($rt_s(335));
+        oc_MultiEdge_LOGGER.$error($rt_s(363));
         $rt_throw(oe_WrongEdgeTypeException__init_());
     }
     if ($this.$myType === oc_MultiEdge$EDGETYPE_B)
@@ -9402,7 +9427,7 @@ oc_MultiEdge_addReverseCopy = $this => {
     oc_MultiEdge$EDGETYPE_$callClinit();
     if (var$1 !== oc_MultiEdge$EDGETYPE_B) {
         oc_MultiEdge_$callClinit();
-        oc_MultiEdge_LOGGER.$error($rt_s(336));
+        oc_MultiEdge_LOGGER.$error($rt_s(364));
         $rt_throw(oe_WrongEdgeTypeException__init_());
     }
     $this.$numCopies = (-1);
@@ -9443,10 +9468,10 @@ oc_MultiEdge__clinit_ = () => {
 otji_JSWrapper = $rt_classWithoutFields();
 function jur_AbstractCharClass$LazyJavaJavaIdentifierPart$1() {
     jur_AbstractCharClass.call(this);
-    this.$this$010 = null;
+    this.$this$09 = null;
 }
 let jur_AbstractCharClass$LazyJavaJavaIdentifierPart$1__init_ = ($this, $this$0) => {
-    $this.$this$010 = $this$0;
+    $this.$this$09 = $this$0;
     jur_AbstractCharClass__init_($this);
 },
 jur_AbstractCharClass$LazyJavaJavaIdentifierPart$1__init_0 = var_0 => {
@@ -9731,7 +9756,7 @@ jur_MultiLineSOLSet_hasConsumed = ($this, $matchResult) => {
     return 0;
 },
 jur_MultiLineSOLSet_getName = $this => {
-    return $rt_s(337);
+    return $rt_s(365);
 },
 ju_List = $rt_classWithoutFields(0);
 function ju_AbstractList() {
@@ -9792,7 +9817,7 @@ function ju_LinkedList() {
     let a = this; ju_AbstractSequentialList.call(a);
     a.$firstEntry = null;
     a.$lastEntry = null;
-    a.$size2 = 0;
+    a.$size1 = 0;
 }
 let ju_LinkedList__init_0 = $this => {
     ju_AbstractSequentialList__init_($this);
@@ -9803,13 +9828,13 @@ ju_LinkedList__init_ = () => {
     return var_0;
 },
 ju_LinkedList_size = $this => {
-    return $this.$size2;
+    return $this.$size1;
 },
 ju_LinkedList_listIterator = ($this, $index) => {
     let $next, $i, $prev;
     if ($index < 0)
         $rt_throw(jl_IndexOutOfBoundsException__init_());
-    if ($index <= ($this.$size2 / 2 | 0)) {
+    if ($index <= ($this.$size1 / 2 | 0)) {
         $next = $this.$firstEntry;
         $i = 0;
         while ($i < $index) {
@@ -9818,11 +9843,11 @@ ju_LinkedList_listIterator = ($this, $index) => {
         }
         return ju_LinkedList$SequentialListIterator__init_($this, $next, $next === null ? null : $next.$previous, $index);
     }
-    if ($index > $this.$size2)
+    if ($index > $this.$size1)
         $rt_throw(jl_IndexOutOfBoundsException__init_());
     $prev = $this.$lastEntry;
     $i = $index;
-    while ($i < $this.$size2) {
+    while ($i < $this.$size1) {
         $prev = $prev.$previous;
         $i = $i + 1 | 0;
     }
@@ -9831,7 +9856,7 @@ ju_LinkedList_listIterator = ($this, $index) => {
 ju_LinkedList_remove = $this => {
     if (!$this.$isEmpty())
         return $this.$poll();
-    $rt_throw(ju_NoSuchElementException__init_());
+    $rt_throw(ju_NoSuchElementException__init_0());
 },
 ju_LinkedList_poll = $this => {
     let $entry;
@@ -9843,7 +9868,7 @@ ju_LinkedList_poll = $this => {
         $this.$lastEntry = null;
     else
         $this.$firstEntry.$previous = null;
-    $this.$size2 = $this.$size2 - 1 | 0;
+    $this.$size1 = $this.$size1 - 1 | 0;
     $this.$modCount = $this.$modCount + 1 | 0;
     return $entry.$item;
 },
@@ -9861,7 +9886,7 @@ ju_LinkedList_addFirst = ($this, $e) => {
         $this.$firstEntry.$previous = $entry;
     $this.$firstEntry = $entry;
     $this.$modCount = $this.$modCount + 1 | 0;
-    $this.$size2 = $this.$size2 + 1 | 0;
+    $this.$size1 = $this.$size1 + 1 | 0;
 },
 ju_LinkedList_addLast = ($this, $e) => {
     let $entry;
@@ -9874,15 +9899,15 @@ ju_LinkedList_addLast = ($this, $e) => {
         $this.$lastEntry.$next4 = $entry;
     $this.$lastEntry = $entry;
     $this.$modCount = $this.$modCount + 1 | 0;
-    $this.$size2 = $this.$size2 + 1 | 0;
+    $this.$size1 = $this.$size1 + 1 | 0;
 },
 ju_NoSuchElementException = $rt_classWithoutFields(jl_RuntimeException),
-ju_NoSuchElementException__init_0 = $this => {
+ju_NoSuchElementException__init_ = $this => {
     jl_RuntimeException__init_($this);
 },
-ju_NoSuchElementException__init_ = () => {
+ju_NoSuchElementException__init_0 = () => {
     let var_0 = new ju_NoSuchElementException();
-    ju_NoSuchElementException__init_0(var_0);
+    ju_NoSuchElementException__init_(var_0);
     return var_0;
 },
 otcic_JSStderrPrintStream = $rt_classWithoutFields(otcic_JsConsolePrintStream),
@@ -9928,7 +9953,7 @@ jur_NegativeLookBehind_hasConsumed = ($this, $matchResult) => {
     return 0;
 },
 jur_NegativeLookBehind_getName = $this => {
-    return $rt_s(338);
+    return $rt_s(366);
 },
 osi_DCPPSolver_Edmonds = $rt_classWithoutFields(oc_SingleVehicleSolver),
 osi_DCPPSolver_Edmonds__init_ = ($this, $instance) => {
@@ -9962,7 +9987,7 @@ osi_DCPPSolver_Edmonds_eulerAugment = $input => {
                         $temp = $indexedArcs.$get($i);
                         $j = 0;
                         while ($j < var$7[$i]) {
-                            $input.$addEdge3(oli_Arc__init_($rt_s(339), $temp.$getEndpoints(), $temp.$getCost()));
+                            $input.$addEdge3(oli_Arc__init_($rt_s(367), $temp.$getEndpoints(), $temp.$getCost()));
                             $j = $j + 1 | 0;
                         }
                         $i = $i + 1 | 0;
@@ -10012,7 +10037,7 @@ osi_DCPPSolver_Edmonds_getProblemAttributes = $this => {
     return var$1;
 },
 osi_DCPPSolver_Edmonds_getSolverName = $this => {
-    return $rt_s(340);
+    return $rt_s(368);
 },
 osi_DCPPSolver_Edmonds_checkGraphRequirements = $this => {
     let $mGraph;
@@ -10094,7 +10119,7 @@ jur_BackReferenceSet_getName = $this => {
     let var$1, var$2;
     var$1 = $this.$groupIndex;
     var$2 = jl_StringBuilder__init_();
-    jl_StringBuilder_append1(jl_StringBuilder_append(var$2, $rt_s(341)), var$1);
+    jl_StringBuilder_append1(jl_StringBuilder_append(var$2, $rt_s(369)), var$1);
     return jl_StringBuilder_toString(var$2);
 },
 jur_AbstractCharClass$LazyLower = $rt_classWithoutFields(jur_AbstractCharClass$LazyCharClass),
@@ -10169,7 +10194,7 @@ jur_DotQuantifierSet_findBackLineTerminator = ($this, $from, $i, $testString) =>
     return $i;
 },
 jur_DotQuantifierSet_getName = $this => {
-    return $rt_s(342);
+    return $rt_s(370);
 },
 jur_AbstractCharClass$LazyJavaJavaIdentifierPart = $rt_classWithoutFields(jur_AbstractCharClass$LazyCharClass),
 jur_AbstractCharClass$LazyJavaJavaIdentifierPart__init_ = $this => {
@@ -10326,7 +10351,7 @@ oc_MutableGraph__init_0 = ($this, $n) => {
     oc_MutableGraph__init_($this);
     $i = 0;
     while ($i < $n) {
-        $this.$addVertex3($this.$constructVertex($rt_s(343)));
+        $this.$addVertex3($this.$constructVertex($rt_s(371)));
         $i = $i + 1 | 0;
     }
 },
@@ -10426,7 +10451,7 @@ oc_MutableGraph_addEdge4 = ($this, $i, $j, $desc, $cost, $isReq) => {
 oc_MutableGraph_getEdge = ($this, $i) => {
     if ($this.$mInternalEdgeMap.$containsKey0($i))
         return $this.$mInternalEdgeMap.$get($i);
-    $rt_throw(jl_IllegalArgumentException__init_0($rt_s(344)));
+    $rt_throw(jl_IllegalArgumentException__init_0($rt_s(372)));
 },
 oc_MutableGraph_addVertex = ($this, $v) => {
     $v.$setId($this.$assignVertexId());
@@ -10436,16 +10461,16 @@ oc_MutableGraph_addVertex = ($this, $v) => {
     $this.$incidenceMap.$put1($v.$getId(), ju_HashSet__init_());
     $this.$onStateChange();
     if ($v.$isFinalized())
-        oc_MutableGraph_LOGGER.$warn($rt_s(345));
+        oc_MutableGraph_LOGGER.$warn($rt_s(373));
 },
 oc_MutableGraph_getVertex = ($this, $i) => {
     if ($this.$mInternalVertexMap.$containsKey0($i))
         return $this.$mInternalVertexMap.$get($i);
-    $rt_throw(jl_IllegalArgumentException__init_0($rt_s(346)));
+    $rt_throw(jl_IllegalArgumentException__init_0($rt_s(374)));
 },
 oc_MutableGraph_removeEdge = ($this, $e) => {
     if (!$this.$mEdges.$contains0($e))
-        $rt_throw(jl_IllegalArgumentException__init_0($rt_s(347)));
+        $rt_throw(jl_IllegalArgumentException__init_0($rt_s(375)));
     $this.$mEdges.$remove0($e);
     $this.$mInternalEdgeMap.$remove($e.$getId());
     $this.$onStateChange();
@@ -10496,7 +10521,7 @@ ogi_MixedGraph_constructEdge = ($this, $i, $j, $desc, $cost, $isDirected, $isReq
         $ret.$setRequired($isRequired);
         return $ret;
     }
-    ogi_MixedGraph_LOGGER.$error($rt_s(348));
+    ogi_MixedGraph_LOGGER.$error($rt_s(376));
     $rt_throw(oe_InvalidEndpointsException__init_());
 },
 ogi_MixedGraph_addEdge0 = ($this, $i, $j, $cost, $isDirected, $isRequired) => {
@@ -10539,7 +10564,7 @@ ogi_MixedGraph_addEdge = ($this, $e) => {
         }
         return;
     }
-    ogi_MixedGraph_LOGGER.$error($rt_s(349));
+    ogi_MixedGraph_LOGGER.$error($rt_s(377));
     $rt_throw(oe_InvalidEndpointsException__init_());
 },
 ogi_MixedGraph_clearEdges = $this => {
@@ -10557,7 +10582,7 @@ ogi_MixedGraph_clearEdges = $this => {
 ogi_MixedGraph_removeEdge = ($this, $e) => {
     let $toUpdate, var$3, $endpoints, $ex, $$je;
     if (!($this.$getEdges0()).$contains0($e)) {
-        ogi_MixedGraph_LOGGER.$error($rt_s(350));
+        ogi_MixedGraph_LOGGER.$error($rt_s(378));
         $rt_throw(jl_IllegalArgumentException__init_());
     }
     a: {
@@ -10630,7 +10655,7 @@ ogi_MixedGraph_getDeepCopy = $this => {
             $n = ($this.$getVertices0()).$size();
             $i = 1;
             while ($i <= $n) {
-                $temp = ovi_MixedVertex__init_($rt_s(351));
+                $temp = ovi_MixedVertex__init_($rt_s(379));
                 $temp2 = $indexedVertices.$get($i);
                 if ($temp2.$isDemandSet())
                     $temp.$setDemand($temp2.$getDemand());
@@ -10644,7 +10669,7 @@ ogi_MixedGraph_getDeepCopy = $this => {
             $i = 0;
             while ($i < $m) {
                 $e = $indexedEdges.$get($forSorting.$get2($i));
-                $e2 = oli_MixedEdge__init_($rt_s(351), ogu_Pair__init_(($ans.$getInternalVertexMap()).$get((($e.$getEndpoints()).$getFirst()).$getId()), ($ans.$getInternalVertexMap()).$get((($e.$getEndpoints()).$getSecond()).$getId())), $e.$getCost(), $e.$isDirected());
+                $e2 = oli_MixedEdge__init_($rt_s(379), ogu_Pair__init_(($ans.$getInternalVertexMap()).$get((($e.$getEndpoints()).$getFirst()).$getId()), ($ans.$getInternalVertexMap()).$get((($e.$getEndpoints()).$getSecond()).$getId())), $e.$getCost(), $e.$isDirected());
                 $e2.$setMatchId($e.$getId());
                 $e2.$setRequired($e.$isRequired());
                 $e2.$setZone($e.$getZone());
@@ -10704,7 +10729,7 @@ ot_OARLibParser_$callClinit = () => {
 ot_OARLibParser_parseWindyGraph = $content => {
     let $normalizedContent, $lines, var$4, $links, $vertices, $inLinksSection, $inVerticesSection, $numVertices, $depotId, $linkFormat, var$12, var$13, $rawLine, $line, $depot, $declaredVertices, $upper, $linkData, $vertexData, var$21, $graph, var$23, $link, $from, $to, $cost, $reverseCost, $required, $e, var$31, $vertex, var$33, $$je;
     ot_OARLibParser_$callClinit();
-    ot_OARLibParser_LOGGER.$info($rt_s(352));
+    ot_OARLibParser_LOGGER.$info($rt_s(380));
     if ($content !== null && !($content.$trim()).$isEmpty()) {
         $normalizedContent = ot_OARLibParser_sanitizeContent($content);
         $lines = $normalizedContent.$split($rt_s(239));
@@ -10725,16 +10750,16 @@ ot_OARLibParser_parseWindyGraph = $content => {
                 $line = $rawLine.$trim();
                 if ($line.$isEmpty())
                     break a;
-                if ($line.$startsWith1($rt_s(353)))
+                if ($line.$startsWith1($rt_s(381)))
                     break a;
-                if ($line.$contains1($rt_s(354))) {
+                if ($line.$contains1($rt_s(382))) {
                     $depot = ot_OARLibParser_parseIntSafe(ot_OARLibParser_extractValue($line));
                     if ($depot === null)
                         break a;
                     $depotId = $depot.$intValue();
                     break a;
                 }
-                if ($line.$contains1($rt_s(355))) {
+                if ($line.$contains1($rt_s(383))) {
                     $declaredVertices = ot_OARLibParser_parseIntSafe(ot_OARLibParser_extractValue($line));
                     if ($declaredVertices === null)
                         break a;
@@ -10743,27 +10768,27 @@ ot_OARLibParser_parseWindyGraph = $content => {
                 }
                 ju_Locale_$callClinit();
                 $upper = $line.$toUpperCase0(ju_Locale_ROOT);
-                if ($upper.$startsWith1($rt_s(356)) && !$upper.$contains1($rt_s(357))) {
+                if ($upper.$startsWith1($rt_s(384)) && !$upper.$contains1($rt_s(385))) {
                     $inLinksSection = 1;
                     $inVerticesSection = 0;
                     $linkFormat = ot_OARLibParser$LinkFormatType_WINDY;
                     break a;
                 }
-                if ($upper.$contains1($rt_s(358))) {
+                if ($upper.$contains1($rt_s(386))) {
                     $inLinksSection = 0;
                     break a;
                 }
-                if ($upper.$startsWith1($rt_s(359)) && !$upper.$contains1($rt_s(357))) {
+                if ($upper.$startsWith1($rt_s(387)) && !$upper.$contains1($rt_s(385))) {
                     $inVerticesSection = 1;
                     $inLinksSection = 0;
                     break a;
                 }
-                if ($upper.$contains1($rt_s(360))) {
+                if ($upper.$contains1($rt_s(388))) {
                     $inVerticesSection = 0;
                     break a;
                 }
                 if ($inLinksSection) {
-                    if ($upper.$startsWith1($rt_s(361))) {
+                    if ($upper.$startsWith1($rt_s(389))) {
                         $linkFormat = ot_OARLibParser_resolveLinkFormat(ot_OARLibParser_extractValue($line), ot_OARLibParser$LinkFormatType_WINDY);
                         break a;
                     }
@@ -10772,16 +10797,16 @@ ot_OARLibParser_parseWindyGraph = $content => {
                         $links.$add2($linkData);
                         break a;
                     }
-                    ot_OARLibParser_LOGGER.$warn((((jl_StringBuilder__init_()).$append4($rt_s(362))).$append4($line)).$toString());
+                    ot_OARLibParser_LOGGER.$warn((((jl_StringBuilder__init_()).$append4($rt_s(390))).$append4($line)).$toString());
                     break a;
                 }
                 if (!$inVerticesSection)
                     break a;
-                if ($upper.$startsWith1($rt_s(361)))
+                if ($upper.$startsWith1($rt_s(389)))
                     break a;
                 $vertexData = ot_OARLibParser_parseVertexLine($line);
                 if ($vertexData === null) {
-                    ot_OARLibParser_LOGGER.$warn((((jl_StringBuilder__init_()).$append4($rt_s(363))).$append4($line)).$toString());
+                    ot_OARLibParser_LOGGER.$warn((((jl_StringBuilder__init_()).$append4($rt_s(391))).$append4($line)).$toString());
                     break a;
                 }
                 if ($vertexData.$id <= 0)
@@ -10792,10 +10817,10 @@ ot_OARLibParser_parseWindyGraph = $content => {
         }
         var$21 = ot_OARLibParser_inferVertexCount($numVertices, $links, $vertices);
         if ($links.$isEmpty())
-            $rt_throw(jl_IllegalArgumentException__init_0($rt_s(364)));
+            $rt_throw(jl_IllegalArgumentException__init_0($rt_s(392)));
         if (var$21 <= 0)
             var$21 = 150;
-        ot_OARLibParser_LOGGER.$info(((((((jl_StringBuilder__init_()).$append4($rt_s(365))).$append2(var$21)).$append4($rt_s(366))).$append2($links.$size())).$append4($rt_s(367))).$toString());
+        ot_OARLibParser_LOGGER.$info(((((((jl_StringBuilder__init_()).$append4($rt_s(393))).$append2(var$21)).$append4($rt_s(394))).$append2($links.$size())).$append4($rt_s(395))).$toString());
         $graph = ogi_WindyGraph__init_2(var$21);
         var$23 = $links.$iterator();
         while (var$23.$hasNext()) {
@@ -10817,7 +10842,7 @@ ot_OARLibParser_parseWindyGraph = $content => {
                         throw $$e;
                     }
                 }
-                ot_OARLibParser_LOGGER.$warn((((((jl_StringBuilder__init_()).$append4($rt_s(368))).$append($link)).$append4($rt_s(369))).$append4($e.$getMessage())).$toString());
+                ot_OARLibParser_LOGGER.$warn((((((jl_StringBuilder__init_()).$append4($rt_s(396))).$append($link)).$append4($rt_s(397))).$append4($e.$getMessage())).$toString());
             }
         }
         var$31 = $vertices.$iterator();
@@ -10836,7 +10861,7 @@ ot_OARLibParser_parseWindyGraph = $content => {
                             throw $$e;
                         }
                     }
-                    ot_OARLibParser_LOGGER.$warn((((((jl_StringBuilder__init_()).$append4($rt_s(370))).$append($vertex)).$append4($rt_s(369))).$append4($e.$getMessage())).$toString());
+                    ot_OARLibParser_LOGGER.$warn((((((jl_StringBuilder__init_()).$append4($rt_s(398))).$append($vertex)).$append4($rt_s(397))).$append4($e.$getMessage())).$toString());
                 }
             }
         }
@@ -10854,17 +10879,64 @@ ot_OARLibParser_parseWindyGraph = $content => {
             $graph.$setDepotId(1);
         }
         var$31 = ot_OARLibParser_LOGGER;
-        var$33 = (((jl_StringBuilder__init_()).$append4($rt_s(371))).$append2(($graph.$getVertices0()).$size())).$append4($rt_s(372));
+        var$33 = (((jl_StringBuilder__init_()).$append4($rt_s(399))).$append2(($graph.$getVertices0()).$size())).$append4($rt_s(400));
         var$33 = (var$33.$append2(($graph.$getEdges0()).$size())).$toString();
         var$31.$info(var$33);
         return $graph;
     }
-    $rt_throw(jl_IllegalArgumentException__init_0($rt_s(373)));
+    $rt_throw(jl_IllegalArgumentException__init_0($rt_s(401)));
+},
+ot_OARLibParser_parseWindyGraphWithFormatDetection = $content => {
+    let var$2, $e2, $$je;
+    ot_OARLibParser_$callClinit();
+    ot_OARLibParser_LOGGER.$info($rt_s(402));
+    a: {
+        try {
+            ot_OARLibParser_LOGGER.$info($rt_s(403));
+            var$2 = ot_OARLibParser_parseWindyGraphCorberan($content);
+        } catch ($$e) {
+            $$je = $rt_wrapException($$e);
+            if ($$je instanceof jl_Exception) {
+                break a;
+            } else {
+                throw $$e;
+            }
+        }
+        return var$2;
+    }
+    ot_OARLibParser_LOGGER.$info($rt_s(404));
+    b: {
+        try {
+            var$2 = ot_OARLibParser_parseWindyGraph($content);
+        } catch ($$e) {
+            $$je = $rt_wrapException($$e);
+            if ($$je instanceof jl_Exception) {
+                $e2 = $$je;
+                break b;
+            } else {
+                throw $$e;
+            }
+        }
+        return var$2;
+    }
+    $rt_throw(jl_Exception__init_2($rt_s(405), $e2));
+},
+ot_OARLibParser_parseWindyGraphCorberan = $content => {
+    let $normalizedContent;
+    ot_OARLibParser_$callClinit();
+    ot_OARLibParser_LOGGER.$info($rt_s(406));
+    if ($content !== null && !($content.$trim()).$isEmpty()) {
+        $normalizedContent = ot_OARLibParser_sanitizeContent($content);
+        if (!($normalizedContent.$toLowerCase0()).$contains1($rt_s(407)) && !$normalizedContent.$contains1($rt_s(408)))
+            $rt_throw(jl_IllegalArgumentException__init_0($rt_s(409)));
+        return ot_OARLibParser_parseWindyGraph($content);
+    }
+    $rt_throw(jl_IllegalArgumentException__init_0($rt_s(410)));
 },
 ot_OARLibParser_parseDirectedGraph = $content => {
     let $normalizedContent, $lines, var$4, $links, $numVertices, $depotId, $inLinksSection, $linkFormat, var$10, var$11, $rawLine, $line, $declaredVertices, $depot, $upper, $linkData, $graph, var$19, $link, $required, $e, var$23, $$je;
     ot_OARLibParser_$callClinit();
-    ot_OARLibParser_LOGGER.$info($rt_s(374));
+    ot_OARLibParser_LOGGER.$info($rt_s(411));
     if ($content !== null && !($content.$trim()).$isEmpty()) {
         $normalizedContent = ot_OARLibParser_sanitizeContent($content);
         $lines = $normalizedContent.$split($rt_s(239));
@@ -10883,16 +10955,16 @@ ot_OARLibParser_parseDirectedGraph = $content => {
                 $line = $rawLine.$trim();
                 if ($line.$isEmpty())
                     break a;
-                if ($line.$startsWith1($rt_s(353)))
+                if ($line.$startsWith1($rt_s(381)))
                     break a;
-                if ($line.$contains1($rt_s(355))) {
+                if ($line.$contains1($rt_s(383))) {
                     $declaredVertices = ot_OARLibParser_parseIntSafe(ot_OARLibParser_extractValue($line));
                     if ($declaredVertices === null)
                         break a;
                     $numVertices = $declaredVertices.$intValue();
                     break a;
                 }
-                if ($line.$contains1($rt_s(354))) {
+                if ($line.$contains1($rt_s(382))) {
                     $depot = ot_OARLibParser_parseIntSafe(ot_OARLibParser_extractValue($line));
                     if ($depot === null)
                         break a;
@@ -10901,19 +10973,19 @@ ot_OARLibParser_parseDirectedGraph = $content => {
                 }
                 ju_Locale_$callClinit();
                 $upper = $line.$toUpperCase0(ju_Locale_ROOT);
-                if ($upper.$startsWith1($rt_s(356)) && !$upper.$contains1($rt_s(357))) {
+                if ($upper.$startsWith1($rt_s(384)) && !$upper.$contains1($rt_s(385))) {
                     $inLinksSection = 1;
                     $linkFormat = ot_OARLibParser$LinkFormatType_DIRECTED;
                     break a;
                 }
-                if (!(!$upper.$contains1($rt_s(358)) && !$upper.$contains1($rt_s(359)))) {
+                if (!(!$upper.$contains1($rt_s(386)) && !$upper.$contains1($rt_s(387)))) {
                     $inLinksSection = 0;
-                    if ($upper.$contains1($rt_s(359)))
+                    if ($upper.$contains1($rt_s(387)))
                         break a;
                 }
                 if (!$inLinksSection)
                     break a;
-                if ($upper.$startsWith1($rt_s(361))) {
+                if ($upper.$startsWith1($rt_s(389))) {
                     $linkFormat = ot_OARLibParser_resolveLinkFormat(ot_OARLibParser_extractValue($line), ot_OARLibParser$LinkFormatType_DIRECTED);
                     break a;
                 }
@@ -10922,16 +10994,16 @@ ot_OARLibParser_parseDirectedGraph = $content => {
                     $links.$add2($linkData);
                     break a;
                 }
-                ot_OARLibParser_LOGGER.$warn((((jl_StringBuilder__init_()).$append4($rt_s(362))).$append4($line)).$toString());
+                ot_OARLibParser_LOGGER.$warn((((jl_StringBuilder__init_()).$append4($rt_s(390))).$append4($line)).$toString());
             }
             var$11 = var$11 + 1 | 0;
         }
         var$10 = ot_OARLibParser_inferVertexCount($numVertices, $links, null);
         if ($links.$isEmpty())
-            $rt_throw(jl_IllegalArgumentException__init_0($rt_s(364)));
+            $rt_throw(jl_IllegalArgumentException__init_0($rt_s(392)));
         if (var$10 <= 0)
-            $rt_throw(jl_IllegalArgumentException__init_0($rt_s(375)));
-        ot_OARLibParser_LOGGER.$info(((((((jl_StringBuilder__init_()).$append4($rt_s(376))).$append2(var$10)).$append4($rt_s(366))).$append2($links.$size())).$append4($rt_s(367))).$toString());
+            $rt_throw(jl_IllegalArgumentException__init_0($rt_s(412)));
+        ot_OARLibParser_LOGGER.$info(((((((jl_StringBuilder__init_()).$append4($rt_s(413))).$append2(var$10)).$append4($rt_s(394))).$append2($links.$size())).$append4($rt_s(395))).$toString());
         $graph = ogi_DirectedGraph__init_0(var$10);
         var$19 = $links.$iterator();
         while (var$19.$hasNext()) {
@@ -10939,7 +11011,7 @@ ot_OARLibParser_parseDirectedGraph = $content => {
             $required = $link.$isRequired0 === null ? 1 : $link.$isRequired0.$booleanValue();
             b: {
                 try {
-                    $graph.$addEdge4($link.$v1.$intValue(), $link.$v2.$intValue(), $rt_s(377), $link.$cost.$intValue(), $required);
+                    $graph.$addEdge4($link.$v1.$intValue(), $link.$v2.$intValue(), $rt_s(414), $link.$cost.$intValue(), $required);
                     break b;
                 } catch ($$e) {
                     $$je = $rt_wrapException($$e);
@@ -10949,7 +11021,7 @@ ot_OARLibParser_parseDirectedGraph = $content => {
                         throw $$e;
                     }
                 }
-                ot_OARLibParser_LOGGER.$warn((((((jl_StringBuilder__init_()).$append4($rt_s(368))).$append($link)).$append4($rt_s(369))).$append4($e.$getMessage())).$toString());
+                ot_OARLibParser_LOGGER.$warn((((((jl_StringBuilder__init_()).$append4($rt_s(396))).$append($link)).$append4($rt_s(397))).$append4($e.$getMessage())).$toString());
             }
         }
         c: {
@@ -10966,17 +11038,17 @@ ot_OARLibParser_parseDirectedGraph = $content => {
             $graph.$setDepotId(1);
         }
         var$23 = ot_OARLibParser_LOGGER;
-        var$19 = (((jl_StringBuilder__init_()).$append4($rt_s(371))).$append2(($graph.$getVertices0()).$size())).$append4($rt_s(372));
+        var$19 = (((jl_StringBuilder__init_()).$append4($rt_s(399))).$append2(($graph.$getVertices0()).$size())).$append4($rt_s(400));
         var$19 = (var$19.$append2(($graph.$getEdges0()).$size())).$toString();
         var$23.$info(var$19);
         return $graph;
     }
-    $rt_throw(jl_IllegalArgumentException__init_0($rt_s(373)));
+    $rt_throw(jl_IllegalArgumentException__init_0($rt_s(401)));
 },
 ot_OARLibParser_parseUndirectedGraph = $content => {
     let $normalizedContent, $lines, var$4, $links, $numVertices, $depotId, $inLinksSection, $linkFormat, var$10, var$11, $rawLine, $line, $declaredVertices, $depot, $upper, $linkData, $graph, var$19, $link, $required, $e, var$23, $$je;
     ot_OARLibParser_$callClinit();
-    ot_OARLibParser_LOGGER.$info($rt_s(378));
+    ot_OARLibParser_LOGGER.$info($rt_s(415));
     if ($content !== null && !($content.$trim()).$isEmpty()) {
         $normalizedContent = ot_OARLibParser_sanitizeContent($content);
         $lines = $normalizedContent.$split($rt_s(239));
@@ -10992,32 +11064,32 @@ ot_OARLibParser_parseUndirectedGraph = $content => {
         while (var$11 < var$10) {
             $rawLine = var$4[var$11];
             $line = $rawLine.$trim();
-            if (!$line.$isEmpty() && !$line.$startsWith1($rt_s(353))) {
-                if ($line.$contains1($rt_s(355))) {
+            if (!$line.$isEmpty() && !$line.$startsWith1($rt_s(381))) {
+                if ($line.$contains1($rt_s(383))) {
                     $declaredVertices = ot_OARLibParser_parseIntSafe(ot_OARLibParser_extractValue($line));
                     if ($declaredVertices !== null)
                         $numVertices = $declaredVertices.$intValue();
-                } else if ($line.$contains1($rt_s(354))) {
+                } else if ($line.$contains1($rt_s(382))) {
                     $depot = ot_OARLibParser_parseIntSafe(ot_OARLibParser_extractValue($line));
                     if ($depot !== null)
                         $depotId = $depot.$intValue();
                 } else {
                     ju_Locale_$callClinit();
                     $upper = $line.$toUpperCase0(ju_Locale_ROOT);
-                    if ($upper.$startsWith1($rt_s(356)) && !$upper.$contains1($rt_s(357))) {
+                    if ($upper.$startsWith1($rt_s(384)) && !$upper.$contains1($rt_s(385))) {
                         $inLinksSection = 1;
                         $linkFormat = ot_OARLibParser$LinkFormatType_UNDIRECTED;
-                    } else if (!(!$upper.$contains1($rt_s(358)) && !$upper.$contains1($rt_s(359))))
+                    } else if (!(!$upper.$contains1($rt_s(386)) && !$upper.$contains1($rt_s(387))))
                         $inLinksSection = 0;
                     else if ($inLinksSection) {
-                        if ($upper.$startsWith1($rt_s(361)))
+                        if ($upper.$startsWith1($rt_s(389)))
                             $linkFormat = ot_OARLibParser_resolveLinkFormat(ot_OARLibParser_extractValue($line), ot_OARLibParser$LinkFormatType_UNDIRECTED);
                         else {
                             $linkData = ot_OARLibParser_parseLinkLine($line, $linkFormat);
                             if ($linkData !== null)
                                 $links.$add2($linkData);
                             else
-                                ot_OARLibParser_LOGGER.$warn((((jl_StringBuilder__init_()).$append4($rt_s(362))).$append4($line)).$toString());
+                                ot_OARLibParser_LOGGER.$warn((((jl_StringBuilder__init_()).$append4($rt_s(390))).$append4($line)).$toString());
                         }
                     }
                 }
@@ -11026,10 +11098,10 @@ ot_OARLibParser_parseUndirectedGraph = $content => {
         }
         var$10 = ot_OARLibParser_inferVertexCount($numVertices, $links, null);
         if ($links.$isEmpty())
-            $rt_throw(jl_IllegalArgumentException__init_0($rt_s(364)));
+            $rt_throw(jl_IllegalArgumentException__init_0($rt_s(392)));
         if (var$10 <= 0)
-            $rt_throw(jl_IllegalArgumentException__init_0($rt_s(375)));
-        ot_OARLibParser_LOGGER.$info(((((((jl_StringBuilder__init_()).$append4($rt_s(379))).$append2(var$10)).$append4($rt_s(366))).$append2($links.$size())).$append4($rt_s(367))).$toString());
+            $rt_throw(jl_IllegalArgumentException__init_0($rt_s(412)));
+        ot_OARLibParser_LOGGER.$info(((((((jl_StringBuilder__init_()).$append4($rt_s(416))).$append2(var$10)).$append4($rt_s(394))).$append2($links.$size())).$append4($rt_s(395))).$toString());
         $graph = ogi_UndirectedGraph__init_2(var$10);
         var$19 = $links.$iterator();
         while (var$19.$hasNext()) {
@@ -11037,7 +11109,7 @@ ot_OARLibParser_parseUndirectedGraph = $content => {
             $required = $link.$isRequired0 === null ? 1 : $link.$isRequired0.$booleanValue();
             a: {
                 try {
-                    $graph.$addEdge4($link.$v1.$intValue(), $link.$v2.$intValue(), $rt_s(377), $link.$cost.$intValue(), $required);
+                    $graph.$addEdge4($link.$v1.$intValue(), $link.$v2.$intValue(), $rt_s(414), $link.$cost.$intValue(), $required);
                     break a;
                 } catch ($$e) {
                     $$je = $rt_wrapException($$e);
@@ -11047,7 +11119,7 @@ ot_OARLibParser_parseUndirectedGraph = $content => {
                         throw $$e;
                     }
                 }
-                ot_OARLibParser_LOGGER.$warn((((((jl_StringBuilder__init_()).$append4($rt_s(368))).$append($link)).$append4($rt_s(369))).$append4($e.$getMessage())).$toString());
+                ot_OARLibParser_LOGGER.$warn((((((jl_StringBuilder__init_()).$append4($rt_s(396))).$append($link)).$append4($rt_s(397))).$append4($e.$getMessage())).$toString());
             }
         }
         b: {
@@ -11064,17 +11136,17 @@ ot_OARLibParser_parseUndirectedGraph = $content => {
             $graph.$setDepotId(1);
         }
         var$23 = ot_OARLibParser_LOGGER;
-        var$19 = (((jl_StringBuilder__init_()).$append4($rt_s(371))).$append2(($graph.$getVertices0()).$size())).$append4($rt_s(372));
+        var$19 = (((jl_StringBuilder__init_()).$append4($rt_s(399))).$append2(($graph.$getVertices0()).$size())).$append4($rt_s(400));
         var$19 = (var$19.$append2(($graph.$getEdges0()).$size())).$toString();
         var$23.$info(var$19);
         return $graph;
     }
-    $rt_throw(jl_IllegalArgumentException__init_0($rt_s(373)));
+    $rt_throw(jl_IllegalArgumentException__init_0($rt_s(401)));
 },
 ot_OARLibParser_parseMixedGraph = $content => {
     let $normalizedContent, $lines, var$4, $links, $numVertices, $depotId, $inLinksSection, $linkFormat, var$10, var$11, $rawLine, $line, $declaredVertices, $depot, $upper, $linkData, var$18, $graph, var$20, $link, $isDirected, $required, $e, var$25, $$je;
     ot_OARLibParser_$callClinit();
-    ot_OARLibParser_LOGGER.$info($rt_s(380));
+    ot_OARLibParser_LOGGER.$info($rt_s(417));
     if ($content !== null && !($content.$trim()).$isEmpty()) {
         $normalizedContent = ot_OARLibParser_sanitizeContent($content);
         $lines = $normalizedContent.$split($rt_s(239));
@@ -11090,32 +11162,32 @@ ot_OARLibParser_parseMixedGraph = $content => {
         while (var$11 < var$10) {
             $rawLine = var$4[var$11];
             $line = $rawLine.$trim();
-            if (!$line.$isEmpty() && !$line.$startsWith1($rt_s(353))) {
-                if ($line.$contains1($rt_s(355))) {
+            if (!$line.$isEmpty() && !$line.$startsWith1($rt_s(381))) {
+                if ($line.$contains1($rt_s(383))) {
                     $declaredVertices = ot_OARLibParser_parseIntSafe(ot_OARLibParser_extractValue($line));
                     if ($declaredVertices !== null)
                         $numVertices = $declaredVertices.$intValue();
-                } else if ($line.$contains1($rt_s(354))) {
+                } else if ($line.$contains1($rt_s(382))) {
                     $depot = ot_OARLibParser_parseIntSafe(ot_OARLibParser_extractValue($line));
                     if ($depot !== null)
                         $depotId = $depot.$intValue();
                 } else {
                     ju_Locale_$callClinit();
                     $upper = $line.$toUpperCase0(ju_Locale_ROOT);
-                    if ($upper.$startsWith1($rt_s(356)) && !$upper.$contains1($rt_s(357))) {
+                    if ($upper.$startsWith1($rt_s(384)) && !$upper.$contains1($rt_s(385))) {
                         $inLinksSection = 1;
                         $linkFormat = ot_OARLibParser$LinkFormatType_MIXED;
-                    } else if (!(!$upper.$contains1($rt_s(358)) && !$upper.$contains1($rt_s(359))))
+                    } else if (!(!$upper.$contains1($rt_s(386)) && !$upper.$contains1($rt_s(387))))
                         $inLinksSection = 0;
                     else if ($inLinksSection) {
-                        if ($upper.$startsWith1($rt_s(361)))
+                        if ($upper.$startsWith1($rt_s(389)))
                             $linkFormat = ot_OARLibParser_resolveLinkFormat(ot_OARLibParser_extractValue($line), ot_OARLibParser$LinkFormatType_MIXED);
                         else {
                             $linkData = ot_OARLibParser_parseLinkLine($line, $linkFormat);
                             if ($linkData !== null)
                                 $links.$add2($linkData);
                             else
-                                ot_OARLibParser_LOGGER.$warn((((jl_StringBuilder__init_()).$append4($rt_s(362))).$append4($line)).$toString());
+                                ot_OARLibParser_LOGGER.$warn((((jl_StringBuilder__init_()).$append4($rt_s(390))).$append4($line)).$toString());
                         }
                     }
                 }
@@ -11124,10 +11196,10 @@ ot_OARLibParser_parseMixedGraph = $content => {
         }
         var$18 = ot_OARLibParser_inferVertexCount($numVertices, $links, null);
         if ($links.$isEmpty())
-            $rt_throw(jl_IllegalArgumentException__init_0($rt_s(364)));
+            $rt_throw(jl_IllegalArgumentException__init_0($rt_s(392)));
         if (var$18 <= 0)
-            $rt_throw(jl_IllegalArgumentException__init_0($rt_s(375)));
-        ot_OARLibParser_LOGGER.$info(((((((jl_StringBuilder__init_()).$append4($rt_s(381))).$append2(var$18)).$append4($rt_s(366))).$append2($links.$size())).$append4($rt_s(367))).$toString());
+            $rt_throw(jl_IllegalArgumentException__init_0($rt_s(412)));
+        ot_OARLibParser_LOGGER.$info(((((((jl_StringBuilder__init_()).$append4($rt_s(418))).$append2(var$18)).$append4($rt_s(394))).$append2($links.$size())).$append4($rt_s(395))).$toString());
         $graph = ogi_MixedGraph__init_2(var$18);
         var$20 = $links.$iterator();
         while (var$20.$hasNext()) {
@@ -11146,7 +11218,7 @@ ot_OARLibParser_parseMixedGraph = $content => {
                         throw $$e;
                     }
                 }
-                ot_OARLibParser_LOGGER.$warn((((((jl_StringBuilder__init_()).$append4($rt_s(368))).$append($link)).$append4($rt_s(369))).$append4($e.$getMessage())).$toString());
+                ot_OARLibParser_LOGGER.$warn((((((jl_StringBuilder__init_()).$append4($rt_s(396))).$append($link)).$append4($rt_s(397))).$append4($e.$getMessage())).$toString());
             }
         }
         b: {
@@ -11163,19 +11235,19 @@ ot_OARLibParser_parseMixedGraph = $content => {
             $graph.$setDepotId(1);
         }
         var$20 = ot_OARLibParser_LOGGER;
-        var$25 = (((jl_StringBuilder__init_()).$append4($rt_s(371))).$append2(($graph.$getVertices0()).$size())).$append4($rt_s(372));
+        var$25 = (((jl_StringBuilder__init_()).$append4($rt_s(399))).$append2(($graph.$getVertices0()).$size())).$append4($rt_s(400));
         var$25 = (var$25.$append2(($graph.$getEdges0()).$size())).$toString();
         var$20.$info(var$25);
         return $graph;
     }
-    $rt_throw(jl_IllegalArgumentException__init_0($rt_s(373)));
+    $rt_throw(jl_IllegalArgumentException__init_0($rt_s(401)));
 },
 ot_OARLibParser_sanitizeContent = $content => {
     let var$2;
     ot_OARLibParser_$callClinit();
-    if ($content.$startsWith1($rt_s(382)))
+    if ($content.$startsWith1($rt_s(419)))
         $content = $content.$substring0(1);
-    var$2 = ($content.$replace($rt_s(383), $rt_s(239))).$replace($rt_s(384), $rt_s(239));
+    var$2 = ($content.$replace($rt_s(420), $rt_s(239))).$replace($rt_s(421), $rt_s(239));
     return var$2;
 },
 ot_OARLibParser_resolveLinkFormat = ($formatSpec, $fallback) => {
@@ -11185,15 +11257,15 @@ ot_OARLibParser_resolveLinkFormat = ($formatSpec, $fallback) => {
         return $fallback;
     ju_Locale_$callClinit();
     $normalized = $formatSpec.$toUpperCase0(ju_Locale_ROOT);
-    if ($normalized.$contains1($rt_s(385))) {
+    if ($normalized.$contains1($rt_s(422))) {
         ot_OARLibParser$LinkFormatType_$callClinit();
         return ot_OARLibParser$LinkFormatType_MIXED;
     }
-    if ($normalized.$contains1($rt_s(386))) {
+    if ($normalized.$contains1($rt_s(423))) {
         ot_OARLibParser$LinkFormatType_$callClinit();
         return ot_OARLibParser$LinkFormatType_WINDY;
     }
-    if (!(!$normalized.$contains1($rt_s(387)) && !$normalized.$contains1($rt_s(388)))) {
+    if (!(!$normalized.$contains1($rt_s(424)) && !$normalized.$contains1($rt_s(425)))) {
         ot_OARLibParser$LinkFormatType_$callClinit();
         if ($fallback === ot_OARLibParser$LinkFormatType_DIRECTED)
             return ot_OARLibParser$LinkFormatType_DIRECTED;
@@ -11205,7 +11277,7 @@ ot_OARLibParser_resolveLinkFormat = ($formatSpec, $fallback) => {
 ot_OARLibParser_parseLinkLine = ($line, $formatType) => {
     let $rawParts, var$4, $parts, var$6, var$7, $rawPart, $trimmed, $data;
     ot_OARLibParser_$callClinit();
-    $rawParts = $line.$split($rt_s(389));
+    $rawParts = $line.$split($rt_s(426));
     var$4 = $rawParts.data;
     $parts = ju_ArrayList__init_();
     var$6 = var$4.length;
@@ -11263,7 +11335,7 @@ ot_OARLibParser_parseLinkLine = ($line, $formatType) => {
 ot_OARLibParser_parseVertexLine = $line => {
     let $rawParts, var$3, var$4, $data, $coordinateIndex, $maybeId, $$je;
     ot_OARLibParser_$callClinit();
-    $rawParts = $line.$split($rt_s(389));
+    $rawParts = $line.$split($rt_s(426));
     var$3 = $rawParts.data;
     var$4 = var$3.length;
     if (var$4 < 2)
@@ -11324,13 +11396,13 @@ ot_OARLibParser_parseBooleanToken = $token => {
     $trimmed = $token.$trim();
     if ($trimmed.$isEmpty())
         return null;
-    if (!$trimmed.$equalsIgnoreCase($rt_s(26)) && !$trimmed.$equalsIgnoreCase($rt_s(390)) && !$trimmed.$equalsIgnoreCase($rt_s(391)) && !$trimmed.$equalsIgnoreCase($rt_s(392))) {
-        if (!$trimmed.$equalsIgnoreCase($rt_s(25)) && !$trimmed.$equalsIgnoreCase($rt_s(393)) && !$trimmed.$equalsIgnoreCase($rt_s(394)) && !$trimmed.$equalsIgnoreCase($rt_s(395))) {
-            if ($trimmed.$equals($rt_s(396))) {
+    if (!$trimmed.$equalsIgnoreCase($rt_s(26)) && !$trimmed.$equalsIgnoreCase($rt_s(427)) && !$trimmed.$equalsIgnoreCase($rt_s(428)) && !$trimmed.$equalsIgnoreCase($rt_s(429))) {
+        if (!$trimmed.$equalsIgnoreCase($rt_s(25)) && !$trimmed.$equalsIgnoreCase($rt_s(430)) && !$trimmed.$equalsIgnoreCase($rt_s(431)) && !$trimmed.$equalsIgnoreCase($rt_s(432))) {
+            if ($trimmed.$equals($rt_s(433))) {
                 jl_Boolean_$callClinit();
                 return jl_Boolean_TRUE;
             }
-            if ($trimmed.$equals($rt_s(274))) {
+            if ($trimmed.$equals($rt_s(280))) {
                 jl_Boolean_$callClinit();
                 return jl_Boolean_FALSE;
             }
@@ -11358,7 +11430,7 @@ ot_OARLibParser_parseBooleanToken = $token => {
 ot_OARLibParser_extractValue = $line => {
     let $idx;
     ot_OARLibParser_$callClinit();
-    $idx = $line.$indexOf3($rt_s(397));
+    $idx = $line.$indexOf3($rt_s(434));
     if ($idx >= 0 && $idx < ($line.$length() - 1 | 0))
         return ($line.$substring0($idx + 1 | 0)).$trim();
     return $rt_s(33);
@@ -11425,7 +11497,7 @@ jur_PreviousMatch_hasConsumed = ($this, $matchResult) => {
     return 0;
 },
 jur_PreviousMatch_getName = $this => {
-    return $rt_s(398);
+    return $rt_s(435);
 },
 otcir_MethodInfo = $rt_classWithoutFields(),
 jur_UnifiedQuantifierSet = $rt_classWithoutFields(jur_LeafQuantifierSet),
@@ -11508,7 +11580,7 @@ jl_Class_getSimpleName = $this => {
         if (jl_Class_isArray($this)) {
             var$2 = jl_Class_getSimpleName(jl_Class_getComponentType($this));
             var$3 = jl_StringBuilder__init_();
-            jl_StringBuilder_append(jl_StringBuilder_append(var$3, var$2), $rt_s(399));
+            jl_StringBuilder_append(jl_StringBuilder_append(var$3, var$2), $rt_s(436));
             $name = jl_StringBuilder_toString(var$3);
         } else if (jl_Class_getEnclosingClass($this) !== null) {
             $name = otp_Platform_getSimpleName($this.$platformClass);
@@ -11815,10 +11887,10 @@ ju_BitSet_isEmpty = $this => {
 };
 function jur_AbstractCharClass$LazyJavaJavaIdentifierStart$1() {
     jur_AbstractCharClass.call(this);
-    this.$this$017 = null;
+    this.$this$016 = null;
 }
 let jur_AbstractCharClass$LazyJavaJavaIdentifierStart$1__init_ = ($this, $this$0) => {
-    $this.$this$017 = $this$0;
+    $this.$this$016 = $this$0;
     jur_AbstractCharClass__init_($this);
 },
 jur_AbstractCharClass$LazyJavaJavaIdentifierStart$1__init_0 = var_0 => {
@@ -11845,7 +11917,7 @@ jur_NonCapFSet_matches = ($this, $stringIndex, $testString, $matchResult) => {
     return $this.$next2.$matches($stringIndex, $testString, $matchResult);
 },
 jur_NonCapFSet_getName = $this => {
-    return $rt_s(400);
+    return $rt_s(437);
 },
 jur_NonCapFSet_hasConsumed = ($this, $mr) => {
     return 0;
@@ -11896,7 +11968,7 @@ osi_UCPPSolver_Edmonds_eulerAugment = $input => {
             while (var$8.$hasNext()) {
                 $v = var$8.$next();
                 if (($v.$getDegree() % 2 | 0) == 1)
-                    $matchingGraph.$addVertex0(ovi_UndirectedVertex__init_($rt_s(245)), $v.$getId());
+                    $matchingGraph.$addVertex0(ovi_UndirectedVertex__init_($rt_s(246)), $v.$getId());
             }
             $oddVertices = $matchingGraph.$getVertices0();
             var$8 = $oddVertices.$iterator();
@@ -11908,7 +11980,7 @@ osi_UCPPSolver_Edmonds_eulerAugment = $input => {
                     if ($v.$getId() <= $v2.$getId())
                         continue;
                     var$13 = $dist.data;
-                    $matchingGraph.$addEdge0(oli_Edge__init_($rt_s(246), ogu_Pair__init_($v, $v2), var$13[$v.$getMatchId()].data[$v2.$getMatchId()]));
+                    $matchingGraph.$addEdge0(oli_Edge__init_($rt_s(247), ogu_Pair__init_($v, $v2), var$13[$v.$getMatchId()].data[$v2.$getMatchId()]));
                 }
             }
             $matchingSolution = ogu_CommonAlgorithms_minCostMatching($matchingGraph);
@@ -11974,7 +12046,7 @@ osi_UCPPSolver_Edmonds_getProblemAttributes = $this => {
     return var$1;
 },
 osi_UCPPSolver_Edmonds_getSolverName = $this => {
-    return $rt_s(401);
+    return $rt_s(438);
 },
 osi_UCPPSolver_Edmonds_checkGraphRequirements = $this => {
     let $mGraph;
@@ -12622,7 +12694,7 @@ jur_UCISupplCharSet_getName = $this => {
     let var$1, var$2;
     var$1 = jl_String__init_(jl_Character_toChars($this.$ch4));
     var$2 = jl_StringBuilder__init_();
-    jl_StringBuilder_append(jl_StringBuilder_append(var$2, $rt_s(402)), var$1);
+    jl_StringBuilder_append(jl_StringBuilder_append(var$2, $rt_s(439)), var$1);
     return jl_StringBuilder_toString(var$2);
 },
 jl_System = $rt_classWithoutFields(),
@@ -12688,7 +12760,7 @@ jl_System_arraycopy = ($src, $srcPos, $dest, $destPos, $length) => {
         }
         $rt_throw(jl_IndexOutOfBoundsException__init_());
     }
-    $rt_throw(jl_NullPointerException__init_1($rt_s(403)));
+    $rt_throw(jl_NullPointerException__init_1($rt_s(440)));
 },
 jl_System_fastArraycopy = ($src, $srcPos, $dest, $destPos, $length) => {
     let var$6;
@@ -12751,21 +12823,21 @@ ot_OARLibParser$LinkFormatType_$values = () => {
     return var$1;
 },
 ot_OARLibParser$LinkFormatType__clinit_ = () => {
-    ot_OARLibParser$LinkFormatType_WINDY = ot_OARLibParser$LinkFormatType__init_($rt_s(266), 0);
-    ot_OARLibParser$LinkFormatType_MIXED = ot_OARLibParser$LinkFormatType__init_($rt_s(265), 1);
-    ot_OARLibParser$LinkFormatType_DIRECTED = ot_OARLibParser$LinkFormatType__init_($rt_s(263), 2);
-    ot_OARLibParser$LinkFormatType_UNDIRECTED = ot_OARLibParser$LinkFormatType__init_($rt_s(264), 3);
-    ot_OARLibParser$LinkFormatType_UNKNOWN = ot_OARLibParser$LinkFormatType__init_($rt_s(404), 4);
+    ot_OARLibParser$LinkFormatType_WINDY = ot_OARLibParser$LinkFormatType__init_($rt_s(272), 0);
+    ot_OARLibParser$LinkFormatType_MIXED = ot_OARLibParser$LinkFormatType__init_($rt_s(271), 1);
+    ot_OARLibParser$LinkFormatType_DIRECTED = ot_OARLibParser$LinkFormatType__init_($rt_s(269), 2);
+    ot_OARLibParser$LinkFormatType_UNDIRECTED = ot_OARLibParser$LinkFormatType__init_($rt_s(270), 3);
+    ot_OARLibParser$LinkFormatType_UNKNOWN = ot_OARLibParser$LinkFormatType__init_($rt_s(441), 4);
     ot_OARLibParser$LinkFormatType_$VALUES = ot_OARLibParser$LinkFormatType_$values();
 };
 function jur_CharClass$3() {
     let a = this; jur_AbstractCharClass.call(a);
     a.$val$curAlt = 0;
     a.$val$cc = null;
-    a.$this$04 = null;
+    a.$this$03 = null;
 }
 let jur_CharClass$3__init_ = ($this, $this$0, var$2, var$3) => {
-    $this.$this$04 = $this$0;
+    $this.$this$03 = $this$0;
     $this.$val$curAlt = var$2;
     $this.$val$cc = var$3;
     jur_AbstractCharClass__init_($this);
@@ -12776,17 +12848,17 @@ jur_CharClass$3__init_0 = (var_0, var_1, var_2) => {
     return var_3;
 },
 jur_CharClass$3_contains = ($this, $ch) => {
-    return !($this.$val$curAlt ^ $this.$this$04.$bits.$get0($ch)) && !($this.$val$curAlt ^ $this.$this$04.$inverted ^ $this.$val$cc.$contains($ch)) ? 0 : 1;
+    return !($this.$val$curAlt ^ $this.$this$03.$bits.$get0($ch)) && !($this.$val$curAlt ^ $this.$this$03.$inverted ^ $this.$val$cc.$contains($ch)) ? 0 : 1;
 };
 function jur_CharClass$4() {
     let a = this; jur_AbstractCharClass.call(a);
     a.$val$curAlt9 = 0;
     a.$val$nb4 = null;
     a.$val$cc2 = null;
-    a.$this$035 = null;
+    a.$this$034 = null;
 }
 let jur_CharClass$4__init_ = ($this, $this$0, var$2, var$3, var$4) => {
-    $this.$this$035 = $this$0;
+    $this.$this$034 = $this$0;
     $this.$val$curAlt9 = var$2;
     $this.$val$nb4 = var$3;
     $this.$val$cc2 = var$4;
@@ -12829,18 +12901,18 @@ opi_ProblemAttributes$NumVehicles_$values = () => {
     return var$1;
 },
 opi_ProblemAttributes$NumVehicles__clinit_ = () => {
-    opi_ProblemAttributes$NumVehicles_SINGLE_VEHICLE = opi_ProblemAttributes$NumVehicles__init_($rt_s(405), 0);
-    opi_ProblemAttributes$NumVehicles_MULTI_VEHICLE = opi_ProblemAttributes$NumVehicles__init_($rt_s(406), 1);
-    opi_ProblemAttributes$NumVehicles_NO_VEHICLES = opi_ProblemAttributes$NumVehicles__init_($rt_s(407), 2);
+    opi_ProblemAttributes$NumVehicles_SINGLE_VEHICLE = opi_ProblemAttributes$NumVehicles__init_($rt_s(442), 0);
+    opi_ProblemAttributes$NumVehicles_MULTI_VEHICLE = opi_ProblemAttributes$NumVehicles__init_($rt_s(443), 1);
+    opi_ProblemAttributes$NumVehicles_NO_VEHICLES = opi_ProblemAttributes$NumVehicles__init_($rt_s(444), 2);
     opi_ProblemAttributes$NumVehicles_$VALUES = opi_ProblemAttributes$NumVehicles_$values();
 };
 function jur_CharClass$1() {
     let a = this; jur_AbstractCharClass.call(a);
     a.$val$cc3 = null;
-    a.$this$011 = null;
+    a.$this$010 = null;
 }
 let jur_CharClass$1__init_ = ($this, $this$0, var$2) => {
-    $this.$this$011 = $this$0;
+    $this.$this$010 = $this$0;
     $this.$val$cc3 = var$2;
     jur_AbstractCharClass__init_($this);
 },
@@ -12856,10 +12928,10 @@ function jur_CharClass$2() {
     let a = this; jur_AbstractCharClass.call(a);
     a.$val$curAlt0 = 0;
     a.$val$cc1 = null;
-    a.$this$02 = null;
+    a.$this$01 = null;
 }
 let jur_CharClass$2__init_ = ($this, $this$0, var$2, var$3) => {
-    $this.$this$02 = $this$0;
+    $this.$this$01 = $this$0;
     $this.$val$curAlt0 = var$2;
     $this.$val$cc1 = var$3;
     jur_AbstractCharClass__init_($this);
@@ -12870,7 +12942,7 @@ jur_CharClass$2__init_0 = (var_0, var_1, var_2) => {
     return var_3;
 },
 jur_CharClass$2_contains = ($this, $ch) => {
-    return !($this.$val$curAlt0 ^ $this.$this$02.$bits.$get0($ch)) && !($this.$val$curAlt0 ^ $this.$this$02.$inverted ^ $this.$val$cc1.$contains($ch)) ? 1 : 0;
+    return !($this.$val$curAlt0 ^ $this.$this$01.$bits.$get0($ch)) && !($this.$val$curAlt0 ^ $this.$this$01.$inverted ^ $this.$val$cc1.$contains($ch)) ? 1 : 0;
 };
 function jur_AbstractCharClass$LazyRange() {
     let a = this; jur_AbstractCharClass$LazyCharClass.call(a);
@@ -12895,10 +12967,10 @@ jur_AbstractCharClass$LazyRange_computeValue = $this => {
 function jur_CharClass$7() {
     let a = this; jur_AbstractCharClass.call(a);
     a.$val$clazz7 = null;
-    a.$this$036 = null;
+    a.$this$035 = null;
 }
 let jur_CharClass$7__init_ = ($this, $this$0, var$2) => {
-    $this.$this$036 = $this$0;
+    $this.$this$035 = $this$0;
     $this.$val$clazz7 = var$2;
     jur_AbstractCharClass__init_($this);
 },
@@ -12926,10 +12998,10 @@ function jur_CharClass$8() {
     let a = this; jur_AbstractCharClass.call(a);
     a.$val$clazz1 = null;
     a.$val$curAlt2 = 0;
-    a.$this$05 = null;
+    a.$this$04 = null;
 }
 let jur_CharClass$8__init_ = ($this, $this$0, var$2, var$3) => {
-    $this.$this$05 = $this$0;
+    $this.$this$04 = $this$0;
     $this.$val$clazz1 = var$2;
     $this.$val$curAlt2 = var$3;
     jur_AbstractCharClass__init_($this);
@@ -12940,17 +13012,17 @@ jur_CharClass$8__init_0 = (var_0, var_1, var_2) => {
     return var_3;
 },
 jur_CharClass$8_contains = ($this, $ch) => {
-    return !$this.$val$clazz1.$contains($ch) && !($this.$val$curAlt2 ^ $this.$this$05.$bits.$get0($ch)) ? 1 : 0;
+    return !$this.$val$clazz1.$contains($ch) && !($this.$val$curAlt2 ^ $this.$this$04.$bits.$get0($ch)) ? 1 : 0;
 };
 function jur_CharClass$5() {
     let a = this; jur_AbstractCharClass.call(a);
     a.$val$curAlt7 = 0;
     a.$val$nb3 = null;
     a.$val$cc0 = null;
-    a.$this$021 = null;
+    a.$this$020 = null;
 }
 let jur_CharClass$5__init_ = ($this, $this$0, var$2, var$3, var$4) => {
-    $this.$this$021 = $this$0;
+    $this.$this$020 = $this$0;
     $this.$val$curAlt7 = var$2;
     $this.$val$nb3 = var$3;
     $this.$val$cc0 = var$4;
@@ -12968,10 +13040,10 @@ gt_TObjectHashingStrategy = $rt_classWithoutFields(0);
 function jur_CharClass$6() {
     let a = this; jur_AbstractCharClass.call(a);
     a.$val$clazz6 = null;
-    a.$this$023 = null;
+    a.$this$022 = null;
 }
 let jur_CharClass$6__init_ = ($this, $this$0, var$2) => {
-    $this.$this$023 = $this$0;
+    $this.$this$022 = $this$0;
     $this.$val$clazz6 = var$2;
     jur_AbstractCharClass__init_($this);
 },
@@ -13053,7 +13125,7 @@ jur_DotSet_matches = ($this, $stringIndex, $testString, $matchResult) => {
     return $this.$lt0.$isLineTerminator($high) ? (-1) : $this.$next2.$matches(var$5, $testString, $matchResult);
 },
 jur_DotSet_getName = $this => {
-    return $rt_s(408);
+    return $rt_s(445);
 },
 jur_DotSet_setNext = ($this, $next) => {
     $this.$next2 = $next;
@@ -13068,10 +13140,10 @@ function jur_CharClass$9() {
     let a = this; jur_AbstractCharClass.call(a);
     a.$val$clazz = null;
     a.$val$curAlt8 = 0;
-    a.$this$07 = null;
+    a.$this$06 = null;
 }
 let jur_CharClass$9__init_ = ($this, $this$0, var$2, var$3) => {
-    $this.$this$07 = $this$0;
+    $this.$this$06 = $this$0;
     $this.$val$clazz = var$2;
     $this.$val$curAlt8 = var$3;
     jur_AbstractCharClass__init_($this);
@@ -13082,7 +13154,7 @@ jur_CharClass$9__init_0 = (var_0, var_1, var_2) => {
     return var_3;
 },
 jur_CharClass$9_contains = ($this, $ch) => {
-    return !$this.$val$clazz.$contains($ch) && !($this.$val$curAlt8 ^ $this.$this$07.$bits.$get0($ch)) ? 0 : 1;
+    return !$this.$val$clazz.$contains($ch) && !($this.$val$curAlt8 ^ $this.$this$06.$bits.$get0($ch)) ? 0 : 1;
 },
 ju_Collections$4 = $rt_classWithoutFields(),
 ju_Collections$4__init_ = $this => {
@@ -13201,7 +13273,7 @@ jl_Character_toString = $c => {
     var$2 = new jl_String;
     var$3 = $rt_createCharArray(1);
     var$3.data[0] = $c;
-    jl_String__init_0(var$2, var$3);
+    jl_String__init_1(var$2, var$3);
     return var$2;
 },
 jl_Character_isValidCodePoint = $codePoint => {
@@ -13810,7 +13882,7 @@ jur_DotAllSet_matches = ($this, $stringIndex, $testString, $matchResult) => {
     return $this.$next2.$matches(var$5, $testString, $matchResult);
 },
 jur_DotAllSet_getName = $this => {
-    return $rt_s(409);
+    return $rt_s(446);
 },
 jur_DotAllSet_setNext = ($this, $next) => {
     $this.$next2 = $next;
@@ -13852,7 +13924,7 @@ jur_CICharSet_getName = $this => {
     let var$1, var$2;
     var$1 = $this.$ch3;
     var$2 = jl_StringBuilder__init_();
-    jl_StringBuilder_append0(jl_StringBuilder_append(var$2, $rt_s(410)), var$1);
+    jl_StringBuilder_append0(jl_StringBuilder_append(var$2, $rt_s(447)), var$1);
     return jl_StringBuilder_toString(var$2);
 };
 function jur_SupplCharSet() {
@@ -13950,10 +14022,10 @@ jur_SupplCharSet_first = ($this, $set) => {
 };
 function jur_AbstractCharClass$LazyJavaLowerCase$1() {
     jur_AbstractCharClass.call(this);
-    this.$this$038 = null;
+    this.$this$037 = null;
 }
 let jur_AbstractCharClass$LazyJavaLowerCase$1__init_ = ($this, $this$0) => {
-    $this.$this$038 = $this$0;
+    $this.$this$037 = $this$0;
     jur_AbstractCharClass__init_($this);
 },
 jur_AbstractCharClass$LazyJavaLowerCase$1__init_0 = var_0 => {
@@ -14415,7 +14487,7 @@ jur_UCISupplRangeSet_getName = $this => {
     var$1 = !$this.$alt0 ? $rt_s(29) : $rt_s(30);
     var$2 = $this.$chars.$toString();
     var$3 = jl_StringBuilder__init_();
-    jl_StringBuilder_append(jl_StringBuilder_append(jl_StringBuilder_append(var$3, $rt_s(332)), var$1), var$2);
+    jl_StringBuilder_append(jl_StringBuilder_append(jl_StringBuilder_append(var$3, $rt_s(360)), var$1), var$2);
     return jl_StringBuilder_toString(var$3);
 },
 jur_AbstractCharClass$LazyJavaUpperCase = $rt_classWithoutFields(jur_AbstractCharClass$LazyCharClass),
@@ -14479,7 +14551,7 @@ jur_HangulDecomposedCharSet_getName = $this => {
     let var$1, var$2;
     var$1 = jur_HangulDecomposedCharSet_getDecomposedChar($this);
     var$2 = jl_StringBuilder__init_();
-    jl_StringBuilder_append(jl_StringBuilder_append(var$2, $rt_s(411)), var$1);
+    jl_StringBuilder_append(jl_StringBuilder_append(var$2, $rt_s(448)), var$1);
     return jl_StringBuilder_toString(var$2);
 },
 jur_HangulDecomposedCharSet_matches = ($this, $strIndex, $testString, $matchResult) => {
@@ -14594,17 +14666,17 @@ opi_ProblemAttributes$NumDepots_$values = () => {
     return var$1;
 },
 opi_ProblemAttributes$NumDepots__clinit_ = () => {
-    opi_ProblemAttributes$NumDepots_SINGLE_DEPOT = opi_ProblemAttributes$NumDepots__init_($rt_s(412), 0);
-    opi_ProblemAttributes$NumDepots_MULTI_DEPOT = opi_ProblemAttributes$NumDepots__init_($rt_s(413), 1);
-    opi_ProblemAttributes$NumDepots_NO_DEPOTS = opi_ProblemAttributes$NumDepots__init_($rt_s(414), 2);
+    opi_ProblemAttributes$NumDepots_SINGLE_DEPOT = opi_ProblemAttributes$NumDepots__init_($rt_s(449), 0);
+    opi_ProblemAttributes$NumDepots_MULTI_DEPOT = opi_ProblemAttributes$NumDepots__init_($rt_s(450), 1);
+    opi_ProblemAttributes$NumDepots_NO_DEPOTS = opi_ProblemAttributes$NumDepots__init_($rt_s(451), 2);
     opi_ProblemAttributes$NumDepots_$VALUES = opi_ProblemAttributes$NumDepots_$values();
 };
 function jur_AbstractCharClass$LazyJavaTitleCase$1() {
     jur_AbstractCharClass.call(this);
-    this.$this$018 = null;
+    this.$this$017 = null;
 }
 let jur_AbstractCharClass$LazyJavaTitleCase$1__init_ = ($this, $this$0) => {
-    $this.$this$018 = $this$0;
+    $this.$this$017 = $this$0;
     jur_AbstractCharClass__init_($this);
 },
 jur_AbstractCharClass$LazyJavaTitleCase$1__init_0 = var_0 => {
@@ -14627,10 +14699,10 @@ ju_Collections$_clinit_$lambda$_59_0__init_0 = () => {
 };
 function jur_AbstractCharClass$LazyJavaMirrored$1() {
     jur_AbstractCharClass.call(this);
-    this.$this$025 = null;
+    this.$this$024 = null;
 }
 let jur_AbstractCharClass$LazyJavaMirrored$1__init_ = ($this, $this$0) => {
-    $this.$this$025 = $this$0;
+    $this.$this$024 = $this$0;
     jur_AbstractCharClass__init_($this);
 },
 jur_AbstractCharClass$LazyJavaMirrored$1__init_0 = var_0 => {
@@ -14666,10 +14738,10 @@ opic_UndirectedCPP_getProblemAttributes = $this => {
 };
 function jur_AbstractCharClass$LazyJavaISOControl$1() {
     jur_AbstractCharClass.call(this);
-    this.$this$039 = null;
+    this.$this$038 = null;
 }
 let jur_AbstractCharClass$LazyJavaISOControl$1__init_ = ($this, $this$0) => {
-    $this.$this$039 = $this$0;
+    $this.$this$038 = $this$0;
     jur_AbstractCharClass__init_($this);
 },
 jur_AbstractCharClass$LazyJavaISOControl$1__init_0 = var_0 => {
@@ -14706,7 +14778,7 @@ jur_WordBoundary_hasConsumed = ($this, $matchResult) => {
     return 0;
 },
 jur_WordBoundary_getName = $this => {
-    return $rt_s(415);
+    return $rt_s(452);
 },
 jur_WordBoundary_isSpace = ($this, $ch, $index, $leftBound, $testString) => {
     let var$5;
@@ -14761,7 +14833,7 @@ jur_UEOLSet_hasConsumed = ($this, $matchResult) => {
     return $res;
 },
 jur_UEOLSet_getName = $this => {
-    return $rt_s(416);
+    return $rt_s(453);
 },
 jur_AbstractCharClass$LazySpace = $rt_classWithoutFields(jur_AbstractCharClass$LazyCharClass),
 jur_AbstractCharClass$LazySpace__init_ = $this => {
@@ -14777,10 +14849,10 @@ jur_AbstractCharClass$LazySpace_computeValue = $this => {
 };
 function ju_HashMap$1() {
     ju_AbstractSet.call(this);
-    this.$this$03 = null;
+    this.$this$02 = null;
 }
 let ju_HashMap$1__init_ = ($this, $this$0) => {
-    $this.$this$03 = $this$0;
+    $this.$this$02 = $this$0;
     ju_AbstractSet__init_($this);
 },
 ju_HashMap$1__init_0 = var_0 => {
@@ -14789,10 +14861,10 @@ ju_HashMap$1__init_0 = var_0 => {
     return var_1;
 },
 ju_HashMap$1_size = $this => {
-    return $this.$this$03.$size();
+    return $this.$this$02.$size();
 },
 ju_HashMap$1_iterator = $this => {
-    return ju_HashMap$KeyIterator__init_0($this.$this$03);
+    return ju_HashMap$KeyIterator__init_0($this.$this$02);
 };
 function jur_UCICharSet() {
     jur_LeafSet.call(this);
@@ -14814,15 +14886,15 @@ jur_UCICharSet_getName = $this => {
     let var$1, var$2;
     var$1 = $this.$ch2;
     var$2 = jl_StringBuilder__init_();
-    jl_StringBuilder_append0(jl_StringBuilder_append(var$2, $rt_s(402)), var$1);
+    jl_StringBuilder_append0(jl_StringBuilder_append(var$2, $rt_s(439)), var$1);
     return jl_StringBuilder_toString(var$2);
 };
 function ju_HashMap$2() {
     ju_AbstractCollection.call(this);
-    this.$this$08 = null;
+    this.$this$07 = null;
 }
 let ju_HashMap$2__init_ = ($this, $this$0) => {
-    $this.$this$08 = $this$0;
+    $this.$this$07 = $this$0;
     ju_AbstractCollection__init_($this);
 },
 ju_HashMap$2__init_0 = var_0 => {
@@ -14831,7 +14903,7 @@ ju_HashMap$2__init_0 = var_0 => {
     return var_1;
 },
 ju_HashMap$2_iterator = $this => {
-    return ju_HashMap$ValueIterator__init_0($this.$this$08);
+    return ju_HashMap$ValueIterator__init_0($this.$this$07);
 };
 function jl_Double() {
     jl_Number.call(this);
@@ -15008,7 +15080,7 @@ jl_Double__clinit_ = () => {
 };
 function jur_AtomicFSet() {
     jur_FSet.call(this);
-    this.$index5 = 0;
+    this.$index4 = 0;
 }
 let jur_AtomicFSet__init_ = ($this, $groupIndex) => {
     jur_FSet__init_($this, $groupIndex);
@@ -15022,14 +15094,14 @@ jur_AtomicFSet_matches = ($this, $stringIndex, $testString, $matchResult) => {
     let $gr;
     $gr = $this.$getGroupIndex();
     $matchResult.$setConsumed($gr, $stringIndex - $matchResult.$getConsumed($gr) | 0);
-    $this.$index5 = $stringIndex;
+    $this.$index4 = $stringIndex;
     return $stringIndex;
 },
 jur_AtomicFSet_getIndex = $this => {
-    return $this.$index5;
+    return $this.$index4;
 },
 jur_AtomicFSet_getName = $this => {
-    return $rt_s(417);
+    return $rt_s(454);
 },
 jur_AtomicFSet_hasConsumed = ($this, $mr) => {
     return 0;
@@ -15410,16 +15482,16 @@ ju_ArrayList_checkIndexForAdd = ($this, $index) => {
 ju_ArrayList_toString = $this => {
     let $length, $buffer, $i;
     if (!$this.$size0)
-        return $rt_s(399);
+        return $rt_s(436);
     $length = $this.$size0 - 1 | 0;
     $buffer = jl_StringBuilder__init_0($this.$size0 * 16 | 0);
     $buffer.$append0(91);
     $i = 0;
     while ($i < $length) {
-        ($buffer.$append($this.$array.data[$i] === $this ? $rt_s(272) : $this.$array.data[$i])).$append4($rt_s(273));
+        ($buffer.$append($this.$array.data[$i] === $this ? $rt_s(278) : $this.$array.data[$i])).$append4($rt_s(279));
         $i = $i + 1 | 0;
     }
-    $buffer.$append($this.$array.data[$length] === $this ? $rt_s(272) : $this.$array.data[$length]);
+    $buffer.$append($this.$array.data[$length] === $this ? $rt_s(278) : $this.$array.data[$length]);
     return ($buffer.$append0(93)).$toString();
 },
 ju_ArrayList_hashCode = $this => {
@@ -15437,17 +15509,17 @@ function ju_LinkedList$SequentialListIterator() {
     a.$nextEntry = null;
     a.$prevEntry = null;
     a.$currentEntry0 = null;
-    a.$index6 = 0;
+    a.$index5 = 0;
     a.$version0 = 0;
-    a.$this$00 = null;
+    a.$this$0 = null;
 }
 let ju_LinkedList$SequentialListIterator__init_0 = ($this, var$1, $nextEntry, $prevEntry, $index) => {
-    $this.$this$00 = var$1;
+    $this.$this$0 = var$1;
     jl_Object__init_($this);
-    $this.$version0 = $this.$this$00.$modCount;
+    $this.$version0 = $this.$this$0.$modCount;
     $this.$nextEntry = $nextEntry;
     $this.$prevEntry = $prevEntry;
-    $this.$index6 = $index;
+    $this.$index5 = $index;
 },
 ju_LinkedList$SequentialListIterator__init_ = (var_0, var_1, var_2, var_3) => {
     let var_4 = new ju_LinkedList$SequentialListIterator();
@@ -15462,23 +15534,23 @@ ju_LinkedList$SequentialListIterator_add = ($this, $e) => {
     $newEntry.$previous = $this.$prevEntry;
     $newEntry.$next4 = $this.$nextEntry;
     if ($this.$prevEntry === null)
-        $this.$this$00.$firstEntry = $newEntry;
+        $this.$this$0.$firstEntry = $newEntry;
     else
         $this.$prevEntry.$next4 = $newEntry;
     if ($this.$nextEntry === null)
-        $this.$this$00.$lastEntry = $newEntry;
+        $this.$this$0.$lastEntry = $newEntry;
     else
         $this.$nextEntry.$previous = $newEntry;
     $this.$prevEntry = $newEntry;
-    var$3 = $this.$this$00;
-    var$3.$size2 = var$3.$size2 + 1 | 0;
-    var$3 = $this.$this$00;
+    var$3 = $this.$this$0;
+    var$3.$size1 = var$3.$size1 + 1 | 0;
+    var$3 = $this.$this$0;
     var$3.$modCount = var$3.$modCount + 1 | 0;
-    $this.$version0 = $this.$this$00.$modCount;
+    $this.$version0 = $this.$this$0.$modCount;
     $this.$currentEntry0 = null;
 },
 ju_LinkedList$SequentialListIterator_checkConcurrentModification = $this => {
-    if ($this.$version0 >= $this.$this$00.$modCount)
+    if ($this.$version0 >= $this.$this$0.$modCount)
         return;
     $rt_throw(ju_ConcurrentModificationException__init_());
 },
@@ -15531,7 +15603,7 @@ jl_String__init_5 = () => {
     jl_String__init_3(var_0);
     return var_0;
 },
-jl_String__init_0 = ($this, $characters) => {
+jl_String__init_1 = ($this, $characters) => {
     let var$2;
     jl_String_$callClinit();
     var$2 = $characters.data;
@@ -15540,13 +15612,13 @@ jl_String__init_0 = ($this, $characters) => {
 },
 jl_String__init_ = var_0 => {
     let var_1 = new jl_String();
-    jl_String__init_0(var_1, var_0);
+    jl_String__init_1(var_1, var_0);
     return var_1;
 },
 jl_String__init_4 = (var$0, var$1) => {
     var$0.$nativeString = var$1;
 },
-jl_String__init_1 = var_0 => {
+jl_String__init_0 = var_0 => {
     let var_1 = new jl_String();
     jl_String__init_4(var_1, var_0);
     return var_1;
@@ -15728,7 +15800,7 @@ jl_String_substring = ($this, $beginIndex, $endIndex) => {
     if (!$beginIndex && $endIndex == $length)
         return $this;
     if ($beginIndex >= 0 && var$4 <= 0 && $endIndex <= $length)
-        return jl_String__init_1($this.$nativeString.substring($beginIndex, $endIndex));
+        return jl_String__init_0($this.$nativeString.substring($beginIndex, $endIndex));
     $rt_throw(jl_StringIndexOutOfBoundsException__init_());
 },
 jl_String_substring0 = ($this, $beginIndex) => {
@@ -15887,11 +15959,18 @@ jl_String_hashCode = $this => {
     }
     return $this.$hashCode3;
 },
+jl_String_toLowerCase = $this => {
+    let $lowerCase;
+    $lowerCase = $this.$nativeString.toLowerCase();
+    if ($lowerCase !== $this.$nativeString)
+        $this = jl_String__init_0($lowerCase);
+    return $this;
+},
 jl_String_toUpperCase = ($this, $locale) => {
     let $upperCase;
     $upperCase = $this.$nativeString.toLocaleUpperCase((ju_Locale_toLanguageTag($locale)).$nativeString);
     if ($upperCase !== $this.$nativeString)
-        $this = jl_String__init_1($upperCase);
+        $this = jl_String__init_0($upperCase);
     return $this;
 },
 jl_String_split = ($this, $regex) => {
@@ -15917,13 +15996,13 @@ jl_NegativeArraySizeException__init_0 = () => {
 oe_NoDemandSetException = $rt_classWithoutFields(jl_Exception),
 oe_NoDemandSetException__init_ = $this => {
     jl_Exception__init_($this);
-},
-oe_NoDemandSetException__init_0 = () => {
+};
+let oe_NoDemandSetException__init_0 = () => {
     let var_0 = new oe_NoDemandSetException();
     oe_NoDemandSetException__init_(var_0);
     return var_0;
-};
-let jur_ReluctantAltQuantifierSet = $rt_classWithoutFields(jur_AltQuantifierSet),
+},
+jur_ReluctantAltQuantifierSet = $rt_classWithoutFields(jur_AltQuantifierSet),
 jur_ReluctantAltQuantifierSet__init_ = ($this, $innerSet, $next, $type) => {
     jur_AltQuantifierSet__init_($this, $innerSet, $next, $type);
 },
@@ -15960,41 +16039,41 @@ ogu_CommonAlgorithms_$callClinit = () => {
 ogu_CommonAlgorithms_tryHierholzer = $eulerianGraph => {
     ogu_CommonAlgorithms_$callClinit();
     if (!ogu_CommonAlgorithms_isEulerian($eulerianGraph)) {
-        ogu_CommonAlgorithms_LOGGER.$error($rt_s(418));
+        ogu_CommonAlgorithms_LOGGER.$error($rt_s(455));
         $rt_throw(jl_IllegalArgumentException__init_());
     }
     if (($eulerianGraph.$getEdges0()).$size())
         return ogu_CommonAlgorithms_hierholzer($eulerianGraph, 0);
-    ogu_CommonAlgorithms_LOGGER.$debug($rt_s(419));
+    ogu_CommonAlgorithms_LOGGER.$debug($rt_s(456));
     return ju_ArrayList__init_();
 },
 ogu_CommonAlgorithms_tryHierholzer1 = $eulerianGraph => {
     ogu_CommonAlgorithms_$callClinit();
     if (!ogu_CommonAlgorithms_isEulerian1($eulerianGraph)) {
-        ogu_CommonAlgorithms_LOGGER.$error($rt_s(418));
+        ogu_CommonAlgorithms_LOGGER.$error($rt_s(455));
         $rt_throw(jl_IllegalArgumentException__init_());
     }
     if (($eulerianGraph.$getEdges0()).$size())
         return ogu_CommonAlgorithms_hierholzer($eulerianGraph, 0);
-    ogu_CommonAlgorithms_LOGGER.$debug($rt_s(419));
+    ogu_CommonAlgorithms_LOGGER.$debug($rt_s(456));
     return ju_ArrayList__init_();
 },
 ogu_CommonAlgorithms_tryHierholzer0 = $eulerianGraph => {
     let $ans;
     ogu_CommonAlgorithms_$callClinit();
     if (!ogu_CommonAlgorithms_isStronglyEulerian($eulerianGraph)) {
-        ogu_CommonAlgorithms_LOGGER.$error($rt_s(418));
+        ogu_CommonAlgorithms_LOGGER.$error($rt_s(455));
         $rt_throw(jl_IllegalArgumentException__init_());
     }
     if (!($eulerianGraph.$getEdges0()).$size()) {
-        ogu_CommonAlgorithms_LOGGER.$debug($rt_s(419));
+        ogu_CommonAlgorithms_LOGGER.$debug($rt_s(456));
         return ju_ArrayList__init_();
     }
     $ans = ogu_CommonAlgorithms_directUndirectedCycles($eulerianGraph);
     $ans.$setDepotId($eulerianGraph.$getDepotId());
     if (ogu_CommonAlgorithms_isStronglyConnected0($ans))
         return ogu_CommonAlgorithms_hierholzer($ans, 1);
-    ogu_CommonAlgorithms_LOGGER.$debug($rt_s(420));
+    ogu_CommonAlgorithms_LOGGER.$debug($rt_s(457));
     $rt_throw(jl_IllegalArgumentException__init_());
 },
 ogu_CommonAlgorithms_hierholzer = ($orig, $useMatchIds) => {
@@ -16665,7 +16744,7 @@ ogu_CommonAlgorithms_isStronglyEulerian = $graph => {
         if ($v.$getDelta())
             return 0;
         if (!$v.$getDegree() && !$v.$getInDegree()) {
-            ogu_CommonAlgorithms_LOGGER.$warn($rt_s(421));
+            ogu_CommonAlgorithms_LOGGER.$warn($rt_s(458));
             return 0;
         }
     }
@@ -16697,7 +16776,7 @@ ogu_CommonAlgorithms_slfShortestPaths = ($g, $sourceId, $dist, $path, $edgePath)
         if (var$13.length == var$12 && $BIG >= 0) {
             $recordEdgePath = $edgePath === null ? 0 : 1;
             if ($recordEdgePath && $edgePath.data.length != var$12) {
-                ogu_CommonAlgorithms_LOGGER.$error($rt_s(422));
+                ogu_CommonAlgorithms_LOGGER.$error($rt_s(459));
                 $rt_throw(jl_IllegalArgumentException__init_());
             }
             $i = 0;
@@ -16721,7 +16800,7 @@ ogu_CommonAlgorithms_slfShortestPaths = ($g, $sourceId, $dist, $path, $edgePath)
             $searchForNegativeCycles = 0;
             a: {
                 while (!$activeVertices.$isEmpty()) {
-                    $u = $indexedVertices.$get(($activeVertices.$remove3()).$intValue());
+                    $u = $indexedVertices.$get(($activeVertices.$remove2()).$intValue());
                     $uid = $u.$getId();
                     var$19[$uid] = 0;
                     var$26 = (($u.$getNeighbors()).$keySet()).$iterator();
@@ -16795,8 +16874,8 @@ ogu_CommonAlgorithms_slfShortestPaths = ($g, $sourceId, $dist, $path, $edgePath)
                             }
                         }
                         if (!$continueSearching) {
-                            ogu_CommonAlgorithms_LOGGER.$error($rt_s(423));
-                            $rt_throw(oe_NegativeCycleException__init_($q, $problemPath.$toNativeArray1(), $problemEdgePath.$toNativeArray1(), $rt_s(424)));
+                            ogu_CommonAlgorithms_LOGGER.$error($rt_s(460));
+                            $rt_throw(oe_NegativeCycleException__init_($q, $problemPath.$toNativeArray1(), $problemEdgePath.$toNativeArray1(), $rt_s(461)));
                         }
                     }
                 }
@@ -16804,7 +16883,7 @@ ogu_CommonAlgorithms_slfShortestPaths = ($g, $sourceId, $dist, $path, $edgePath)
             return;
         }
     }
-    ogu_CommonAlgorithms_LOGGER.$error($rt_s(422));
+    ogu_CommonAlgorithms_LOGGER.$error($rt_s(459));
     $rt_throw(jl_IllegalArgumentException__init_());
 },
 ogu_CommonAlgorithms_windySLF = ($g, $sourceId, $dist, $path, $edgePath) => {
@@ -16844,7 +16923,7 @@ ogu_CommonAlgorithms_windySLF = ($g, $sourceId, $dist, $path, $edgePath) => {
         if (var$15.length == var$14 && $BIG >= 0) {
             $recordEdgePath = $edgePath === null ? 0 : 1;
             if ($recordEdgePath && $edgePath.data.length != var$14) {
-                ogu_CommonAlgorithms_LOGGER.$error($rt_s(422));
+                ogu_CommonAlgorithms_LOGGER.$error($rt_s(459));
                 $rt_throw(jl_IllegalArgumentException__init_());
             }
             $i = 0;
@@ -16868,7 +16947,7 @@ ogu_CommonAlgorithms_windySLF = ($g, $sourceId, $dist, $path, $edgePath) => {
             $searchForNegativeCycles = 0;
             b: {
                 while (!$activeVertices.$isEmpty()) {
-                    $u = $indexedVertices.$get(($activeVertices.$remove3()).$intValue());
+                    $u = $indexedVertices.$get(($activeVertices.$remove2()).$intValue());
                     $uid = $u.$getId();
                     var$21[$uid] = 0;
                     var$28 = (($u.$getNeighbors()).$keySet()).$iterator();
@@ -16942,8 +17021,8 @@ ogu_CommonAlgorithms_windySLF = ($g, $sourceId, $dist, $path, $edgePath) => {
                             }
                         }
                         if (!$continueSearching) {
-                            ogu_CommonAlgorithms_LOGGER.$error($rt_s(423));
-                            $rt_throw(oe_NegativeCycleException__init_($q, $problemPath.$toNativeArray1(), $problemEdgePath.$toNativeArray1(), $rt_s(424)));
+                            ogu_CommonAlgorithms_LOGGER.$error($rt_s(460));
+                            $rt_throw(oe_NegativeCycleException__init_($q, $problemPath.$toNativeArray1(), $problemEdgePath.$toNativeArray1(), $rt_s(461)));
                         }
                     }
                 }
@@ -16951,11 +17030,11 @@ ogu_CommonAlgorithms_windySLF = ($g, $sourceId, $dist, $path, $edgePath) => {
             return;
         }
     }
-    ogu_CommonAlgorithms_LOGGER.$error($rt_s(422));
+    ogu_CommonAlgorithms_LOGGER.$error($rt_s(459));
     $rt_throw(jl_IllegalArgumentException__init_());
 },
 ogu_CommonAlgorithms_dijkstrasAlgorithm = ($g, $sourceId, $dist, $path, $edgePath) => {
-    let var$6, $n, var$8, var$9, var$10, $recordEdgePath, $virtual, var$13, $l, $e, $pq, $i, $minid, $indexedVertices, $temp, $u, $uid, var$23, $v, $min, $vid, var$27, $link, $alt, $$je;
+    let var$6, $n, var$8, var$9, var$10, $recordEdgePath, $virtual, var$13, $l, $e, $pq, $visited, $indexedVertices, $temp, $uid, $currentDist, var$22, $u, var$24, $v, $min, $minid, $link, $vid, $alt, $$je;
     ogu_CommonAlgorithms_$callClinit();
     var$6 = $dist.data;
     $n = ($g.$getVertices()).$size();
@@ -16966,7 +17045,7 @@ ogu_CommonAlgorithms_dijkstrasAlgorithm = ($g, $sourceId, $dist, $path, $edgePat
         if (var$10.length == var$9) {
             $recordEdgePath = $edgePath === null ? 0 : 1;
             if ($recordEdgePath && $edgePath.data.length != var$9) {
-                ogu_CommonAlgorithms_LOGGER.$error($rt_s(425));
+                ogu_CommonAlgorithms_LOGGER.$error($rt_s(462));
                 $rt_throw(jl_IllegalArgumentException__init_());
             }
             $virtual = ogi_DirectedGraph__init_0($n);
@@ -16999,46 +17078,51 @@ ogu_CommonAlgorithms_dijkstrasAlgorithm = ($g, $sourceId, $dist, $path, $edgePat
                 return;
             }
             $pq = ju_PriorityQueue__init_0($n, ogu_Utils$DijkstrasComparator__init_());
+            $visited = $rt_createBooleanArray(var$9);
+            ju_Arrays_fill($dist, 2147483647);
+            ju_Arrays_fill($path, (-1));
+            if ($recordEdgePath)
+                ju_Arrays_fill($edgePath, (-1));
             var$6[$sourceId] = 0;
             var$10[$sourceId] = (-1);
-            $i = 1;
-            while ($i <= $n) {
-                if ($i != $sourceId) {
-                    var$6[$i] = 2147483647;
-                    var$10[$i] = (-1);
-                    if ($recordEdgePath)
-                        $edgePath.data[$i] = (-1);
-                }
-                $pq.$add2(ogu_Pair__init_(jl_Integer_valueOf($i), jl_Integer_valueOf(var$6[$i])));
-                $i = $i + 1 | 0;
-            }
-            $minid = 2147483647;
+            $pq.$add2(ogu_Pair__init_(jl_Integer_valueOf($sourceId), jl_Integer_valueOf(0)));
             $indexedVertices = $virtual.$getInternalVertexMap();
             while (!$pq.$isEmpty()) {
                 $temp = $pq.$poll();
-                $u = $indexedVertices.$get(($temp.$getFirst()).$intValue());
-                $uid = $u.$getId();
-                if (var$6[$uid] == 2147483647)
+                $uid = ($temp.$getFirst()).$intValue();
+                $currentDist = ($temp.$getSecond()).$intValue();
+                if ($currentDist > var$6[$uid])
                     continue;
-                var$23 = (($u.$getNeighbors0()).$keySet()).$iterator();
-                while (var$23.$hasNext()) {
-                    $v = var$23.$next();
+                if ($currentDist == 2147483647)
+                    continue;
+                var$22 = $visited.data;
+                if (var$22[$uid])
+                    continue;
+                var$22[$uid] = 1;
+                $u = $indexedVertices.$get($uid);
+                if ($u === null)
+                    continue;
+                var$24 = (($u.$getNeighbors0()).$keySet()).$iterator();
+                while (var$24.$hasNext()) {
+                    $v = var$24.$next();
                     $l = ($u.$getNeighbors0()).$get1($v);
                     $min = 2147483647;
-                    $vid = $v.$getId();
-                    if (!$pq.$contains0(ogu_Pair__init_(jl_Integer_valueOf($vid), jl_Integer_valueOf(var$6[$vid]))))
-                        continue;
-                    var$27 = $l.$iterator();
-                    while (var$27.$hasNext()) {
-                        $link = var$27.$next();
+                    $minid = 2147483647;
+                    var$13 = $l.$iterator();
+                    while (var$13.$hasNext()) {
+                        $link = var$13.$next();
                         if ($link.$getCost() < $min) {
                             $min = $link.$getCost();
                             $minid = $link.$getMatchId();
                         }
                     }
-                    $alt = var$6[$uid] + $min | 0;
+                    if ($min == 2147483647)
+                        continue;
+                    $vid = $v.$getId();
+                    if (var$22[$vid])
+                        continue;
+                    $alt = $currentDist + $min | 0;
                     if ($alt < var$6[$vid]) {
-                        $pq.$remove0(ogu_Pair__init_(jl_Integer_valueOf($vid), jl_Integer_valueOf(var$6[$vid])));
                         var$6[$vid] = $alt;
                         var$10[$vid] = $uid;
                         if ($recordEdgePath)
@@ -17050,7 +17134,7 @@ ogu_CommonAlgorithms_dijkstrasAlgorithm = ($g, $sourceId, $dist, $path, $edgePat
             return;
         }
     }
-    ogu_CommonAlgorithms_LOGGER.$error($rt_s(425));
+    ogu_CommonAlgorithms_LOGGER.$error($rt_s(462));
     $rt_throw(jl_IllegalArgumentException__init_());
 },
 ogu_CommonAlgorithms_fwLeastCostPaths0 = ($g, $dist, $path) => {
@@ -17115,7 +17199,7 @@ ogu_CommonAlgorithms_directUndirectedCycles = $input => {
     let $ans, $temp, $n, $i, var$6, $e, $indexedEdges, $indexedVertices, $startId, $currId, var$12, $v, $foundNewEdge, $usedEdges, $vertexIds, $edgeIds, $curr, $neighbors, var$20, $lim, $e2, var$23, $$je;
     ogu_CommonAlgorithms_$callClinit();
     if (!ogu_CommonAlgorithms_isStronglyEulerian($input)) {
-        ogu_CommonAlgorithms_LOGGER.$error($rt_s(426));
+        ogu_CommonAlgorithms_LOGGER.$error($rt_s(463));
         $rt_throw(jl_IllegalArgumentException__init_());
     }
     a: {
@@ -17125,17 +17209,17 @@ ogu_CommonAlgorithms_directUndirectedCycles = $input => {
             $n = ($input.$getVertices0()).$size();
             $i = 0;
             while ($i < $n) {
-                $temp.$addVertex2(ovi_UndirectedVertex__init_($rt_s(427)));
-                $ans.$addVertex1(ovi_DirectedVertex__init_($rt_s(307)));
+                $temp.$addVertex2(ovi_UndirectedVertex__init_($rt_s(464)));
+                $ans.$addVertex1(ovi_DirectedVertex__init_($rt_s(325)));
                 $i = $i + 1 | 0;
             }
             var$6 = ($input.$getEdges0()).$iterator();
             while (var$6.$hasNext()) {
                 $e = var$6.$next();
                 if ($e.$isDirected())
-                    $ans.$addEdge(($e.$getTail0()).$getId(), ($e.$getHead0()).$getId(), $rt_s(307), $e.$getCost(), $e.$getId());
+                    $ans.$addEdge(($e.$getTail0()).$getId(), ($e.$getHead0()).$getId(), $rt_s(325), $e.$getCost(), $e.$getId());
                 else
-                    $temp.$addEdge((($e.$getEndpoints()).$getFirst()).$getId(), (($e.$getEndpoints()).$getSecond()).$getId(), $rt_s(427), $e.$getCost(), $e.$getId());
+                    $temp.$addEdge((($e.$getEndpoints()).$getFirst()).$getId(), (($e.$getEndpoints()).$getSecond()).$getId(), $rt_s(464), $e.$getCost(), $e.$getId());
             }
             $indexedEdges = $temp.$getInternalEdgeMap();
             $indexedVertices = $temp.$getInternalVertexMap();
@@ -17195,7 +17279,7 @@ ogu_CommonAlgorithms_directUndirectedCycles = $input => {
                     $temp.$removeEdge2($e2);
                     var$23 = ($vertexIds.$get($i)).$intValue();
                     $i = $i + 1 | 0;
-                    $ans.$addEdge(var$23, ($vertexIds.$get($i)).$intValue(), $rt_s(428), $e2.$getCost(), $e2.$getMatchId());
+                    $ans.$addEdge(var$23, ($vertexIds.$get($i)).$intValue(), $rt_s(465), $e2.$getCost(), $e2.$getMatchId());
                 }
             }
         } catch ($$e) {
@@ -17225,7 +17309,7 @@ ogu_CommonAlgorithms_fwLeastCostPaths = ($g, $dist, $path, $edgePath) => {
         var$11 = $path.data;
         if (var$11.length == var$10) {
             if ($recordEdgePath && $edgePath.data.length != var$10) {
-                ogu_CommonAlgorithms_LOGGER.$error($rt_s(429));
+                ogu_CommonAlgorithms_LOGGER.$error($rt_s(466));
                 $rt_throw(jl_IllegalArgumentException__init_());
             }
             a: {
@@ -17234,7 +17318,7 @@ ogu_CommonAlgorithms_fwLeastCostPaths = ($g, $dist, $path, $edgePath) => {
                         $g2 = ogi_DirectedGraph__init_();
                         $i = 0;
                         while ($i < $n) {
-                            $g2.$addVertex1(ovi_DirectedVertex__init_($rt_s(293)));
+                            $g2.$addVertex1(ovi_DirectedVertex__init_($rt_s(302)));
                             $i = $i + 1 | 0;
                         }
                         $indexedWindyEdges = $g.$getInternalEdgeMap();
@@ -17243,13 +17327,13 @@ ogu_CommonAlgorithms_fwLeastCostPaths = ($g, $dist, $path, $edgePath) => {
                             $temp = $indexedWindyEdges.$get($i);
                             if ($temp !== null) {
                                 if ($temp.$isDirected())
-                                    $g2.$addEdge((($temp.$getEndpoints()).$getFirst()).$getId(), (($temp.$getEndpoints()).$getSecond()).$getId(), $rt_s(304), $temp.$getCost(), $i);
+                                    $g2.$addEdge((($temp.$getEndpoints()).$getFirst()).$getId(), (($temp.$getEndpoints()).$getSecond()).$getId(), $rt_s(322), $temp.$getCost(), $i);
                                 else if (!$rt_isInstance($temp, oli_AsymmetricLink)) {
-                                    $g2.$addEdge($temp.$getFirstEndpointId(), $temp.$getSecondEndpointId(), $rt_s(304), $temp.$getCost(), $i);
-                                    $g2.$addEdge($temp.$getSecondEndpointId(), $temp.$getFirstEndpointId(), $rt_s(305), $temp.$getCost(), $i);
+                                    $g2.$addEdge($temp.$getFirstEndpointId(), $temp.$getSecondEndpointId(), $rt_s(322), $temp.$getCost(), $i);
+                                    $g2.$addEdge($temp.$getSecondEndpointId(), $temp.$getFirstEndpointId(), $rt_s(323), $temp.$getCost(), $i);
                                 } else {
-                                    $g2.$addEdge((($temp.$getEndpoints()).$getFirst()).$getId(), (($temp.$getEndpoints()).$getSecond()).$getId(), $rt_s(304), $temp.$getCost(), $i);
-                                    $g2.$addEdge((($temp.$getEndpoints()).$getSecond()).$getId(), (($temp.$getEndpoints()).$getFirst()).$getId(), $rt_s(305), $temp.$getReverseCost(), $i);
+                                    $g2.$addEdge((($temp.$getEndpoints()).$getFirst()).$getId(), (($temp.$getEndpoints()).$getSecond()).$getId(), $rt_s(322), $temp.$getCost(), $i);
+                                    $g2.$addEdge((($temp.$getEndpoints()).$getSecond()).$getId(), (($temp.$getEndpoints()).$getFirst()).$getId(), $rt_s(323), $temp.$getReverseCost(), $i);
                                 }
                             }
                             $i = $i + 1 | 0;
@@ -17368,7 +17452,7 @@ ogu_CommonAlgorithms_fwLeastCostPaths = ($g, $dist, $path, $edgePath) => {
             return;
         }
     }
-    ogu_CommonAlgorithms_LOGGER.$error($rt_s(430));
+    ogu_CommonAlgorithms_LOGGER.$error($rt_s(467));
     $rt_throw(jl_IllegalArgumentException__init_());
 },
 ogu_CommonAlgorithms_addShortestPath = ($g, $dist, $path, $edgePath, $p) => {
@@ -17408,8 +17492,8 @@ ogu_CommonAlgorithms_shortestSuccessivePathsMinCostNetworkFlow = $g => {
     $retArray = $rt_createIntArray($g.$getEidCounter());
     if (ogu_CommonAlgorithms_isEulerian($g))
         return $retArray;
-    $source = ovi_DirectedVertex__init_($rt_s(431));
-    $sink = ovi_DirectedVertex__init_($rt_s(432));
+    $source = ovi_DirectedVertex__init_($rt_s(468));
+    $sink = ovi_DirectedVertex__init_($rt_s(469));
     $copy.$addVertex1($source);
     $copy.$addVertex1($sink);
     $hasDemand = 0;
@@ -17459,7 +17543,7 @@ ogu_CommonAlgorithms_shortestSuccessivePathsMinCostNetworkFlow = $g => {
                 $a.$setCost(($a.$getCost() + var$24[($a.$getTail()).$getId()] | 0) - var$24[($a.$getHead()).$getId()] | 0);
             }
             if ($dist.data[$sinkId] == 2147483647) {
-                ogu_CommonAlgorithms_LOGGER.$error($rt_s(433));
+                ogu_CommonAlgorithms_LOGGER.$error($rt_s(470));
                 $rt_throw(jl_IllegalArgumentException__init_());
             }
             $dijkstraDist = $rt_createIntArray(var$17);
@@ -17496,7 +17580,7 @@ ogu_CommonAlgorithms_shortestSuccessivePathsMinCostNetworkFlow = $g => {
                                 var$10 = var$34.$getMatchId();
                                 var$35[var$10] = var$35[var$10] - $maxFlow | 0;
                                 if (!var$36[var$34.$getMatchId()]) {
-                                    $temp2 = oli_Arc__init_($rt_s(311), ogu_Pair__init_(var$34.$getHead(), var$34.$getTail()),  -var$34.$getCost() | 0);
+                                    $temp2 = oli_Arc__init_($rt_s(329), ogu_Pair__init_(var$34.$getHead(), var$34.$getTail()),  -var$34.$getCost() | 0);
                                     $temp2.$setCapacity($maxFlow);
                                     $copy.$addEdge7($temp2, var$34.$getMatchId());
                                     var$36[var$34.$getMatchId()] = $temp2.$getId();
@@ -17520,7 +17604,7 @@ ogu_CommonAlgorithms_shortestSuccessivePathsMinCostNetworkFlow = $g => {
                                         $temp2 = $indexedArcs.$get(var$24[var$34.$getMatchId()]);
                                         $temp2.$setCapacity($temp2.$getCapacity() + $maxFlow | 0);
                                     } else {
-                                        $temp2 = oli_Arc__init_($rt_s(311), ogu_Pair__init_(var$34.$getHead(), var$34.$getTail()),  -var$34.$getCost() | 0);
+                                        $temp2 = oli_Arc__init_($rt_s(329), ogu_Pair__init_(var$34.$getHead(), var$34.$getTail()),  -var$34.$getCost() | 0);
                                         $temp2.$setCapacity($maxFlow);
                                         $copy.$addEdge7($temp2, var$34.$getMatchId());
                                         var$24[var$34.$getMatchId()] = $temp2.$getId();
@@ -17573,7 +17657,7 @@ ogu_CommonAlgorithms_shortestSuccessivePathsMinCostNetworkFlow = $g => {
                 var$41 = $hasDemand;
                 if ($v.$getDemand() > 0) {
                     var$41 = $hasDemand;
-                    $temp = oli_Arc__init_($rt_s(434), ogu_Pair__init_($source, $v), 0);
+                    $temp = oli_Arc__init_($rt_s(471), ogu_Pair__init_($source, $v), 0);
                     $temp.$setCapacity($v.$getDemand());
                     $copy.$addEdge3($temp);
                     $temp.$setMatchId($temp.$getId());
@@ -17583,7 +17667,7 @@ ogu_CommonAlgorithms_shortestSuccessivePathsMinCostNetworkFlow = $g => {
                     var$41 = $hasDemand;
                     if ($v.$getDemand() < 0) {
                         var$41 = $hasDemand;
-                        $temp = oli_Arc__init_($rt_s(435), ogu_Pair__init_($v, $sink), 0);
+                        $temp = oli_Arc__init_($rt_s(472), ogu_Pair__init_($v, $sink), 0);
                         $temp.$setCapacity( -$v.$getDemand() | 0);
                         $copy.$addEdge3($temp);
                         $temp.$setMatchId($temp.$getId());
@@ -17657,7 +17741,7 @@ jur_FSet$PossessiveFSet_matches = ($this, $stringIndex, $testString, $matchResul
     return $stringIndex;
 },
 jur_FSet$PossessiveFSet_getName = $this => {
-    return $rt_s(436);
+    return $rt_s(473);
 },
 jur_FSet$PossessiveFSet_hasConsumed = ($this, $mr) => {
     return 0;
@@ -17678,9 +17762,9 @@ jl_IllegalArgumentException__init_0 = var_0 => {
     let var_1 = new jl_IllegalArgumentException();
     jl_IllegalArgumentException__init_2(var_1, var_0);
     return var_1;
-},
-jl_NumberFormatException = $rt_classWithoutFields(jl_IllegalArgumentException);
-let jl_NumberFormatException__init_2 = $this => {
+};
+let jl_NumberFormatException = $rt_classWithoutFields(jl_IllegalArgumentException),
+jl_NumberFormatException__init_2 = $this => {
     jl_IllegalArgumentException__init_1($this);
 },
 jl_NumberFormatException__init_ = () => {
@@ -17707,7 +17791,7 @@ oli_Edge__init_ = (var_0, var_1, var_2) => {
     return var_3;
 },
 oli_Edge_getCopy = $this => {
-    return oli_Edge__init_($rt_s(437), $this.$getEndpoints(), $this.$getCost());
+    return oli_Edge__init_($rt_s(474), $this.$getEndpoints(), $this.$getCost());
 },
 oli_Edge_isWindy = $this => {
     return 0;
@@ -17791,7 +17875,7 @@ oc_Route_appendEdge0 = ($this, $l, $service) => {
     let $isWindy, $lreq, $lFirst, $lSecond, $temp, $tempReq, $tempFirst, $tempSecond, $trueCost, var$12, var$13, var$14, var$15, $limi, $i, $tempDir, var$19, $tempE, $tempCostMod, $tempTD;
     if ($service && !$l.$isRequired() && $l.$isWindy() && !$l.$isReverseRequired()) {
         oc_Route_$callClinit();
-        oc_Route_LOGGER.$error($rt_s(438));
+        oc_Route_LOGGER.$error($rt_s(475));
         $rt_throw(jl_IllegalArgumentException__init_());
     }
     a: {
@@ -17949,7 +18033,7 @@ oc_Route_appendEdge0 = ($this, $l, $service) => {
             } else if (var$19 && var$12) {
                 if ($lSecond != $tempFirst && $lSecond != $tempSecond) {
                     oc_Route_$callClinit();
-                    oc_Route_LOGGER.$error($rt_s(439));
+                    oc_Route_LOGGER.$error($rt_s(476));
                     $rt_throw(jl_IllegalArgumentException__init_());
                 }
                 $trueCost = $l.$getReverseCost();
@@ -18038,7 +18122,7 @@ oc_Route_toString = $this => {
         }
         if ($tempV12.$getId() != $prevIdReal && $tempV22.$getId() != $prevIdReal) {
             if ($tempV12.$getId() != $prevIdReal_0 && $tempV22.$getId() != $prevIdReal_0)
-                return $rt_s(440);
+                return $rt_s(477);
             $firstToSecond = !($beginningCycleLength % 2 | 0) ? 0 : 1;
         } else
             $firstToSecond = $beginningCycleLength % 2 | 0 ? 0 : 1;
@@ -18059,7 +18143,7 @@ oc_Route_toString = $this => {
             $prevIdReal_0 = var$15.$getId();
         } else {
             if (var$15.$getId() != $prevIdReal_0)
-                return $rt_s(440);
+                return $rt_s(477);
             var$7 = ((((((jl_StringBuilder__init_()).$append4($ans)).$append2($prevAltId1)).$append4($rt_s(18))).$append2($prevAltId2)).$append4($rt_s(18))).$toString();
             $prevIdReal_0 = var$14.$getId();
         }
@@ -18093,7 +18177,7 @@ oc_Route_toString = $this => {
         }
         $i = $i + 1 | 0;
     }
-    return $rt_s(440);
+    return $rt_s(477);
 },
 oc_Route__clinit_ = () => {
     oc_Route_LOGGER = ou_SimpleLogger_getLogger($rt_cls(oc_Route));
@@ -18151,7 +18235,7 @@ jur_MultiLineEOLSet_hasConsumed = ($this, $matchResult) => {
     return $res;
 },
 jur_MultiLineEOLSet_getName = $this => {
-    return $rt_s(441);
+    return $rt_s(478);
 },
 jur_IntArrHash = $rt_classWithoutFields(),
 jur_AbstractCharClass$LazyJavaMirrored = $rt_classWithoutFields(jur_AbstractCharClass$LazyCharClass),
@@ -18168,10 +18252,10 @@ jur_AbstractCharClass$LazyJavaMirrored_computeValue = $this => {
 };
 function jur_AbstractCharClass$LazyJavaDigit$1() {
     jur_AbstractCharClass.call(this);
-    this.$this$016 = null;
+    this.$this$015 = null;
 }
 let jur_AbstractCharClass$LazyJavaDigit$1__init_ = ($this, $this$0) => {
-    $this.$this$016 = $this$0;
+    $this.$this$015 = $this$0;
     jur_AbstractCharClass__init_($this);
 },
 jur_AbstractCharClass$LazyJavaDigit$1__init_0 = var_0 => {
@@ -18195,13 +18279,21 @@ jur_AbstractCharClass$LazyJavaISOControl_computeValue = $this => {
     return jur_AbstractCharClass$LazyJavaISOControl$1__init_0($this);
 },
 jl_IllegalStateException = $rt_classWithoutFields(jl_RuntimeException),
-jl_IllegalStateException__init_0 = $this => {
+jl_IllegalStateException__init_2 = $this => {
     jl_RuntimeException__init_($this);
 },
-jl_IllegalStateException__init_ = () => {
+jl_IllegalStateException__init_0 = () => {
     let var_0 = new jl_IllegalStateException();
-    jl_IllegalStateException__init_0(var_0);
+    jl_IllegalStateException__init_2(var_0);
     return var_0;
+},
+jl_IllegalStateException__init_1 = ($this, $message) => {
+    jl_RuntimeException__init_0($this, $message);
+},
+jl_IllegalStateException__init_ = var_0 => {
+    let var_1 = new jl_IllegalStateException();
+    jl_IllegalStateException__init_1(var_1, var_0);
+    return var_1;
 },
 oc_Link$Zone = $rt_classWithoutFields(jl_Enum),
 oc_Link$Zone_RESIDENTIAL = null,
@@ -18238,12 +18330,12 @@ oc_Link$Zone_$values = () => {
     return var$1;
 },
 oc_Link$Zone__clinit_ = () => {
-    oc_Link$Zone_RESIDENTIAL = oc_Link$Zone__init_($rt_s(442), 0);
-    oc_Link$Zone_COMMERCIAL = oc_Link$Zone__init_($rt_s(443), 1);
-    oc_Link$Zone_MIXED = oc_Link$Zone__init_($rt_s(265), 2);
-    oc_Link$Zone_CIVIC = oc_Link$Zone__init_($rt_s(444), 3);
-    oc_Link$Zone_OTHER = oc_Link$Zone__init_($rt_s(445), 4);
-    oc_Link$Zone_NOT_SET = oc_Link$Zone__init_($rt_s(446), 5);
+    oc_Link$Zone_RESIDENTIAL = oc_Link$Zone__init_($rt_s(479), 0);
+    oc_Link$Zone_COMMERCIAL = oc_Link$Zone__init_($rt_s(480), 1);
+    oc_Link$Zone_MIXED = oc_Link$Zone__init_($rt_s(271), 2);
+    oc_Link$Zone_CIVIC = oc_Link$Zone__init_($rt_s(481), 3);
+    oc_Link$Zone_OTHER = oc_Link$Zone__init_($rt_s(482), 4);
+    oc_Link$Zone_NOT_SET = oc_Link$Zone__init_($rt_s(483), 5);
     oc_Link$Zone_$VALUES = oc_Link$Zone_$values();
 };
 function jur_HighSurrogateCharSet() {
@@ -18386,9 +18478,9 @@ osi_MCPPSolver_Yaoyuenyong_eliminateAddedDirectedCycles = ($n, $edgeContainers) 
                 if ($temp.$getNumCopies() && $temp.$getNumCopies() != (-1)) {
                     $e = $temp.$getFirst0();
                     if (!$temp.$isDirectedForward())
-                        $add.$addEdge7(oli_Arc__init_($rt_s(447), ogu_Pair__init_($addVertices.$get((($e.$getEndpoints()).$getSecond()).$getId()), $addVertices.$get((($e.$getEndpoints()).$getFirst()).$getId())), $e.$getCost()), $e.$getId());
+                        $add.$addEdge7(oli_Arc__init_($rt_s(484), ogu_Pair__init_($addVertices.$get((($e.$getEndpoints()).$getSecond()).$getId()), $addVertices.$get((($e.$getEndpoints()).$getFirst()).$getId())), $e.$getCost()), $e.$getId());
                     else
-                        $add.$addEdge7(oli_Arc__init_($rt_s(447), ogu_Pair__init_($addVertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $addVertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), $e.$getCost()), $e.$getId());
+                        $add.$addEdge7(oli_Arc__init_($rt_s(484), ogu_Pair__init_($addVertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $addVertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), $e.$getCost()), $e.$getId());
                 }
                 $i = $i + 1 | 0;
             }
@@ -18504,7 +18596,7 @@ osi_MCPPSolver_Yaoyuenyong_CostMod1 = ($Gij, $edgeContainers, $Em, $Am) => {
                     while (var$8.$hasNext()) {
                         $a = var$8.$next();
                         if (!$a.$isDirected())
-                            $rt_throw(jl_IllegalArgumentException__init_0($rt_s(448)));
+                            $rt_throw(jl_IllegalArgumentException__init_0($rt_s(485)));
                         $temp = $gijEdges.$get($a.$getMatchId());
                         var$7 = ($edgeContainers.$get($a.$getMatchId())).$getType3();
                         oc_MultiEdge$EDGETYPE_$callClinit();
@@ -18512,7 +18604,7 @@ osi_MCPPSolver_Yaoyuenyong_CostMod1 = ($Gij, $edgeContainers, $Em, $Am) => {
                             $temp.$setCost(0);
                         else {
                             if (($edgeContainers.$get($a.$getMatchId())).$getType3() !== oc_MultiEdge$EDGETYPE_F)
-                                $rt_throw(jl_IllegalArgumentException__init_0($rt_s(449)));
+                                $rt_throw(jl_IllegalArgumentException__init_0($rt_s(486)));
                             $temp.$setCost($K);
                         }
                     }
@@ -18524,7 +18616,7 @@ osi_MCPPSolver_Yaoyuenyong_CostMod1 = ($Gij, $edgeContainers, $Em, $Am) => {
                 $temp = $gijEdges.$get($e.$getMatchId());
                 $temp.$setCost($K);
             }
-            $rt_throw(jl_IllegalArgumentException__init_0($rt_s(450)));
+            $rt_throw(jl_IllegalArgumentException__init_0($rt_s(487)));
         } catch ($$e) {
             $$je = $rt_wrapException($$e);
             if ($$je instanceof jl_Exception) {
@@ -18593,7 +18685,7 @@ osi_MCPPSolver_Yaoyuenyong_inOutDegree = ($input, $U, $M, $inMdubPrime, $edgeCon
             $setup = ogi_DirectedGraph__init_();
             $i = 1;
             while ($i < (($input.$getVertices0()).$size() + 1 | 0)) {
-                $setup.$addVertex0(ovi_DirectedVertex__init_($rt_s(317)), $i);
+                $setup.$addVertex0(ovi_DirectedVertex__init_($rt_s(345)), $i);
                 $i = $i + 1 | 0;
             }
             $inputEdges = $input.$getInternalEdgeMap();
@@ -18608,15 +18700,15 @@ osi_MCPPSolver_Yaoyuenyong_inOutDegree = ($input, $U, $M, $inMdubPrime, $edgeCon
                     break;
                 $e = $inputEdges.$get($i);
                 if ($e.$isDirected())
-                    $setup.$addEdge7(oli_Arc__init_($rt_s(317), ogu_Pair__init_($setupVertices.$get(($e.$getTail0()).$getId()), $setupVertices.$get(($e.$getHead0()).$getId())), $e.$getCost()), $e.$getId());
+                    $setup.$addEdge7(oli_Arc__init_($rt_s(345), ogu_Pair__init_($setupVertices.$get(($e.$getTail0()).$getId()), $setupVertices.$get(($e.$getHead0()).$getId())), $e.$getCost()), $e.$getId());
                 else {
-                    $setup.$addEdge7(oli_Arc__init_($rt_s(317), ogu_Pair__init_($setupVertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $setupVertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), $e.$getCost()), $e.$getId());
-                    $setup.$addEdge7(oli_Arc__init_($rt_s(317), ogu_Pair__init_($setupVertices.$get((($e.$getEndpoints()).$getSecond()).$getId()), $setupVertices.$get((($e.$getEndpoints()).$getFirst()).$getId())), $e.$getCost()), $e.$getId());
+                    $setup.$addEdge7(oli_Arc__init_($rt_s(345), ogu_Pair__init_($setupVertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $setupVertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), $e.$getCost()), $e.$getId());
+                    $setup.$addEdge7(oli_Arc__init_($rt_s(345), ogu_Pair__init_($setupVertices.$get((($e.$getEndpoints()).$getSecond()).$getId()), $setupVertices.$get((($e.$getEndpoints()).$getFirst()).$getId())), $e.$getCost()), $e.$getId());
                     if ($e.$getCost()) {
-                        $a = oli_Arc__init_($rt_s(317), ogu_Pair__init_($setupVertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $setupVertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), 0);
+                        $a = oli_Arc__init_($rt_s(345), ogu_Pair__init_($setupVertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $setupVertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), 0);
                         $a.$setCapacity(1);
                         $setup.$addEdge7($a, $e.$getId());
-                        var$16 = oli_Arc__init_($rt_s(317), ogu_Pair__init_($setupVertices.$get((($e.$getEndpoints()).$getSecond()).$getId()), $setupVertices.$get((($e.$getEndpoints()).$getFirst()).$getId())), 0);
+                        var$16 = oli_Arc__init_($rt_s(345), ogu_Pair__init_($setupVertices.$get((($e.$getEndpoints()).$getSecond()).$getId()), $setupVertices.$get((($e.$getEndpoints()).$getFirst()).$getId())), 0);
                         var$16.$setCapacity(1);
                         $setup.$addEdge7(var$16, $e.$getId());
                     }
@@ -18639,12 +18731,12 @@ osi_MCPPSolver_Yaoyuenyong_inOutDegree = ($input, $U, $M, $inMdubPrime, $edgeCon
                 $a = $setupEdges.$get($i);
                 if ($e.$isDirected()) {
                     var$23 = $undirTraversals.data;
-                    $M.$add2(oli_MixedEdge__init_($rt_s(328), ogu_Pair__init_($e.$getTail0(), $e.$getHead0()), $e.$getCost(), 1));
+                    $M.$add2(oli_MixedEdge__init_($rt_s(356), ogu_Pair__init_($e.$getTail0(), $e.$getHead0()), $e.$getCost(), 1));
                     $inMdubPrime.$add2(jl_Boolean_valueOf(0));
                     var$23[$e.$getId()] = 2;
                     $j = 0;
                     while ($j < $flowanswer.data[$i]) {
-                        $M.$add2(oli_MixedEdge__init_($rt_s(328), ogu_Pair__init_($e.$getTail0(), $e.$getHead0()), $e.$getCost(), 1));
+                        $M.$add2(oli_MixedEdge__init_($rt_s(356), ogu_Pair__init_($e.$getTail0(), $e.$getHead0()), $e.$getCost(), 1));
                         $inMdubPrime.$add2(jl_Boolean_valueOf(1));
                         $eContainer.$addCopy();
                         $j = $j + 1 | 0;
@@ -18653,7 +18745,7 @@ osi_MCPPSolver_Yaoyuenyong_inOutDegree = ($input, $U, $M, $inMdubPrime, $edgeCon
                     var$23 = $flowanswer.data;
                     if (var$23[$i] > 0) {
                         if (!$e.$getCost() && !(!($edgeContainers.$get($e.$getId())).$isDirectedBackward() && !($edgeContainers.$get($e.$getId())).$isDirectedForward()))
-                            $U.$add2(oli_MixedEdge__init_($rt_s(451), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), 0, 0));
+                            $U.$add2(oli_MixedEdge__init_($rt_s(488), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), 0, 0));
                         else if (($a.$getTail()).$getId() != (($e.$getEndpoints()).$getFirst()).$getId())
                             ($edgeContainers.$get($e.$getId())).$directBackward();
                         else
@@ -18661,7 +18753,7 @@ osi_MCPPSolver_Yaoyuenyong_inOutDegree = ($input, $U, $M, $inMdubPrime, $edgeCon
                     }
                     $j = 0;
                     while ($j < var$23[$i]) {
-                        $M.$add2(oli_MixedEdge__init_($rt_s(328), ogu_Pair__init_($inputVertices.$get(($a.$getTail()).$getId()), $inputVertices.$get(($a.$getHead()).$getId())), $e.$getCost(), 1));
+                        $M.$add2(oli_MixedEdge__init_($rt_s(356), ogu_Pair__init_($inputVertices.$get(($a.$getTail()).$getId()), $inputVertices.$get(($a.$getHead()).$getId())), $e.$getCost(), 1));
                         $inMdubPrime.$add2(jl_Boolean_valueOf(1));
                         $eContainer.$addCopy();
                         $j = $j + 1 | 0;
@@ -18673,7 +18765,7 @@ osi_MCPPSolver_Yaoyuenyong_inOutDegree = ($input, $U, $M, $inMdubPrime, $edgeCon
                         if (!var$23[$e.$getId()])
                             var$23[$e.$getId()] = (-1);
                         else {
-                            $U.$add2(oli_MixedEdge__init_($rt_s(328), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), $e.$getCost(), 0));
+                            $U.$add2(oli_MixedEdge__init_($rt_s(356), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), $e.$getCost(), 0));
                             var$23[$e.$getId()] = 2;
                         }
                     } else {
@@ -18681,7 +18773,7 @@ osi_MCPPSolver_Yaoyuenyong_inOutDegree = ($input, $U, $M, $inMdubPrime, $edgeCon
                         if (!var$23[$e.$getId()])
                             var$23[$e.$getId()] = 1;
                         else {
-                            $U.$add2(oli_MixedEdge__init_($rt_s(328), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), $e.$getCost(), 0));
+                            $U.$add2(oli_MixedEdge__init_($rt_s(356), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), $e.$getCost(), 0));
                             var$23[$e.$getId()] = 2;
                         }
                     }
@@ -18696,14 +18788,14 @@ osi_MCPPSolver_Yaoyuenyong_inOutDegree = ($input, $U, $M, $inMdubPrime, $edgeCon
                 $e = $inputEdges.$get($i);
                 $eContainer = $edgeContainers.$get($e.$getId());
                 if (!var$23[$i])
-                    $U.$add2(oli_MixedEdge__init_($rt_s(328), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), $e.$getCost(), 0));
+                    $U.$add2(oli_MixedEdge__init_($rt_s(356), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), $e.$getCost(), 0));
                 else if (var$23[$i] == 1) {
-                    $M.$add2(oli_MixedEdge__init_($rt_s(328), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), $e.$getCost(), 1));
+                    $M.$add2(oli_MixedEdge__init_($rt_s(356), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), $e.$getCost(), 1));
                     $inMdubPrime.$add2(jl_Boolean_valueOf(0));
                     if (!$eContainer.$isDirectedForward())
                         $eContainer.$directForward();
                 } else if (var$23[$i] == (-1)) {
-                    $M.$add2(oli_MixedEdge__init_($rt_s(328), ogu_Pair__init_(($e.$getEndpoints()).$getSecond(), ($e.$getEndpoints()).$getFirst()), $e.$getCost(), 1));
+                    $M.$add2(oli_MixedEdge__init_($rt_s(356), ogu_Pair__init_(($e.$getEndpoints()).$getSecond(), ($e.$getEndpoints()).$getFirst()), $e.$getCost(), 1));
                     $inMdubPrime.$add2(jl_Boolean_valueOf(0));
                     if (!$eContainer.$isDirectedBackward())
                         $eContainer.$directBackward();
@@ -18729,14 +18821,14 @@ osi_MCPPSolver_Yaoyuenyong_evenDegree = ($input, $Em, $Am) => {
             $setup = ogi_UndirectedGraph__init_();
             $i = 1;
             while ($i < (($input.$getVertices0()).$size() + 1 | 0)) {
-                $setup.$addVertex0(ovi_UndirectedVertex__init_($rt_s(326)), $i);
+                $setup.$addVertex0(ovi_UndirectedVertex__init_($rt_s(354)), $i);
                 $i = $i + 1 | 0;
             }
             $indexedVertices = $setup.$getInternalVertexMap();
             var$7 = ($input.$getEdges0()).$iterator();
             while (var$7.$hasNext()) {
                 $e = var$7.$next();
-                $setup.$addEdge7(oli_Edge__init_($rt_s(326), ogu_Pair__init_($indexedVertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $indexedVertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), $e.$getCost()), $e.$getId());
+                $setup.$addEdge7(oli_Edge__init_($rt_s(354), ogu_Pair__init_($indexedVertices.$get((($e.$getEndpoints()).$getFirst()).$getId()), $indexedVertices.$get((($e.$getEndpoints()).$getSecond()).$getId())), $e.$getCost()), $e.$getId());
             }
             $n = ($setup.$getVertices0()).$size();
             var$10 = $n + 1 | 0;
@@ -18749,7 +18841,7 @@ osi_MCPPSolver_Yaoyuenyong_evenDegree = ($input, $Em, $Am) => {
             while (var$15.$hasNext()) {
                 $v = var$15.$next();
                 if (($v.$getDegree() % 2 | 0) == 1)
-                    $matchingGraph.$addVertex0(ovi_UndirectedVertex__init_($rt_s(245)), $v.$getId());
+                    $matchingGraph.$addVertex0(ovi_UndirectedVertex__init_($rt_s(246)), $v.$getId());
             }
             $oddVertices = $matchingGraph.$getVertices0();
             var$18 = $oddVertices.$iterator();
@@ -18761,7 +18853,7 @@ osi_MCPPSolver_Yaoyuenyong_evenDegree = ($input, $Em, $Am) => {
                     if ($v.$getId() <= $v2.$getId())
                         continue;
                     var$20 = $dist.data;
-                    $matchingGraph.$addEdge0(oli_Edge__init_($rt_s(246), ogu_Pair__init_($v, $v2), var$20[$v.$getMatchId()].data[$v2.$getMatchId()]));
+                    $matchingGraph.$addEdge0(oli_Edge__init_($rt_s(247), ogu_Pair__init_($v, $v2), var$20[$v.$getMatchId()].data[$v2.$getMatchId()]));
                 }
             }
             $matchingSolution = ogu_CommonAlgorithms_minCostMatching($matchingGraph);
@@ -18776,7 +18868,7 @@ osi_MCPPSolver_Yaoyuenyong_evenDegree = ($input, $Em, $Am) => {
                     var$10 = $path.data[$curr].data[$end];
                     var$27 = var$26[$curr].data[$end];
                     $e = ($input.$getInternalEdgeMap()).$get(($setupEdges.$get(var$27)).$getMatchId());
-                    $temp = oli_MixedEdge__init_($rt_s(327), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), $e.$getCost(), $e.$isDirected());
+                    $temp = oli_MixedEdge__init_($rt_s(355), ogu_Pair__init_(($e.$getEndpoints()).$getFirst(), ($e.$getEndpoints()).$getSecond()), $e.$getCost(), $e.$isDirected());
                     $input.$addEdge7($temp, $e.$getId());
                     if (!$temp.$isDirected())
                         $Em.$add2($temp);
@@ -18897,11 +18989,11 @@ osi_MCPPSolver_Yaoyuenyong_solve = $this => {
                             $end = $next;
                         }
                         if ($cost1 < ($toImprove.$getFirst0()).$getCost()) {
-                            (jl_System_out()).$println1((((((jl_StringBuilder__init_()).$append4($rt_s(452))).$append2($cost1)).$append4($rt_s(453))).$append2(($toImprove.$getFirst0()).$getCost())).$toString());
+                            (jl_System_out()).$println1((((((jl_StringBuilder__init_()).$append4($rt_s(489))).$append2($cost1)).$append4($rt_s(490))).$append2(($toImprove.$getFirst0()).$getCost())).$toString());
                             $resetStart = 0;
                             if ($toImprove.$isDirectedBackward())
                                 $j = $i;
-                            (jl_System_out()).$println1(((((((jl_StringBuilder__init_()).$append4($rt_s(454))).$append2($curr)).$append4($rt_s(455))).$append2($j)).$append4($rt_s(408))).$toString());
+                            (jl_System_out()).$println1(((((((jl_StringBuilder__init_()).$append4($rt_s(491))).$append2($curr)).$append4($rt_s(492))).$append2($j)).$append4($rt_s(445))).$toString());
                             osi_MCPPSolver_Yaoyuenyong_addShortestPathAndUpdate($curr, $j, $path, $edgePath, $gij1Edges, $gEdgeContainers);
                             $toImprove.$tryRemoveCopy();
                         }
@@ -18951,16 +19043,16 @@ osi_MCPPSolver_Yaoyuenyong_solve = $this => {
                             }
                         }
                         if ($cost1 < ($toImprove.$getFirst0()).$getCost() && $cost1 < $cost2) {
-                            (jl_System_out()).$println1(((((((jl_StringBuilder__init_()).$append4($rt_s(452))).$append2($cost1)).$append4($rt_s(453))).$append2(($toImprove.$getFirst0()).$getCost())).$append4($rt_s(408))).$toString());
+                            (jl_System_out()).$println1(((((((jl_StringBuilder__init_()).$append4($rt_s(489))).$append2($cost1)).$append4($rt_s(490))).$append2(($toImprove.$getFirst0()).$getCost())).$append4($rt_s(445))).$toString());
                             $resetStart = 0;
                             $toImprove.$directBackward();
-                            (jl_System_out()).$println1(((((((jl_StringBuilder__init_()).$append4($rt_s(454))).$append2($i)).$append4($rt_s(455))).$append2($j)).$append4($rt_s(408))).$toString());
+                            (jl_System_out()).$println1(((((((jl_StringBuilder__init_()).$append4($rt_s(491))).$append2($i)).$append4($rt_s(492))).$append2($j)).$append4($rt_s(445))).$toString());
                             osi_MCPPSolver_Yaoyuenyong_addShortestPathAndUpdate($i, $j, $path, $edgePath, $gij1Edges, $gEdgeContainers);
                         } else if ($cost2 < ($toImprove.$getFirst0()).$getCost() && $cost2 < $cost1) {
-                            (jl_System_out()).$println1((((((jl_StringBuilder__init_()).$append4($rt_s(452))).$append2($cost2)).$append4($rt_s(453))).$append2(($toImprove.$getFirst0()).$getCost())).$toString());
+                            (jl_System_out()).$println1((((((jl_StringBuilder__init_()).$append4($rt_s(489))).$append2($cost2)).$append4($rt_s(490))).$append2(($toImprove.$getFirst0()).$getCost())).$toString());
                             $resetStart = 0;
                             $toImprove.$directForward();
-                            (jl_System_out()).$println1(((((((jl_StringBuilder__init_()).$append4($rt_s(454))).$append2($j)).$append4($rt_s(455))).$append2($i)).$append4($rt_s(408))).$toString());
+                            (jl_System_out()).$println1(((((((jl_StringBuilder__init_()).$append4($rt_s(491))).$append2($j)).$append4($rt_s(492))).$append2($i)).$append4($rt_s(445))).$toString());
                             osi_MCPPSolver_Yaoyuenyong_addShortestPathAndUpdate($j, $i, var$41, var$35, $gij1Edges, $gEdgeContainers);
                         }
                     }
@@ -19028,7 +19120,7 @@ osi_MCPPSolver_Yaoyuenyong_solve = $this => {
                     var$39 = var$49 + $cost2 | 0;
                     if (var$39 >= 0)
                         continue;
-                    (jl_System_out()).$println1((((jl_StringBuilder__init_()).$append4($rt_s(456))).$append2(var$39)).$toString());
+                    (jl_System_out()).$println1((((jl_StringBuilder__init_()).$append4($rt_s(493))).$append2(var$39)).$toString());
                     var$44 = 0;
                     $improvements = 1;
                     if (!$toImprove.$isDirectedForward()) {
@@ -19038,7 +19130,7 @@ osi_MCPPSolver_Yaoyuenyong_solve = $this => {
                         $toImprove.$addReverseCopy();
                         $toImprove.$directBackward();
                     }
-                    (jl_System_out()).$println1(((((((jl_StringBuilder__init_()).$append4($rt_s(454))).$append2($curr)).$append4($rt_s(455))).$append2($end)).$append4($rt_s(408))).$toString());
+                    (jl_System_out()).$println1(((((((jl_StringBuilder__init_()).$append4($rt_s(491))).$append2($curr)).$append4($rt_s(492))).$append2($end)).$append4($rt_s(445))).$toString());
                     osi_MCPPSolver_Yaoyuenyong_addShortestPathAndUpdate($curr, $end, $path, $edgePath, $gij3Edges, $gEdgeContainers);
                     osi_MCPPSolver_Yaoyuenyong_addShortestPathAndUpdate($curr, $end, $path2, $edgePath2, $gij4Edges, $gEdgeContainers);
                     osi_MCPPSolver_Yaoyuenyong_eliminateAddedDirectedCycles($n, $gEdgeContainers);
@@ -19063,16 +19155,16 @@ osi_MCPPSolver_Yaoyuenyong_solve = $this => {
                 if ($toImprove.$isDirectedForward()) {
                     $k2 = 0;
                     while ($k2 < ($toImprove.$getNumCopies() + 1 | 0)) {
-                        $G.$addEdge8(oli_MixedEdge__init_($rt_s(306), $e.$getEndpoints(), $e.$getCost(), 1));
+                        $G.$addEdge8(oli_MixedEdge__init_($rt_s(324), $e.$getEndpoints(), $e.$getCost(), 1));
                         $k2 = $k2 + 1 | 0;
                     }
                 } else if (!$toImprove.$isDirectedBackward()) {
-                    $G.$addEdge8(oli_MixedEdge__init_($rt_s(306), ogu_Pair__init_(($e.$getEndpoints()).$getSecond(), ($e.$getEndpoints()).$getFirst()), $e.$getCost(), 1));
-                    $G.$addEdge8(oli_MixedEdge__init_($rt_s(306), $e.$getEndpoints(), $e.$getCost(), 1));
+                    $G.$addEdge8(oli_MixedEdge__init_($rt_s(324), ogu_Pair__init_(($e.$getEndpoints()).$getSecond(), ($e.$getEndpoints()).$getFirst()), $e.$getCost(), 1));
+                    $G.$addEdge8(oli_MixedEdge__init_($rt_s(324), $e.$getEndpoints(), $e.$getCost(), 1));
                 } else {
                     $k2 = 0;
                     while ($k2 < ($toImprove.$getNumCopies() + 1 | 0)) {
-                        $G.$addEdge8(oli_MixedEdge__init_($rt_s(306), ogu_Pair__init_(($e.$getEndpoints()).$getSecond(), ($e.$getEndpoints()).$getFirst()), $e.$getCost(), 1));
+                        $G.$addEdge8(oli_MixedEdge__init_($rt_s(324), ogu_Pair__init_(($e.$getEndpoints()).$getSecond(), ($e.$getEndpoints()).$getFirst()), $e.$getCost(), 1));
                         $k2 = $k2 + 1 | 0;
                     }
                 }
@@ -19117,7 +19209,7 @@ osi_MCPPSolver_Yaoyuenyong_getProblemAttributes = $this => {
     return var$1;
 },
 osi_MCPPSolver_Yaoyuenyong_getSolverName = $this => {
-    return $rt_s(457);
+    return $rt_s(494);
 },
 osi_MCPPSolver_Yaoyuenyong_checkGraphRequirements = $this => {
     let $mGraph;
@@ -19210,7 +19302,7 @@ jur_SOLSet_hasConsumed = ($this, $matchResult) => {
     return 0;
 },
 jur_SOLSet_getName = $this => {
-    return $rt_s(458);
+    return $rt_s(495);
 },
 oe_InvalidEndpointsException = $rt_classWithoutFields(jl_Exception),
 oe_InvalidEndpointsException__init_0 = $this => {
@@ -19223,10 +19315,10 @@ oe_InvalidEndpointsException__init_ = () => {
 };
 function jur_AbstractCharClass$LazyJavaSpaceChar$1() {
     jur_AbstractCharClass.call(this);
-    this.$this$032 = null;
+    this.$this$031 = null;
 }
 let jur_AbstractCharClass$LazyJavaSpaceChar$1__init_ = ($this, $this$0) => {
-    $this.$this$032 = $this$0;
+    $this.$this$031 = $this$0;
     jur_AbstractCharClass__init_($this);
 },
 jur_AbstractCharClass$LazyJavaSpaceChar$1__init_0 = var_0 => {
@@ -19336,13 +19428,13 @@ ogi_WindyGraph_addEdge3 = ($this, $i, $j, $desc, $cost, $reverseCost, $matchId, 
 ogi_WindyGraph_constructEdge0 = ($this, $i, $j, $desc, $cost, $reverseCost) => {
     if (($this.$getInternalVertexMap()).$containsKey0($i) && ($this.$getInternalVertexMap()).$containsKey0($j) && $i >= 0 && $j >= 0)
         return oli_WindyEdge__init_0($desc, ogu_Pair__init_(($this.$getInternalVertexMap()).$get($i), ($this.$getInternalVertexMap()).$get($j)), $cost, $reverseCost);
-    ogi_WindyGraph_LOGGER.$error($rt_s(348));
+    ogi_WindyGraph_LOGGER.$error($rt_s(376));
     $rt_throw(oe_InvalidEndpointsException__init_());
 },
 ogi_WindyGraph_constructEdge = ($this, $i, $j, $desc, $cost, $reverseCost, $isRequired) => {
     if (($this.$getInternalVertexMap()).$containsKey0($i) && ($this.$getInternalVertexMap()).$containsKey0($j) && $i >= 0 && $j >= 0)
         return oli_WindyEdge__init_2($desc, ogu_Pair__init_(($this.$getInternalVertexMap()).$get($i), ($this.$getInternalVertexMap()).$get($j)), $cost, $reverseCost, $isRequired);
-    ogi_WindyGraph_LOGGER.$error($rt_s(348));
+    ogi_WindyGraph_LOGGER.$error($rt_s(376));
     $rt_throw(oe_InvalidEndpointsException__init_());
 },
 ogi_WindyGraph_addVertex = ($this, $v) => {
@@ -19362,39 +19454,35 @@ ogi_WindyGraph_addEdge0 = ($this, $e) => {
     oc_MutableGraph_addEdge($this, $e);
 },
 ogi_WindyGraph_getDeepCopy = $this => {
-    let $ans, $indexedEdges, $indexedVertices, $n, $i, $temp2, $temp, $forSortingE, $m, $e, $e2, $$je;
+    let $ans, $indexedEdges, $indexedVertices, $n, $i, $temp2, $temp, $forSortingE, $m, $e, $edgeId, $e2, $$je;
     a: {
         try {
             $ans = ogi_WindyGraph__init_();
             $indexedEdges = $this.$getInternalEdgeMap();
             $indexedVertices = $this.$getInternalVertexMap();
             $n = ($this.$getVertices0()).$size();
+            ogi_WindyGraph_LOGGER.$info((((((((jl_StringBuilder__init_()).$append4($rt_s(496))).$append2($n)).$append4($rt_s(252))).$append2($indexedEdges.$size())).$append4($rt_s(497))).$append2($indexedVertices.$size())).$toString());
             $i = 1;
-            while ($i <= $n) {
-                $temp2 = $indexedVertices.$get($i);
-                $temp = ovi_WindyVertex__init_($temp2.$getLabel());
-                $temp.$setCoordinates($temp2.$getX(), $temp2.$getY());
-                if ($temp2.$isDemandSet())
-                    $temp.$setDemand($temp2.$getDemand());
-                $ans.$addVertex0($temp, $temp2.$getId());
-                $i = $i + 1 | 0;
+            b: {
+                while (true) {
+                    if ($i > $n)
+                        break b;
+                    $temp2 = $indexedVertices.$get($i);
+                    if ($temp2 === null)
+                        break;
+                    $temp = ovi_WindyVertex__init_($temp2.$getLabel());
+                    $temp.$setCoordinates($temp2.$getX(), $temp2.$getY());
+                    if ($temp2.$isDemandSet())
+                        $temp.$setDemand($temp2.$getDemand());
+                    $ans.$addVertex0($temp, $temp2.$getId());
+                    $i = $i + 1 | 0;
+                }
+                $rt_throw(jl_IllegalStateException__init_((((((jl_StringBuilder__init_()).$append4($rt_s(498))).$append2($i)).$append4($rt_s(304))).$append2($n)).$toString()));
             }
             $forSortingE = gt_TIntArrayList__init_0($indexedEdges.$keys());
             $forSortingE.$sort1();
             $m = $forSortingE.$size();
             $i = 0;
-            while ($i < $m) {
-                $e = $indexedEdges.$get($forSortingE.$get2($i));
-                $e2 = oli_WindyEdge__init_0($e.$getLabel(), ogu_Pair__init_($ans.$getVertex($e.$getFirstEndpointId()), $ans.$getVertex($e.$getSecondEndpointId())), $e.$getCost(), $e.$getReverseCost());
-                $e2.$setMatchId($e.$getId());
-                $e2.$setRequired($e.$isRequired());
-                $e2.$setZone($e.$getZone());
-                $e2.$setType0($e.$getType());
-                $e2.$setMaxSpeed($e.$getMaxSpeed());
-                $ans.$addEdge7($e2, $e.$getId());
-                $i = $i + 1 | 0;
-            }
-            $ans.$setDepotId($this.$getDepotId());
         } catch ($$e) {
             $$je = $rt_wrapException($$e);
             if ($$je instanceof jl_Exception) {
@@ -19404,7 +19492,44 @@ ogi_WindyGraph_getDeepCopy = $this => {
                 throw $$e;
             }
         }
-        return $ans;
+        c: {
+            try {
+                while ($i < $m) {
+                    $edgeId = $forSortingE.$get2($i);
+                    $e = $indexedEdges.$get($edgeId);
+                    if ($e === null)
+                        break c;
+                    $e2 = oli_WindyEdge__init_0($e.$getLabel(), ogu_Pair__init_($ans.$getVertex($e.$getFirstEndpointId()), $ans.$getVertex($e.$getSecondEndpointId())), $e.$getCost(), $e.$getReverseCost());
+                    $e2.$setMatchId($e.$getId());
+                    $e2.$setRequired($e.$isRequired());
+                    $e2.$setZone($e.$getZone());
+                    $e2.$setType0($e.$getType());
+                    $e2.$setMaxSpeed($e.$getMaxSpeed());
+                    $ans.$addEdge7($e2, $e.$getId());
+                    $i = $i + 1 | 0;
+                }
+                $ans.$setDepotId($this.$getDepotId());
+            } catch ($$e) {
+                $$je = $rt_wrapException($$e);
+                if ($$je instanceof jl_Exception) {
+                    $e = $$je;
+                    break a;
+                } else {
+                    throw $$e;
+                }
+            }
+            return $ans;
+        }
+        try {
+            $rt_throw(jl_IllegalStateException__init_(((((((((jl_StringBuilder__init_()).$append4($rt_s(499))).$append2($edgeId)).$append4($rt_s(500))).$append2($i)).$append4($rt_s(304))).$append2($m)).$append4($rt_s(501))).$toString()));
+        } catch ($$e) {
+            $$je = $rt_wrapException($$e);
+            if ($$je instanceof jl_Exception) {
+                $e = $$je;
+            } else {
+                throw $$e;
+            }
+        }
     }
     $e.$printStackTrace0();
     return null;
@@ -19481,7 +19606,7 @@ ogi_DirectedGraph_addEdge = ($this, $e) => {
 ogi_DirectedGraph_removeEdge = ($this, $e) => {
     let $toUpdate, var$3;
     if (!($this.$getEdges0()).$contains0($e)) {
-        ogi_DirectedGraph_LOGGER.$error($rt_s(459));
+        ogi_DirectedGraph_LOGGER.$error($rt_s(502));
         $rt_throw(jl_IllegalArgumentException__init_());
     }
     ($e.$getTail()).$removeFromNeighbors0($e.$getHead(), $e);
@@ -19504,7 +19629,7 @@ ogi_DirectedGraph_getDeepCopy = $this => {
             ($this.$getEdges0()).$size();
             $i = 1;
             while ($i <= $n) {
-                $temp = ovi_DirectedVertex__init_($rt_s(351));
+                $temp = ovi_DirectedVertex__init_($rt_s(379));
                 $temp2 = $indexedVertices.$get($i);
                 if ($temp2.$isDemandSet())
                     $temp.$setDemand($temp2.$getDemand());
@@ -19518,7 +19643,7 @@ ogi_DirectedGraph_getDeepCopy = $this => {
             $i = 0;
             while ($i < var$9) {
                 $a = $indexedArcs.$get($forSorting.$get2($i));
-                $a2 = oli_Arc__init_($rt_s(351), ogu_Pair__init_(($ans.$getInternalVertexMap()).$get(($a.$getTail()).$getId()), ($ans.$getInternalVertexMap()).$get(($a.$getHead()).$getId())), $a.$getCost());
+                $a2 = oli_Arc__init_($rt_s(379), ogu_Pair__init_(($ans.$getInternalVertexMap()).$get(($a.$getTail()).$getId()), ($ans.$getInternalVertexMap()).$get(($a.$getHead()).$getId())), $a.$getCost());
                 if ($a.$isCapacitySet())
                     $a2.$setCapacity($a.$getCapacity());
                 $a2.$setRequired($a.$isRequired());
@@ -19547,7 +19672,7 @@ ogi_DirectedGraph_getDeepCopy = $this => {
 ogi_DirectedGraph_constructEdge = ($this, $i, $j, $desc, $cost) => {
     if (($this.$getInternalVertexMap()).$containsKey0($i) && ($this.$getInternalVertexMap()).$containsKey0($j) && $i >= 0 && $j >= 0)
         return oli_Arc__init_($desc, ogu_Pair__init_(($this.$getInternalVertexMap()).$get($i), ($this.$getInternalVertexMap()).$get($j)), $cost);
-    ogi_DirectedGraph_LOGGER.$error($rt_s(348));
+    ogi_DirectedGraph_LOGGER.$error($rt_s(376));
     $rt_throw(oe_InvalidEndpointsException__init_());
 },
 ogi_DirectedGraph_constructVertex = ($this, $desc) => {
@@ -19590,14 +19715,14 @@ function jur_PatternSyntaxException() {
     let a = this; jl_IllegalArgumentException.call(a);
     a.$desc = null;
     a.$pattern1 = null;
-    a.$index2 = 0;
+    a.$index1 = 0;
 }
 let jur_PatternSyntaxException__init_0 = ($this, $description, $pattern, $index) => {
     jl_IllegalArgumentException__init_1($this);
-    $this.$index2 = (-1);
+    $this.$index1 = (-1);
     $this.$desc = $description;
     $this.$pattern1 = $pattern;
-    $this.$index2 = $index;
+    $this.$index1 = $index;
 },
 jur_PatternSyntaxException__init_ = (var_0, var_1, var_2) => {
     let var_3 = new jur_PatternSyntaxException();
@@ -19607,17 +19732,17 @@ jur_PatternSyntaxException__init_ = (var_0, var_1, var_2) => {
 jur_PatternSyntaxException_getMessage = $this => {
     let $filler, $temp, var$3, var$4, var$5, var$6;
     $filler = $rt_s(33);
-    if ($this.$index2 >= 1) {
-        $temp = $rt_createCharArray($this.$index2);
+    if ($this.$index1 >= 1) {
+        $temp = $rt_createCharArray($this.$index1);
         ju_Arrays_fill2($temp, 32);
         $filler = jl_String__init_($temp);
     }
     var$3 = $this.$desc;
     if ($this.$pattern1 !== null && $this.$pattern1.$length()) {
-        var$4 = $this.$index2;
+        var$4 = $this.$index1;
         var$5 = $this.$pattern1;
         var$6 = jl_StringBuilder__init_();
-        jl_StringBuilder_append(jl_StringBuilder_append(jl_StringBuilder_append(jl_StringBuilder_append(jl_StringBuilder_append1(var$6, var$4), $rt_s(273)), var$5), $rt_s(273)), $filler);
+        jl_StringBuilder_append(jl_StringBuilder_append(jl_StringBuilder_append(jl_StringBuilder_append(jl_StringBuilder_append1(var$6, var$4), $rt_s(279)), var$5), $rt_s(279)), $filler);
         var$5 = jl_StringBuilder_toString(var$6);
     } else
         var$5 = $rt_s(33);
@@ -19632,11 +19757,11 @@ ot_TeaVMWrapper_$callClinit = () => {
     ot_TeaVMWrapper__clinit_();
 },
 ot_TeaVMWrapper_main = $args => {
-    let var$2, var$3, var$4, $arg, $solver, $instanceContent, $dg, $dcpp, $dcppSolver, $ex, $ug, $ucpp, $ucppSolver, $mg, $mcpp, $mcppSolver, $mg2, $vertices, var$20, $v, $mcpp2, $mcppSolver2, $e, $wg, $wpp, $wppSolver, $wg2, $wrpp, $wrppSolver, $$je;
+    let var$2, var$3, var$4, $arg, $solver, $instanceContent, $dg, $dcpp, $dcppSolver, $ex, $ug, $ucpp, $ucppSolver, $mg, $mcpp, $mcppSolver, $mg2, $vertices, var$20, $v, $mcpp2, $mcppSolver2, $e, $wg, $wpp, $wppSolver, $wg2, $debugEdges, $dbgCount, $edge, $debugVertices, $dbgVertexCount, $vertex, $inspectionError, $wrpp, $wrppSolver, $$je;
     ot_TeaVMWrapper_$callClinit();
     var$2 = $args.data;
     var$3 = var$2.length;
-    if (var$3 != 2 && !var$2[0].$equals($rt_s(460)) && !(var$3 == 3 && var$2[0].$equals($rt_s(460)))) {
+    if (var$3 != 2 && !var$2[0].$equals($rt_s(503)) && !(var$3 == 3 && var$2[0].$equals($rt_s(503)))) {
         var$4 = 0;
         while (var$4 < var$3) {
             $arg = var$2[var$4];
@@ -19655,7 +19780,7 @@ ot_TeaVMWrapper_main = $args => {
                     case 1:
                         try {
                             $dg = ot_OARLibParser_parseDirectedGraph($instanceContent);
-                            $dcpp = opic_DirectedCPP__init_0($dg, $rt_s(461));
+                            $dcpp = opic_DirectedCPP__init_0($dg, $rt_s(504));
                             $dcppSolver = osi_DCPPSolver_Edmonds__init_0($dcpp);
                             $dcppSolver.$trySolve();
                             (jl_System_out()).$println1($dcppSolver.$printCurrentSol());
@@ -19673,7 +19798,7 @@ ot_TeaVMWrapper_main = $args => {
                     case 2:
                         try {
                             $ug = ot_OARLibParser_parseUndirectedGraph($instanceContent);
-                            $ucpp = opic_UndirectedCPP__init_0($ug, $rt_s(461));
+                            $ucpp = opic_UndirectedCPP__init_0($ug, $rt_s(504));
                             $ucppSolver = osi_UCPPSolver_Edmonds__init_0($ucpp);
                             $ucppSolver.$trySolve();
                             (jl_System_out()).$println1($ucppSolver.$printCurrentSol());
@@ -19691,7 +19816,7 @@ ot_TeaVMWrapper_main = $args => {
                     case 3:
                         try {
                             $mg = ot_OARLibParser_parseMixedGraph($instanceContent);
-                            $mcpp = opic_MixedCPP__init_0($mg, $rt_s(461));
+                            $mcpp = opic_MixedCPP__init_0($mg, $rt_s(504));
                             $mcppSolver = osi_MCPPSolver_Frederickson__init_0($mcpp);
                             $mcppSolver.$trySolve();
                             (jl_System_out()).$println1($mcppSolver.$printCurrentSol());
@@ -19709,15 +19834,15 @@ ot_TeaVMWrapper_main = $args => {
                     case 4:
                         try {
                             $mg2 = ot_OARLibParser_parseMixedGraph($instanceContent);
-                            (jl_System_out()).$println1($rt_s(462));
+                            (jl_System_out()).$println1($rt_s(505));
                             $vertices = ju_ArrayList__init_3($mg2.$getVertices0());
                             ju_Collections_sort($vertices, ot_TeaVMWrapper$main$lambda$_1_0__init_0());
                             var$20 = $vertices.$iterator();
                             while (var$20.$hasNext()) {
                                 $v = var$20.$next();
-                                (jl_System_out()).$println1((((((((((jl_StringBuilder__init_()).$append4($rt_s(463))).$append2($v.$getId())).$append4($rt_s(464))).$append2($v.$getDegree())).$append4($rt_s(465))).$append2($v.$getInDegree())).$append4($rt_s(466))).$append2($v.$getOutDegree())).$toString());
+                                (jl_System_out()).$println1((((((((((jl_StringBuilder__init_()).$append4($rt_s(506))).$append2($v.$getId())).$append4($rt_s(507))).$append2($v.$getDegree())).$append4($rt_s(508))).$append2($v.$getInDegree())).$append4($rt_s(509))).$append2($v.$getOutDegree())).$toString());
                             }
-                            $mcpp2 = opic_MixedCPP__init_0($mg2, $rt_s(467));
+                            $mcpp2 = opic_MixedCPP__init_0($mg2, $rt_s(510));
                             $mcppSolver2 = osi_MCPPSolver_Yaoyuenyong__init_0($mcpp2);
                             $mcppSolver2.$trySolve();
                             (jl_System_out()).$println1($mcppSolver2.$printCurrentSol());
@@ -19735,7 +19860,7 @@ ot_TeaVMWrapper_main = $args => {
                     case 5:
                         try {
                             $wg = ot_OARLibParser_parseWindyGraph($instanceContent);
-                            $wpp = opic_WindyCPP__init_0($wg, $rt_s(467));
+                            $wpp = opic_WindyCPP__init_0($wg, $rt_s(510));
                             $wppSolver = osi_WRPPSolver_Win__init_0($wpp);
                             $wppSolver.$trySolve();
                             (jl_System_out()).$println1($wppSolver.$printCurrentSol());
@@ -19754,10 +19879,76 @@ ot_TeaVMWrapper_main = $args => {
                         break;
                     case 7:
                         try {
-                            $wg2 = ot_OARLibParser_parseWindyGraph($instanceContent);
-                            $wrpp = opir_WindyRPP__init_0($wg2, $rt_s(467));
+                            (jl_System_out()).$println1($rt_s(511));
+                            $wg2 = ot_OARLibParser_parseWindyGraphWithFormatDetection($instanceContent);
+                            (jl_System_out()).$println1((((((jl_StringBuilder__init_()).$append4($rt_s(512))).$append2(($wg2.$getVertices0()).$size())).$append4($rt_s(400))).$append2(($wg2.$getEdges0()).$size())).$toString());
+                            c: {
+                                try {
+                                    (jl_System_out()).$println1($rt_s(513));
+                                    $debugEdges = $wg2.$getEdges0();
+                                    if ($debugEdges === null)
+                                        (jl_System_out()).$println1($rt_s(514));
+                                    else {
+                                        $dbgCount = 0;
+                                        var$20 = $debugEdges.$iterator();
+                                        d: {
+                                            while (true) {
+                                                if (!var$20.$hasNext())
+                                                    break d;
+                                                $edge = var$20.$next();
+                                                if ($edge === null)
+                                                    break;
+                                                if ($dbgCount < 3)
+                                                    (jl_System_out()).$println1((((((((((jl_StringBuilder__init_()).$append4($rt_s(515))).$append2($edge.$getId())).$append4($rt_s(516))).$append2($edge.$getCost())).$append4($rt_s(517))).$append2($edge.$getReverseCost())).$append4($rt_s(518))).$append16($edge.$isRequired())).$toString());
+                                                $dbgCount = $dbgCount + 1 | 0;
+                                            }
+                                            (jl_System_out()).$println1($rt_s(519));
+                                        }
+                                        (jl_System_out()).$println1((((jl_StringBuilder__init_()).$append4($rt_s(520))).$append2($dbgCount)).$toString());
+                                    }
+                                    $debugVertices = $wg2.$getVertices0();
+                                    if ($debugVertices === null)
+                                        (jl_System_out()).$println1($rt_s(521));
+                                    else {
+                                        $dbgVertexCount = 0;
+                                        var$20 = $debugVertices.$iterator();
+                                        e: {
+                                            while (true) {
+                                                if (!var$20.$hasNext())
+                                                    break e;
+                                                $vertex = var$20.$next();
+                                                if ($vertex === null)
+                                                    break;
+                                                if ($dbgVertexCount < 3)
+                                                    (jl_System_out()).$println1((((((jl_StringBuilder__init_()).$append4($rt_s(522))).$append2($vertex.$getId())).$append4($rt_s(523))).$append2($vertex.$getDegree())).$toString());
+                                                $dbgVertexCount = $dbgVertexCount + 1 | 0;
+                                            }
+                                            (jl_System_out()).$println1($rt_s(524));
+                                        }
+                                        (jl_System_out()).$println1((((jl_StringBuilder__init_()).$append4($rt_s(525))).$append2($dbgVertexCount)).$toString());
+                                    }
+                                    break c;
+                                } catch ($$e) {
+                                    $$je = $rt_wrapException($$e);
+                                    if ($$je instanceof jl_Throwable) {
+                                        $inspectionError = $$je;
+                                    } else {
+                                        throw $$e;
+                                    }
+                                }
+                                (jl_System_out()).$println1((((jl_StringBuilder__init_()).$append4($rt_s(526))).$append4($inspectionError.$getMessage())).$toString());
+                                $inspectionError.$printStackTrace0();
+                            }
+                            (jl_System_out()).$println1($rt_s(527));
+                            $wrpp = opir_WindyRPP__init_0($wg2, $rt_s(510));
+                            (jl_System_out()).$println1($rt_s(528));
+                            (jl_System_out()).$println1($rt_s(529));
                             $wrppSolver = osi_WRPPSolver_Benavent_H1__init_1($wrpp);
+                            (jl_System_out()).$println1($rt_s(530));
+                            (jl_System_out()).$println1($rt_s(531));
                             $wrppSolver.$trySolve();
+                            (jl_System_out()).$println1($rt_s(532));
+                            (jl_System_out()).$println1($rt_s(533));
                             (jl_System_out()).$println1($wrppSolver.$printCurrentSol());
                             break b;
                         } catch ($$e) {
@@ -19768,13 +19959,14 @@ ot_TeaVMWrapper_main = $args => {
                                 throw $$e;
                             }
                         }
+                        (jl_System_out()).$println1($rt_s(534));
                         $e.$printStackTrace0();
                         break b;
                     default:
                         break b;
                 }
-                (jl_System_out()).$println1($rt_s(468));
-                (jl_System_out()).$println1($rt_s(469));
+                (jl_System_out()).$println1($rt_s(535));
+                (jl_System_out()).$println1($rt_s(536));
             }
             break a;
         } catch ($$e) {
@@ -19790,25 +19982,25 @@ ot_TeaVMWrapper_main = $args => {
 ot_TeaVMWrapper_displayHelp = () => {
     let $helpText, var$2;
     ot_TeaVMWrapper_$callClinit();
-    $helpText = $rt_s(470);
+    $helpText = $rt_s(537);
     var$2 = (((jl_StringBuilder__init_()).$append4($helpText)).$append4($rt_s(239))).$toString();
     var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(239))).$toString();
-    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(471))).$toString();
-    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(472))).$toString();
-    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(473))).$toString();
-    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(474))).$toString();
-    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(475))).$toString();
-    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(476))).$toString();
-    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(477))).$toString();
-    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(478))).$toString();
-    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(479))).$toString();
-    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(480))).$toString();
-    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(481))).$toString();
+    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(538))).$toString();
+    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(539))).$toString();
+    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(540))).$toString();
+    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(541))).$toString();
+    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(542))).$toString();
+    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(543))).$toString();
+    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(544))).$toString();
+    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(545))).$toString();
+    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(546))).$toString();
+    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(547))).$toString();
+    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(548))).$toString();
     var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(239))).$toString();
-    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(482))).$toString();
-    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(483))).$toString();
+    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(549))).$toString();
+    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(550))).$toString();
     var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(239))).$toString();
-    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(484))).$toString();
+    var$2 = (((jl_StringBuilder__init_()).$append4(var$2)).$append4($rt_s(551))).$toString();
     (jl_System_out()).$println1(var$2);
 },
 ot_TeaVMWrapper_lambda$main$0 = ($v1, $v2) => {
@@ -19836,7 +20028,7 @@ opi_RuralPostmanProblem__init_ = ($this, $graph, $name, $objFunc) => {
             $isCpp = 0;
     }
     if ($isCpp)
-        opi_RuralPostmanProblem_LOGGER.$warn($rt_s(485));
+        opi_RuralPostmanProblem_LOGGER.$warn($rt_s(552));
 },
 opi_RuralPostmanProblem__clinit_ = () => {
     opi_RuralPostmanProblem_LOGGER = ou_SimpleLogger_getLogger($rt_cls(opi_RuralPostmanProblem));
@@ -19935,9 +20127,9 @@ opi_ProblemAttributes$Type_$values = () => {
     return var$1;
 },
 opi_ProblemAttributes$Type__clinit_ = () => {
-    opi_ProblemAttributes$Type_CHINESE_POSTMAN = opi_ProblemAttributes$Type__init_($rt_s(486), 0);
-    opi_ProblemAttributes$Type_RURAL_POSTMAN = opi_ProblemAttributes$Type__init_($rt_s(487), 1);
-    opi_ProblemAttributes$Type_PARTITIONING = opi_ProblemAttributes$Type__init_($rt_s(488), 2);
+    opi_ProblemAttributes$Type_CHINESE_POSTMAN = opi_ProblemAttributes$Type__init_($rt_s(553), 0);
+    opi_ProblemAttributes$Type_RURAL_POSTMAN = opi_ProblemAttributes$Type__init_($rt_s(554), 1);
+    opi_ProblemAttributes$Type_PARTITIONING = opi_ProblemAttributes$Type__init_($rt_s(555), 2);
     opi_ProblemAttributes$Type_$VALUES = opi_ProblemAttributes$Type_$values();
 };
 function jur_Pattern() {
@@ -19998,7 +20190,7 @@ jur_Pattern_pattern = $this => {
 },
 jur_Pattern_compile0 = ($pattern, $flags) => {
     if ($pattern === null)
-        $rt_throw(jl_NullPointerException__init_1($rt_s(489)));
+        $rt_throw(jl_NullPointerException__init_1($rt_s(556)));
     if ($flags && ($flags | 255) != 255)
         $rt_throw(jl_IllegalArgumentException__init_0($rt_s(33)));
     jur_AbstractSet_$callClinit();
@@ -20777,17 +20969,17 @@ jur_Pattern_finalizeCompile = $this => {
 },
 jur_Pattern_quote = $s => {
     let $sb, $apos, var$4, $apos_0;
-    $sb = (jl_StringBuilder__init_()).$append4($rt_s(490));
+    $sb = (jl_StringBuilder__init_()).$append4($rt_s(557));
     $apos = 0;
     while (true) {
-        var$4 = $s.$indexOf2($rt_s(491), $apos);
+        var$4 = $s.$indexOf2($rt_s(558), $apos);
         if (var$4 < 0)
             break;
         $apos_0 = var$4 + 2 | 0;
-        ($sb.$append4($s.$substring($apos, $apos_0))).$append4($rt_s(492));
+        ($sb.$append4($s.$substring($apos, $apos_0))).$append4($rt_s(559));
         $apos = $apos_0;
     }
-    return (($sb.$append4($s.$substring0($apos))).$append4($rt_s(491))).$toString();
+    return (($sb.$append4($s.$substring0($apos))).$append4($rt_s(558))).$toString();
 },
 jur_Pattern_groupCount = $this => {
     return $this.$globalGroupIndex;
@@ -20857,13 +21049,13 @@ oc_Link$HighwayType_$values = () => {
     return var$1;
 },
 oc_Link$HighwayType__clinit_ = () => {
-    oc_Link$HighwayType_TRUNK = oc_Link$HighwayType__init_($rt_s(493), 0);
-    oc_Link$HighwayType_PRIMARY = oc_Link$HighwayType__init_($rt_s(494), 1);
-    oc_Link$HighwayType_SECONDARY = oc_Link$HighwayType__init_($rt_s(495), 2);
-    oc_Link$HighwayType_TERTIARY = oc_Link$HighwayType__init_($rt_s(496), 3);
-    oc_Link$HighwayType_RESIDENTIAL_ACCESS = oc_Link$HighwayType__init_($rt_s(497), 4);
-    oc_Link$HighwayType_OTHER = oc_Link$HighwayType__init_($rt_s(445), 5);
-    oc_Link$HighwayType_NOT_SET = oc_Link$HighwayType__init_($rt_s(446), 6);
+    oc_Link$HighwayType_TRUNK = oc_Link$HighwayType__init_($rt_s(560), 0);
+    oc_Link$HighwayType_PRIMARY = oc_Link$HighwayType__init_($rt_s(561), 1);
+    oc_Link$HighwayType_SECONDARY = oc_Link$HighwayType__init_($rt_s(562), 2);
+    oc_Link$HighwayType_TERTIARY = oc_Link$HighwayType__init_($rt_s(563), 3);
+    oc_Link$HighwayType_RESIDENTIAL_ACCESS = oc_Link$HighwayType__init_($rt_s(564), 4);
+    oc_Link$HighwayType_OTHER = oc_Link$HighwayType__init_($rt_s(482), 5);
+    oc_Link$HighwayType_NOT_SET = oc_Link$HighwayType__init_($rt_s(483), 6);
     oc_Link$HighwayType_$VALUES = oc_Link$HighwayType_$values();
 },
 jur_PosAltGroupQuantifierSet = $rt_classWithoutFields(jur_AltGroupQuantifierSet),
@@ -20904,19 +21096,19 @@ ou_SimpleLogger_getLogger = $clazz => {
     return ou_SimpleLogger__init_(jl_Class_getSimpleName($clazz));
 },
 ou_SimpleLogger_debug = ($this, $message) => {
-    (jl_System_out()).$println1((((((jl_StringBuilder__init_()).$append4($rt_s(498))).$append4($this.$name)).$append4($rt_s(499))).$append4($message)).$toString());
+    (jl_System_out()).$println1((((((jl_StringBuilder__init_()).$append4($rt_s(565))).$append4($this.$name)).$append4($rt_s(566))).$append4($message)).$toString());
 },
 ou_SimpleLogger_info = ($this, $message) => {
-    (jl_System_out()).$println1((((((jl_StringBuilder__init_()).$append4($rt_s(500))).$append4($this.$name)).$append4($rt_s(499))).$append4($message)).$toString());
+    (jl_System_out()).$println1((((((jl_StringBuilder__init_()).$append4($rt_s(567))).$append4($this.$name)).$append4($rt_s(566))).$append4($message)).$toString());
 },
 ou_SimpleLogger_warn = ($this, $message) => {
-    (jl_System_out()).$println1((((((jl_StringBuilder__init_()).$append4($rt_s(501))).$append4($this.$name)).$append4($rt_s(499))).$append4($message)).$toString());
+    (jl_System_out()).$println1((((((jl_StringBuilder__init_()).$append4($rt_s(568))).$append4($this.$name)).$append4($rt_s(566))).$append4($message)).$toString());
 },
 ou_SimpleLogger_error0 = ($this, $message) => {
-    (jl_System_err()).$println1((((((jl_StringBuilder__init_()).$append4($rt_s(502))).$append4($this.$name)).$append4($rt_s(499))).$append4($message)).$toString());
+    (jl_System_err()).$println1((((((jl_StringBuilder__init_()).$append4($rt_s(569))).$append4($this.$name)).$append4($rt_s(566))).$append4($message)).$toString());
 },
 ou_SimpleLogger_error = ($this, $message, $throwable) => {
-    (jl_System_err()).$println1((((((jl_StringBuilder__init_()).$append4($rt_s(502))).$append4($this.$name)).$append4($rt_s(499))).$append4($message)).$toString());
+    (jl_System_err()).$println1((((((jl_StringBuilder__init_()).$append4($rt_s(569))).$append4($this.$name)).$append4($rt_s(566))).$append4($message)).$toString());
     if ($throwable !== null)
         $throwable.$printStackTrace(jl_System_err());
 };
@@ -21235,7 +21427,7 @@ jur_UMultiLineEOLSet_hasConsumed = ($this, $matchResult) => {
     return $res;
 },
 jur_UMultiLineEOLSet_getName = $this => {
-    return $rt_s(503);
+    return $rt_s(570);
 };
 function ovi_DirectedVertex() {
     let a = this; oc_Vertex.call(a);
@@ -21560,7 +21752,7 @@ jur_EOLSet_hasConsumed = ($this, $matchResult) => {
     return $res;
 },
 jur_EOLSet_getName = $this => {
-    return $rt_s(416);
+    return $rt_s(453);
 },
 jur_AbstractLineTerminator$2 = $rt_classWithoutFields(jur_AbstractLineTerminator),
 jur_AbstractLineTerminator$2__init_ = $this => {
@@ -22124,7 +22316,7 @@ jur_Lexer_parseCharClassName = $this => {
         if ($this.$pattern0.data[$this.$index0] != 123) {
             var$2 = jl_String__init_2($this.$pattern0, jur_Lexer_nextIndex($this), 1);
             var$3 = jl_StringBuilder__init_();
-            jl_StringBuilder_append(jl_StringBuilder_append(var$3, $rt_s(504)), var$2);
+            jl_StringBuilder_append(jl_StringBuilder_append(var$3, $rt_s(571)), var$2);
             return jl_StringBuilder_toString(var$3);
         }
         jur_Lexer_nextIndex($this);
@@ -22145,15 +22337,15 @@ jur_Lexer_parseCharClassName = $this => {
     $res = $sb.$toString();
     if ($res.$length() == 1) {
         var$2 = jl_StringBuilder__init_();
-        jl_StringBuilder_append(jl_StringBuilder_append(var$2, $rt_s(504)), $res);
+        jl_StringBuilder_append(jl_StringBuilder_append(var$2, $rt_s(571)), $res);
         return jl_StringBuilder_toString(var$2);
     }
     b: {
         c: {
             if ($res.$length() > 3) {
-                if ($res.$startsWith1($rt_s(504)))
+                if ($res.$startsWith1($rt_s(571)))
                     break c;
-                if ($res.$startsWith1($rt_s(505)))
+                if ($res.$startsWith1($rt_s(572)))
                     break c;
             }
             break b;
@@ -23168,7 +23360,7 @@ ogi_UndirectedGraph_addEdge0 = ($this, $e) => {
 ogi_UndirectedGraph_removeEdge = ($this, $e) => {
     let $endpoints, $toUpdate, var$4;
     if (!($this.$getEdges0()).$contains0($e)) {
-        ogi_UndirectedGraph_LOGGER.$error($rt_s(350));
+        ogi_UndirectedGraph_LOGGER.$error($rt_s(378));
         $rt_throw(jl_IllegalArgumentException__init_());
     }
     $endpoints = $e.$getEndpoints();
@@ -23192,7 +23384,7 @@ ogi_UndirectedGraph_getDeepCopy0 = $this => {
             $n = ($this.$getVertices0()).$size();
             $i = 1;
             while ($i <= $n) {
-                $temp = ovi_UndirectedVertex__init_($rt_s(351));
+                $temp = ovi_UndirectedVertex__init_($rt_s(379));
                 $temp2 = $indexedVertices.$get($i);
                 $temp.$setCoordinates($temp2.$getX(), $temp2.$getY());
                 $ans.$addVertex0($temp, $i);
@@ -23204,7 +23396,7 @@ ogi_UndirectedGraph_getDeepCopy0 = $this => {
             $i = 0;
             while ($i < $m) {
                 $e = $indexedEdges.$get($forSorting.$get2($i));
-                $e2 = oli_Edge__init_($rt_s(351), ogu_Pair__init_(($ans.$getInternalVertexMap()).$get((($e.$getEndpoints()).$getFirst()).$getId()), ($ans.$getInternalVertexMap()).$get((($e.$getEndpoints()).$getSecond()).$getId())), $e.$getCost());
+                $e2 = oli_Edge__init_($rt_s(379), ogu_Pair__init_(($ans.$getInternalVertexMap()).$get((($e.$getEndpoints()).$getFirst()).$getId()), ($ans.$getInternalVertexMap()).$get((($e.$getEndpoints()).$getSecond()).$getId())), $e.$getCost());
                 $e2.$setRequired($e.$isRequired());
                 $e2.$setMatchId($e.$getId());
                 $e2.$setZone($e.$getZone());
@@ -23231,7 +23423,7 @@ ogi_UndirectedGraph_getDeepCopy0 = $this => {
 ogi_UndirectedGraph_constructEdge0 = ($this, $i, $j, $desc, $cost) => {
     if (($this.$getInternalVertexMap()).$containsKey0($i) && ($this.$getInternalVertexMap()).$containsKey0($j) && $i >= 0 && $j >= 0)
         return oli_Edge__init_($desc, ogu_Pair__init_(($this.$getInternalVertexMap()).$get($i), ($this.$getInternalVertexMap()).$get($j)), $cost);
-    ogi_UndirectedGraph_LOGGER.$error($rt_s(348));
+    ogi_UndirectedGraph_LOGGER.$error($rt_s(376));
     $rt_throw(oe_InvalidEndpointsException__init_());
 },
 ogi_UndirectedGraph_constructVertex0 = ($this, $desc) => {
@@ -23262,9 +23454,9 @@ jur_AbstractCharClass$LazyCharClass, 0, jl_Object, [], 1, 0, 0, 0, ["$_init_", $
 jur_AbstractCharClass$LazyBlank, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyBlank__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyBlank_computeValue)],
 jur_AbstractCharClass$LazyCntrl, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyCntrl__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyCntrl_computeValue)],
 jl_Throwable, 0, jl_Object, [], 0, 3, 0, 0, ["$fillInStackTrace", $rt_wrapFunction0(jl_Throwable_fillInStackTrace), "$getMessage", $rt_wrapFunction0(jl_Throwable_getMessage), "$getLocalizedMessage", $rt_wrapFunction0(jl_Throwable_getLocalizedMessage), "$getCause", $rt_wrapFunction0(jl_Throwable_getCause), "$printStackTrace0", $rt_wrapFunction0(jl_Throwable_printStackTrace), "$printStackTrace", $rt_wrapFunction1(jl_Throwable_printStackTrace0)],
-jl_Exception, 0, jl_Throwable, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(jl_Exception__init_), "$_init_0", $rt_wrapFunction1(jl_Exception__init_0)],
-jl_RuntimeException, 0, jl_Exception, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(jl_RuntimeException__init_), "$_init_0", $rt_wrapFunction1(jl_RuntimeException__init_0)],
-jl_IndexOutOfBoundsException, "IndexOutOfBoundsException", 20, jl_RuntimeException, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(jl_IndexOutOfBoundsException__init_0), "$_init_0", $rt_wrapFunction1(jl_IndexOutOfBoundsException__init_1)],
+jl_Exception, "Exception", 20, jl_Throwable, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(jl_Exception__init_), "$_init_0", $rt_wrapFunction2(jl_Exception__init_1), "$_init_1", $rt_wrapFunction1(jl_Exception__init_0)],
+jl_RuntimeException, 0, jl_Exception, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(jl_RuntimeException__init_), "$_init_1", $rt_wrapFunction1(jl_RuntimeException__init_0)],
+jl_IndexOutOfBoundsException, "IndexOutOfBoundsException", 20, jl_RuntimeException, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(jl_IndexOutOfBoundsException__init_0), "$_init_1", $rt_wrapFunction1(jl_IndexOutOfBoundsException__init_1)],
 jur_SpecialToken, 0, jl_Object, [], 1, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_SpecialToken__init_)],
 jur_AbstractCharClass, 0, jur_SpecialToken, [], 1, 0, 0, jur_AbstractCharClass_$callClinit, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass__init_), "$getBits", $rt_wrapFunction0(jur_AbstractCharClass_getBits), "$getLowHighSurrogates", $rt_wrapFunction0(jur_AbstractCharClass_getLowHighSurrogates), "$hasLowHighSurrogates", $rt_wrapFunction0(jur_AbstractCharClass_hasLowHighSurrogates), "$mayContainSupplCodepoints", $rt_wrapFunction0(jur_AbstractCharClass_mayContainSupplCodepoints), "$getInstance", $rt_wrapFunction0(jur_AbstractCharClass_getInstance),
 "$getSurrogates", $rt_wrapFunction0(jur_AbstractCharClass_getSurrogates), "$getWithoutSurrogates", $rt_wrapFunction0(jur_AbstractCharClass_getWithoutSurrogates), "$hasUCI", $rt_wrapFunction0(jur_AbstractCharClass_hasUCI), "$setNegative", $rt_wrapFunction1(jur_AbstractCharClass_setNegative), "$isNegative", $rt_wrapFunction0(jur_AbstractCharClass_isNegative)],
@@ -23273,74 +23465,72 @@ jur_AbstractCharClass$LazyJavaJavaIdentifierStart, 0, jur_AbstractCharClass$Lazy
 ji_Serializable, 0, jl_Object, [], 3, 3, 0, 0, 0,
 jl_Number, 0, jl_Object, [ji_Serializable], 1, 3, 0, 0, ["$_init_", $rt_wrapFunction0(jl_Number__init_)],
 jl_Comparable, 0, jl_Object, [], 3, 3, 0, 0, 0,
-jl_Integer, "Integer", 20, jl_Number, [jl_Comparable], 0, 3, 0, jl_Integer_$callClinit, ["$_init_1", $rt_wrapFunction1(jl_Integer__init_), "$intValue", $rt_wrapFunction0(jl_Integer_intValue), "$toString", $rt_wrapFunction0(jl_Integer_toString1), "$hashCode0", $rt_wrapFunction0(jl_Integer_hashCode), "$equals", $rt_wrapFunction1(jl_Integer_equals), "$compareTo", $rt_wrapFunction1(jl_Integer_compareTo), "$compareTo0", $rt_wrapFunction1(jl_Integer_compareTo0)],
+jl_Integer, "Integer", 20, jl_Number, [jl_Comparable], 0, 3, 0, jl_Integer_$callClinit, ["$_init_2", $rt_wrapFunction1(jl_Integer__init_), "$intValue", $rt_wrapFunction0(jl_Integer_intValue), "$toString", $rt_wrapFunction0(jl_Integer_toString1), "$hashCode0", $rt_wrapFunction0(jl_Integer_hashCode), "$equals", $rt_wrapFunction1(jl_Integer_equals), "$compareTo", $rt_wrapFunction1(jl_Integer_compareTo), "$compareTo0", $rt_wrapFunction1(jl_Integer_compareTo0)],
 jl_AbstractStringBuilder$Constants, 0, jl_Object, [], 0, 0, 0, jl_AbstractStringBuilder$Constants_$callClinit, 0,
-jur_AbstractSet, 0, jl_Object, [], 1, 0, 0, jur_AbstractSet_$callClinit, ["$_init_", $rt_wrapFunction0(jur_AbstractSet__init_), "$_init_8", $rt_wrapFunction1(jur_AbstractSet__init_0), "$find", $rt_wrapFunction3(jur_AbstractSet_find), "$findBack", $rt_wrapFunction4(jur_AbstractSet_findBack), "$setType", $rt_wrapFunction1(jur_AbstractSet_setType), "$getType0", $rt_wrapFunction0(jur_AbstractSet_getType), "$getQualifiedName", $rt_wrapFunction0(jur_AbstractSet_getQualifiedName), "$toString", $rt_wrapFunction0(jur_AbstractSet_toString),
+jur_AbstractSet, 0, jl_Object, [], 1, 0, 0, jur_AbstractSet_$callClinit, ["$_init_", $rt_wrapFunction0(jur_AbstractSet__init_), "$_init_9", $rt_wrapFunction1(jur_AbstractSet__init_0), "$find", $rt_wrapFunction3(jur_AbstractSet_find), "$findBack", $rt_wrapFunction4(jur_AbstractSet_findBack), "$setType", $rt_wrapFunction1(jur_AbstractSet_setType), "$getType0", $rt_wrapFunction0(jur_AbstractSet_getType), "$getQualifiedName", $rt_wrapFunction0(jur_AbstractSet_getQualifiedName), "$toString", $rt_wrapFunction0(jur_AbstractSet_toString),
 "$getNext", $rt_wrapFunction0(jur_AbstractSet_getNext), "$setNext", $rt_wrapFunction1(jur_AbstractSet_setNext), "$first", $rt_wrapFunction1(jur_AbstractSet_first), "$processBackRefReplacement", $rt_wrapFunction0(jur_AbstractSet_processBackRefReplacement), "$processSecondPass", $rt_wrapFunction0(jur_AbstractSet_processSecondPass)],
-jur_JointSet, "JointSet", 19, jur_AbstractSet, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_JointSet__init_), "$_init_28", $rt_wrapFunction2(jur_JointSet__init_0), "$matches", $rt_wrapFunction3(jur_JointSet_matches), "$setNext", $rt_wrapFunction1(jur_JointSet_setNext), "$getName", $rt_wrapFunction0(jur_JointSet_getName), "$first", $rt_wrapFunction1(jur_JointSet_first), "$hasConsumed", $rt_wrapFunction1(jur_JointSet_hasConsumed), "$processSecondPass", $rt_wrapFunction0(jur_JointSet_processSecondPass)],
-jur_SingleSet, "SingleSet", 19, jur_JointSet, [], 0, 0, 0, 0, ["$_init_6", $rt_wrapFunction2(jur_SingleSet__init_), "$matches", $rt_wrapFunction3(jur_SingleSet_matches), "$find", $rt_wrapFunction3(jur_SingleSet_find), "$findBack", $rt_wrapFunction4(jur_SingleSet_findBack), "$first", $rt_wrapFunction1(jur_SingleSet_first), "$processBackRefReplacement", $rt_wrapFunction0(jur_SingleSet_processBackRefReplacement), "$processSecondPass", $rt_wrapFunction0(jur_SingleSet_processSecondPass)],
+jur_JointSet, "JointSet", 19, jur_AbstractSet, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_JointSet__init_), "$_init_29", $rt_wrapFunction2(jur_JointSet__init_0), "$matches", $rt_wrapFunction3(jur_JointSet_matches), "$setNext", $rt_wrapFunction1(jur_JointSet_setNext), "$getName", $rt_wrapFunction0(jur_JointSet_getName), "$first", $rt_wrapFunction1(jur_JointSet_first), "$hasConsumed", $rt_wrapFunction1(jur_JointSet_hasConsumed), "$processSecondPass", $rt_wrapFunction0(jur_JointSet_processSecondPass)],
+jur_SingleSet, "SingleSet", 19, jur_JointSet, [], 0, 0, 0, 0, ["$_init_7", $rt_wrapFunction2(jur_SingleSet__init_), "$matches", $rt_wrapFunction3(jur_SingleSet_matches), "$find", $rt_wrapFunction3(jur_SingleSet_find), "$findBack", $rt_wrapFunction4(jur_SingleSet_findBack), "$first", $rt_wrapFunction1(jur_SingleSet_first), "$processBackRefReplacement", $rt_wrapFunction0(jur_SingleSet_processBackRefReplacement), "$processSecondPass", $rt_wrapFunction0(jur_SingleSet_processSecondPass)],
 jl_Long, 0, jl_Number, [jl_Comparable], 0, 3, 0, jl_Long_$callClinit, 0,
 ju_Map, 0, jl_Object, [], 3, 3, 0, 0, 0,
-jur_SequenceSet$IntHash, 0, jl_Object, [], 0, 0, 0, 0, ["$_init_1", $rt_wrapFunction1(jur_SequenceSet$IntHash__init_0), "$put0", $rt_wrapFunction2(jur_SequenceSet$IntHash_put), "$get2", $rt_wrapFunction1(jur_SequenceSet$IntHash_get)],
+jur_SequenceSet$IntHash, 0, jl_Object, [], 0, 0, 0, 0, ["$_init_2", $rt_wrapFunction1(jur_SequenceSet$IntHash__init_0), "$put0", $rt_wrapFunction2(jur_SequenceSet$IntHash_put), "$get2", $rt_wrapFunction1(jur_SequenceSet$IntHash_get)],
 jur_AbstractCharClass$LazyAlpha, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyAlpha__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyAlpha_computeValue)],
-ju_Iterator, 0, jl_Object, [], 3, 3, 0, 0, 0,
-ju_PriorityQueue$1, 0, jl_Object, [ju_Iterator], 0, 0, 0, 0, ["$_init_30", $rt_wrapFunction1(ju_PriorityQueue$1__init_), "$hasNext", $rt_wrapFunction0(ju_PriorityQueue$1_hasNext), "$next", $rt_wrapFunction0(ju_PriorityQueue$1_next), "$remove2", $rt_wrapFunction0(ju_PriorityQueue$1_remove)],
 jur_AbstractCharClass$LazyDigit, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyDigit__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyDigit_computeValue)],
 jur_AbstractCharClass$LazyNonDigit, 0, jur_AbstractCharClass$LazyDigit, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyNonDigit__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyNonDigit_computeValue)],
-jur_BackReferencedSingleSet, "BackReferencedSingleSet", 19, jur_SingleSet, [], 0, 0, 0, 0, ["$_init_5", $rt_wrapFunction1(jur_BackReferencedSingleSet__init_), "$find", $rt_wrapFunction3(jur_BackReferencedSingleSet_find), "$findBack", $rt_wrapFunction4(jur_BackReferencedSingleSet_findBack), "$processBackRefReplacement", $rt_wrapFunction0(jur_BackReferencedSingleSet_processBackRefReplacement)],
-jur_CIBackReferenceSet, "CIBackReferenceSet", 19, jur_JointSet, [], 0, 0, 0, 0, ["$_init_15", $rt_wrapFunction2(jur_CIBackReferenceSet__init_), "$matches", $rt_wrapFunction3(jur_CIBackReferenceSet_matches), "$setNext", $rt_wrapFunction1(jur_CIBackReferenceSet_setNext), "$getString", $rt_wrapFunction1(jur_CIBackReferenceSet_getString), "$getName", $rt_wrapFunction0(jur_CIBackReferenceSet_getName), "$hasConsumed", $rt_wrapFunction1(jur_CIBackReferenceSet_hasConsumed)],
+jur_BackReferencedSingleSet, "BackReferencedSingleSet", 19, jur_SingleSet, [], 0, 0, 0, 0, ["$_init_6", $rt_wrapFunction1(jur_BackReferencedSingleSet__init_), "$find", $rt_wrapFunction3(jur_BackReferencedSingleSet_find), "$findBack", $rt_wrapFunction4(jur_BackReferencedSingleSet_findBack), "$processBackRefReplacement", $rt_wrapFunction0(jur_BackReferencedSingleSet_processBackRefReplacement)],
+jur_CIBackReferenceSet, "CIBackReferenceSet", 19, jur_JointSet, [], 0, 0, 0, 0, ["$_init_16", $rt_wrapFunction2(jur_CIBackReferenceSet__init_), "$matches", $rt_wrapFunction3(jur_CIBackReferenceSet_matches), "$setNext", $rt_wrapFunction1(jur_CIBackReferenceSet_setNext), "$getString", $rt_wrapFunction1(jur_CIBackReferenceSet_getString), "$getName", $rt_wrapFunction0(jur_CIBackReferenceSet_getName), "$hasConsumed", $rt_wrapFunction1(jur_CIBackReferenceSet_hasConsumed)],
 jur_AbstractCharClass$LazyWord, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyWord__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyWord_computeValue)],
 jur_AbstractCharClass$LazyNonWord, 0, jur_AbstractCharClass$LazyWord, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyNonWord__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyNonWord_computeValue)],
-jur_AbstractCharClass$1, "AbstractCharClass$1", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_2", $rt_wrapFunction2(jur_AbstractCharClass$1__init_), "$contains", $rt_wrapFunction1(jur_AbstractCharClass$1_contains)],
-jur_AbstractCharClass$2, "AbstractCharClass$2", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_3", $rt_wrapFunction3(jur_AbstractCharClass$2__init_), "$contains", $rt_wrapFunction1(jur_AbstractCharClass$2_contains)],
+jur_AbstractCharClass$1, "AbstractCharClass$1", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_3", $rt_wrapFunction2(jur_AbstractCharClass$1__init_), "$contains", $rt_wrapFunction1(jur_AbstractCharClass$1_contains)],
+jur_AbstractCharClass$2, "AbstractCharClass$2", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_4", $rt_wrapFunction3(jur_AbstractCharClass$2__init_), "$contains", $rt_wrapFunction1(jur_AbstractCharClass$2_contains)],
 jur_AbstractCharClass$LazyJavaLowerCase, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaLowerCase__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaLowerCase_computeValue)],
-jur_LeafSet, 0, jur_AbstractSet, [], 1, 0, 0, 0, ["$_init_8", $rt_wrapFunction1(jur_LeafSet__init_0), "$_init_", $rt_wrapFunction0(jur_LeafSet__init_), "$matches", $rt_wrapFunction3(jur_LeafSet_matches), "$charCount", $rt_wrapFunction0(jur_LeafSet_charCount), "$hasConsumed", $rt_wrapFunction1(jur_LeafSet_hasConsumed)],
+jur_LeafSet, 0, jur_AbstractSet, [], 1, 0, 0, 0, ["$_init_9", $rt_wrapFunction1(jur_LeafSet__init_0), "$_init_", $rt_wrapFunction0(jur_LeafSet__init_), "$matches", $rt_wrapFunction3(jur_LeafSet_matches), "$charCount", $rt_wrapFunction0(jur_LeafSet_charCount), "$hasConsumed", $rt_wrapFunction1(jur_LeafSet_hasConsumed)],
 jur_CISequenceSet, "CISequenceSet", 19, jur_LeafSet, [], 0, 0, 0, 0, ["$_init_72", $rt_wrapFunction1(jur_CISequenceSet__init_), "$accepts", $rt_wrapFunction2(jur_CISequenceSet_accepts), "$getName", $rt_wrapFunction0(jur_CISequenceSet_getName)],
 otciu_CLDRHelper, 0, jl_Object, [], 4, 3, 0, 0, 0,
-jur_QuantifierSet, 0, jur_AbstractSet, [], 1, 0, 0, 0, ["$_init_9", $rt_wrapFunction3(jur_QuantifierSet__init_), "$getInnerSet", $rt_wrapFunction0(jur_QuantifierSet_getInnerSet), "$first", $rt_wrapFunction1(jur_QuantifierSet_first), "$hasConsumed", $rt_wrapFunction1(jur_QuantifierSet_hasConsumed), "$processSecondPass", $rt_wrapFunction0(jur_QuantifierSet_processSecondPass)],
-jur_LeafQuantifierSet, "LeafQuantifierSet", 19, jur_QuantifierSet, [], 0, 0, 0, 0, ["$_init_10", $rt_wrapFunction3(jur_LeafQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_LeafQuantifierSet_matches), "$getName", $rt_wrapFunction0(jur_LeafQuantifierSet_getName)],
-jur_CompositeQuantifierSet, "CompositeQuantifierSet", 19, jur_LeafQuantifierSet, [], 0, 0, 0, 0, ["$_init_11", $rt_wrapFunction4(jur_CompositeQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_CompositeQuantifierSet_matches), "$getName", $rt_wrapFunction0(jur_CompositeQuantifierSet_getName)],
-jur_PossessiveCompositeQuantifierSet, "PossessiveCompositeQuantifierSet", 19, jur_CompositeQuantifierSet, [], 0, 0, 0, 0, ["$_init_11", $rt_wrapFunction4(jur_PossessiveCompositeQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_PossessiveCompositeQuantifierSet_matches)],
+jur_QuantifierSet, 0, jur_AbstractSet, [], 1, 0, 0, 0, ["$_init_10", $rt_wrapFunction3(jur_QuantifierSet__init_), "$getInnerSet", $rt_wrapFunction0(jur_QuantifierSet_getInnerSet), "$first", $rt_wrapFunction1(jur_QuantifierSet_first), "$hasConsumed", $rt_wrapFunction1(jur_QuantifierSet_hasConsumed), "$processSecondPass", $rt_wrapFunction0(jur_QuantifierSet_processSecondPass)],
+jur_LeafQuantifierSet, "LeafQuantifierSet", 19, jur_QuantifierSet, [], 0, 0, 0, 0, ["$_init_11", $rt_wrapFunction3(jur_LeafQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_LeafQuantifierSet_matches), "$getName", $rt_wrapFunction0(jur_LeafQuantifierSet_getName)],
+jur_CompositeQuantifierSet, "CompositeQuantifierSet", 19, jur_LeafQuantifierSet, [], 0, 0, 0, 0, ["$_init_12", $rt_wrapFunction4(jur_CompositeQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_CompositeQuantifierSet_matches), "$getName", $rt_wrapFunction0(jur_CompositeQuantifierSet_getName)],
+jur_PossessiveCompositeQuantifierSet, "PossessiveCompositeQuantifierSet", 19, jur_CompositeQuantifierSet, [], 0, 0, 0, 0, ["$_init_12", $rt_wrapFunction4(jur_PossessiveCompositeQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_PossessiveCompositeQuantifierSet_matches)],
 jl_CharSequence, 0, jl_Object, [], 3, 3, 0, 0, 0,
 ogu_Utils, "Utils", 14, jl_Object, [], 0, 3, [0,0,0], ogu_Utils_$callClinit, 0,
 jl_StringIndexOutOfBoundsException, "StringIndexOutOfBoundsException", 20, jl_IndexOutOfBoundsException, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(jl_StringIndexOutOfBoundsException__init_0)],
-ju_MissingResourceException, "MissingResourceException", 18, jl_RuntimeException, [], 0, 3, 0, 0, ["$_init_19", $rt_wrapFunction3(ju_MissingResourceException__init_)],
+ju_MissingResourceException, "MissingResourceException", 18, jl_RuntimeException, [], 0, 3, 0, 0, ["$_init_20", $rt_wrapFunction3(ju_MissingResourceException__init_)],
 jur_AbstractCharClass$LazyJavaLetterOrDigit$1, "AbstractCharClass$LazyJavaLetterOrDigit$1", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_82", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaLetterOrDigit$1__init_), "$contains", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaLetterOrDigit$1_contains)],
 jur_CharClass$18, "CharClass$18", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_88", $rt_wrapFunction2(jur_CharClass$18__init_), "$contains", $rt_wrapFunction1(jur_CharClass$18_contains), "$toString", $rt_wrapFunction0(jur_CharClass$18_toString)],
-jur_GroupQuantifierSet, "GroupQuantifierSet", 19, jur_QuantifierSet, [], 0, 0, 0, 0, ["$_init_9", $rt_wrapFunction3(jur_GroupQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_GroupQuantifierSet_matches), "$getName", $rt_wrapFunction0(jur_GroupQuantifierSet_getName)],
-jur_PossessiveGroupQuantifierSet, "PossessiveGroupQuantifierSet", 19, jur_GroupQuantifierSet, [], 0, 0, 0, 0, ["$_init_9", $rt_wrapFunction3(jur_PossessiveGroupQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_PossessiveGroupQuantifierSet_matches)]]);
-$rt_metadata([oc_Link, "Link", 1, jl_Object, [], 1, 3, [0,0,0], oc_Link_$callClinit, ["$_init_13", $rt_wrapFunction3(oc_Link__init_), "$_init_12", $rt_wrapFunction4(oc_Link__init_0), "$getLabel", $rt_wrapFunction0(oc_Link_getLabel), "$setLabel", $rt_wrapFunction1(oc_Link_setLabel), "$getEndpoints", $rt_wrapFunction0(oc_Link_getEndpoints), "$setEndpoints", $rt_wrapFunction1(oc_Link_setEndpoints), "$getCost", $rt_wrapFunction0(oc_Link_getCost), "$setCost", $rt_wrapFunction1(oc_Link_setCost), "$getId", $rt_wrapFunction0(oc_Link_getId),
+jur_GroupQuantifierSet, "GroupQuantifierSet", 19, jur_QuantifierSet, [], 0, 0, 0, 0, ["$_init_10", $rt_wrapFunction3(jur_GroupQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_GroupQuantifierSet_matches), "$getName", $rt_wrapFunction0(jur_GroupQuantifierSet_getName)],
+jur_PossessiveGroupQuantifierSet, "PossessiveGroupQuantifierSet", 19, jur_GroupQuantifierSet, [], 0, 0, 0, 0, ["$_init_10", $rt_wrapFunction3(jur_PossessiveGroupQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_PossessiveGroupQuantifierSet_matches)],
+oc_Link, "Link", 1, jl_Object, [], 1, 3, [0,0,0], oc_Link_$callClinit, ["$_init_14", $rt_wrapFunction3(oc_Link__init_), "$_init_13", $rt_wrapFunction4(oc_Link__init_0), "$getLabel", $rt_wrapFunction0(oc_Link_getLabel), "$setLabel", $rt_wrapFunction1(oc_Link_setLabel), "$getEndpoints", $rt_wrapFunction0(oc_Link_getEndpoints), "$setEndpoints", $rt_wrapFunction1(oc_Link_setEndpoints), "$getCost", $rt_wrapFunction0(oc_Link_getCost), "$setCost", $rt_wrapFunction1(oc_Link_setCost), "$getId", $rt_wrapFunction0(oc_Link_getId),
 "$setId", $rt_wrapFunction1(oc_Link_setId), "$getFirstEndpointId", $rt_wrapFunction0(oc_Link_getFirstEndpointId), "$getSecondEndpointId", $rt_wrapFunction0(oc_Link_getSecondEndpointId), "$isDirected", $rt_wrapFunction0(oc_Link_isDirected), "$setDirected", $rt_wrapFunction1(oc_Link_setDirected), "$getMatchId", $rt_wrapFunction0(oc_Link_getMatchId), "$setMatchId", $rt_wrapFunction1(oc_Link_setMatchId), "$getCapacity", $rt_wrapFunction0(oc_Link_getCapacity), "$setCapacity", $rt_wrapFunction1(oc_Link_setCapacity),
 "$isCapacitySet", $rt_wrapFunction0(oc_Link_isCapacitySet), "$isRequired", $rt_wrapFunction0(oc_Link_isRequired), "$setRequired", $rt_wrapFunction1(oc_Link_setRequired), "$setGraphId", $rt_wrapFunction1(oc_Link_setGraphId), "$toString", $rt_wrapFunction0(oc_Link_toString), "$getMaxSpeed", $rt_wrapFunction0(oc_Link_getMaxSpeed), "$setMaxSpeed", $rt_wrapFunction1(oc_Link_setMaxSpeed), "$getZone", $rt_wrapFunction0(oc_Link_getZone), "$setZone", $rt_wrapFunction1(oc_Link_setZone), "$getType", $rt_wrapFunction0(oc_Link_getType),
 "$setType0", $rt_wrapFunction1(oc_Link_setType)],
-oli_MixedEdge, "MixedEdge", 10, oc_Link, [], 0, 3, 0, 0, ["$_init_12", $rt_wrapFunction4(oli_MixedEdge__init_0), "$getHead0", $rt_wrapFunction0(oli_MixedEdge_getHead), "$getTail0", $rt_wrapFunction0(oli_MixedEdge_getTail), "$isWindy", $rt_wrapFunction0(oli_MixedEdge_isWindy)],
-jl_Cloneable, 0, jl_Object, [], 3, 3, 0, 0, 0,
-gt_THash, 0, jl_Object, [jl_Cloneable], 1, 3, 0, gt_THash_$callClinit, ["$_init_", $rt_wrapFunction0(gt_THash__init_), "$_init_14", $rt_wrapFunction2(gt_THash__init_0), "$isEmpty", $rt_wrapFunction0(gt_THash_isEmpty), "$size", $rt_wrapFunction0(gt_THash_size), "$compact", $rt_wrapFunction0(gt_THash_compact), "$removeAt", $rt_wrapFunction1(gt_THash_removeAt), "$setUp", $rt_wrapFunction1(gt_THash_setUp), "$postInsertHook", $rt_wrapFunction1(gt_THash_postInsertHook), "$calculateGrownCapacity", $rt_wrapFunction0(gt_THash_calculateGrownCapacity)],
+oli_MixedEdge, "MixedEdge", 10, oc_Link, [], 0, 3, 0, 0, ["$_init_13", $rt_wrapFunction4(oli_MixedEdge__init_0), "$getHead0", $rt_wrapFunction0(oli_MixedEdge_getHead), "$getTail0", $rt_wrapFunction0(oli_MixedEdge_getTail), "$isWindy", $rt_wrapFunction0(oli_MixedEdge_isWindy)]]);
+$rt_metadata([jl_Cloneable, 0, jl_Object, [], 3, 3, 0, 0, 0,
+gt_THash, 0, jl_Object, [jl_Cloneable], 1, 3, 0, gt_THash_$callClinit, ["$_init_", $rt_wrapFunction0(gt_THash__init_), "$_init_15", $rt_wrapFunction2(gt_THash__init_0), "$isEmpty", $rt_wrapFunction0(gt_THash_isEmpty), "$size", $rt_wrapFunction0(gt_THash_size), "$compact", $rt_wrapFunction0(gt_THash_compact), "$removeAt", $rt_wrapFunction1(gt_THash_removeAt), "$setUp", $rt_wrapFunction1(gt_THash_setUp), "$postInsertHook", $rt_wrapFunction1(gt_THash_postInsertHook), "$calculateGrownCapacity", $rt_wrapFunction0(gt_THash_calculateGrownCapacity)],
 gt_TPrimitiveHash, 0, gt_THash, [], 1, 3, 0, 0, ["$_init_", $rt_wrapFunction0(gt_TPrimitiveHash__init_), "$setUp", $rt_wrapFunction1(gt_TPrimitiveHash_setUp)],
 gt_TIntHashingStrategy, 0, jl_Object, [ji_Serializable], 3, 3, 0, 0, 0,
 gt_TIntHash, 0, gt_TPrimitiveHash, [gt_TIntHashingStrategy], 1, 3, 0, 0, ["$_init_", $rt_wrapFunction0(gt_TIntHash__init_), "$setUp", $rt_wrapFunction1(gt_TIntHash_setUp), "$index", $rt_wrapFunction1(gt_TIntHash_index), "$computeHashCode", $rt_wrapFunction1(gt_TIntHash_computeHashCode)],
-jur_UCIBackReferenceSet, "UCIBackReferenceSet", 19, jur_CIBackReferenceSet, [], 0, 0, 0, 0, ["$_init_15", $rt_wrapFunction2(jur_UCIBackReferenceSet__init_), "$matches", $rt_wrapFunction3(jur_UCIBackReferenceSet_matches), "$getName", $rt_wrapFunction0(jur_UCIBackReferenceSet_getName)],
+jur_UCIBackReferenceSet, "UCIBackReferenceSet", 19, jur_CIBackReferenceSet, [], 0, 0, 0, 0, ["$_init_16", $rt_wrapFunction2(jur_UCIBackReferenceSet__init_), "$matches", $rt_wrapFunction3(jur_UCIBackReferenceSet_matches), "$getName", $rt_wrapFunction0(jur_UCIBackReferenceSet_getName)],
 jur_CharClass$13, 0, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_85", $rt_wrapFunction2(jur_CharClass$13__init_), "$contains", $rt_wrapFunction1(jur_CharClass$13_contains)],
 jur_CharClass$12, 0, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_85", $rt_wrapFunction2(jur_CharClass$12__init_), "$contains", $rt_wrapFunction1(jur_CharClass$12_contains)],
 jur_CharClass$11, 0, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_84", $rt_wrapFunction4(jur_CharClass$11__init_), "$contains", $rt_wrapFunction1(jur_CharClass$11_contains)],
-jur_AbstractCharClass$LazyCategory, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_20", $rt_wrapFunction2(jur_AbstractCharClass$LazyCategory__init_0), "$_init_21", $rt_wrapFunction3(jur_AbstractCharClass$LazyCategory__init_1), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyCategory_computeValue)],
+jur_AbstractCharClass$LazyCategory, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_21", $rt_wrapFunction2(jur_AbstractCharClass$LazyCategory__init_0), "$_init_22", $rt_wrapFunction3(jur_AbstractCharClass$LazyCategory__init_1), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyCategory_computeValue)],
 otci_Base46, 0, jl_Object, [], 4, 3, 0, 0, 0,
 jur_CharClass$10, 0, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_84", $rt_wrapFunction4(jur_CharClass$10__init_), "$contains", $rt_wrapFunction1(jur_CharClass$10_contains)],
 jur_CharClass$17, 0, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_84", $rt_wrapFunction4(jur_CharClass$17__init_), "$contains", $rt_wrapFunction1(jur_CharClass$17_contains)],
 jur_UCISequenceSet, "UCISequenceSet", 19, jur_LeafSet, [], 0, 0, 0, 0, ["$_init_72", $rt_wrapFunction1(jur_UCISequenceSet__init_), "$accepts", $rt_wrapFunction2(jur_UCISequenceSet_accepts), "$getName", $rt_wrapFunction0(jur_UCISequenceSet_getName)],
 jur_CharClass$16, 0, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_84", $rt_wrapFunction4(jur_CharClass$16__init_), "$contains", $rt_wrapFunction1(jur_CharClass$16_contains)],
-jur_DotAllQuantifierSet, "DotAllQuantifierSet", 19, jur_QuantifierSet, [], 0, 0, 0, 0, ["$_init_9", $rt_wrapFunction3(jur_DotAllQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_DotAllQuantifierSet_matches), "$find", $rt_wrapFunction3(jur_DotAllQuantifierSet_find), "$getName", $rt_wrapFunction0(jur_DotAllQuantifierSet_getName)],
+jur_DotAllQuantifierSet, "DotAllQuantifierSet", 19, jur_QuantifierSet, [], 0, 0, 0, 0, ["$_init_10", $rt_wrapFunction3(jur_DotAllQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_DotAllQuantifierSet_matches), "$find", $rt_wrapFunction3(jur_DotAllQuantifierSet_find), "$getName", $rt_wrapFunction0(jur_DotAllQuantifierSet_getName)],
 jur_CharClass$15, 0, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_87", $rt_wrapFunction3(jur_CharClass$15__init_), "$contains", $rt_wrapFunction1(jur_CharClass$15_contains)],
 jur_AbstractCharClass$LazyJavaDefined$1, "AbstractCharClass$LazyJavaDefined$1", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_68", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaDefined$1__init_), "$contains", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaDefined$1_contains)],
 jur_CharClass$14, 0, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_87", $rt_wrapFunction3(jur_CharClass$14__init_), "$contains", $rt_wrapFunction1(jur_CharClass$14_contains)],
-jur_FSet, "FSet", 19, jur_AbstractSet, [], 0, 0, 0, jur_FSet_$callClinit, ["$_init_1", $rt_wrapFunction1(jur_FSet__init_), "$matches", $rt_wrapFunction3(jur_FSet_matches), "$getGroupIndex", $rt_wrapFunction0(jur_FSet_getGroupIndex), "$getName", $rt_wrapFunction0(jur_FSet_getName), "$hasConsumed", $rt_wrapFunction1(jur_FSet_hasConsumed)],
-jur_BehindFSet, "BehindFSet", 19, jur_FSet, [], 0, 0, 0, 0, ["$_init_1", $rt_wrapFunction1(jur_BehindFSet__init_), "$matches", $rt_wrapFunction3(jur_BehindFSet_matches), "$getName", $rt_wrapFunction0(jur_BehindFSet_getName)],
-jl_AbstractStringBuilder, 0, jl_Object, [ji_Serializable, jl_CharSequence], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jl_AbstractStringBuilder__init_0), "$_init_1", $rt_wrapFunction1(jl_AbstractStringBuilder__init_), "$append6", $rt_wrapFunction1(jl_AbstractStringBuilder_append6), "$append7", $rt_wrapFunction1(jl_AbstractStringBuilder_append2), "$insert0", $rt_wrapFunction2(jl_AbstractStringBuilder_insert3), "$append8", $rt_wrapFunction1(jl_AbstractStringBuilder_append3), "$append1", $rt_wrapFunction2(jl_AbstractStringBuilder_append7),
+jur_FSet, "FSet", 19, jur_AbstractSet, [], 0, 0, 0, jur_FSet_$callClinit, ["$_init_2", $rt_wrapFunction1(jur_FSet__init_), "$matches", $rt_wrapFunction3(jur_FSet_matches), "$getGroupIndex", $rt_wrapFunction0(jur_FSet_getGroupIndex), "$getName", $rt_wrapFunction0(jur_FSet_getName), "$hasConsumed", $rt_wrapFunction1(jur_FSet_hasConsumed)],
+jur_BehindFSet, "BehindFSet", 19, jur_FSet, [], 0, 0, 0, 0, ["$_init_2", $rt_wrapFunction1(jur_BehindFSet__init_), "$matches", $rt_wrapFunction3(jur_BehindFSet_matches), "$getName", $rt_wrapFunction0(jur_BehindFSet_getName)],
+jl_AbstractStringBuilder, 0, jl_Object, [ji_Serializable, jl_CharSequence], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jl_AbstractStringBuilder__init_0), "$_init_2", $rt_wrapFunction1(jl_AbstractStringBuilder__init_), "$append6", $rt_wrapFunction1(jl_AbstractStringBuilder_append6), "$append7", $rt_wrapFunction1(jl_AbstractStringBuilder_append2), "$insert0", $rt_wrapFunction2(jl_AbstractStringBuilder_insert3), "$append8", $rt_wrapFunction1(jl_AbstractStringBuilder_append3), "$append1", $rt_wrapFunction2(jl_AbstractStringBuilder_append7),
 "$insert1", $rt_wrapFunction3(jl_AbstractStringBuilder_insert5), "$append9", $rt_wrapFunction1(jl_AbstractStringBuilder_append5), "$insert2", $rt_wrapFunction2(jl_AbstractStringBuilder_insert2), "$append10", $rt_wrapFunction1(jl_AbstractStringBuilder_append1), "$insert3", $rt_wrapFunction2(jl_AbstractStringBuilder_insert0), "$insert", $rt_wrapFunction2(jl_AbstractStringBuilder_insert4), "$append12", $rt_wrapFunction1(jl_AbstractStringBuilder_append4), "$insert4", $rt_wrapFunction2(jl_AbstractStringBuilder_insert1),
 "$ensureCapacity", $rt_wrapFunction1(jl_AbstractStringBuilder_ensureCapacity), "$toString", $rt_wrapFunction0(jl_AbstractStringBuilder_toString), "$length", $rt_wrapFunction0(jl_AbstractStringBuilder_length), "$charAt", $rt_wrapFunction1(jl_AbstractStringBuilder_charAt), "$append5", $rt_wrapFunction3(jl_AbstractStringBuilder_append0), "$insert5", $rt_wrapFunction4(jl_AbstractStringBuilder_insert), "$append11", $rt_wrapFunction1(jl_AbstractStringBuilder_append), "$deleteCharAt0", $rt_wrapFunction1(jl_AbstractStringBuilder_deleteCharAt),
 "$delete", $rt_wrapFunction2(jl_AbstractStringBuilder_delete)],
 jl_Appendable, 0, jl_Object, [], 3, 3, 0, 0, 0,
-jl_StringBuilder, 0, jl_AbstractStringBuilder, [jl_Appendable], 0, 3, 0, 0, ["$_init_1", $rt_wrapFunction1(jl_StringBuilder__init_2), "$_init_", $rt_wrapFunction0(jl_StringBuilder__init_1), "$append", $rt_wrapFunction1(jl_StringBuilder_append), "$append4", $rt_wrapFunction1(jl_StringBuilder_append2), "$append2", $rt_wrapFunction1(jl_StringBuilder_append1), "$append14", $rt_wrapFunction1(jl_StringBuilder_append5), "$append0", $rt_wrapFunction1(jl_StringBuilder_append0), "$append13", $rt_wrapFunction3(jl_StringBuilder_append4),
+jl_StringBuilder, 0, jl_AbstractStringBuilder, [jl_Appendable], 0, 3, 0, 0, ["$_init_2", $rt_wrapFunction1(jl_StringBuilder__init_2), "$_init_", $rt_wrapFunction0(jl_StringBuilder__init_1), "$append", $rt_wrapFunction1(jl_StringBuilder_append), "$append4", $rt_wrapFunction1(jl_StringBuilder_append2), "$append2", $rt_wrapFunction1(jl_StringBuilder_append1), "$append14", $rt_wrapFunction1(jl_StringBuilder_append5), "$append0", $rt_wrapFunction1(jl_StringBuilder_append0), "$append13", $rt_wrapFunction3(jl_StringBuilder_append4),
 "$append3", $rt_wrapFunction1(jl_StringBuilder_append7), "$append16", $rt_wrapFunction1(jl_StringBuilder_append3), "$insert10", $rt_wrapFunction2(jl_StringBuilder_insert5), "$insert6", $rt_wrapFunction4(jl_StringBuilder_insert3), "$insert8", $rt_wrapFunction2(jl_StringBuilder_insert6), "$insert7", $rt_wrapFunction2(jl_StringBuilder_insert1), "$insert9", $rt_wrapFunction2(jl_StringBuilder_insert2), "$delete0", $rt_wrapFunction2(jl_StringBuilder_delete), "$deleteCharAt", $rt_wrapFunction1(jl_StringBuilder_deleteCharAt),
 "$insert11", $rt_wrapFunction2(jl_StringBuilder_insert8), "$insert5", $rt_wrapFunction4(jl_StringBuilder_insert7), "$append5", $rt_wrapFunction3(jl_StringBuilder_append6), "$length", $rt_wrapFunction0(jl_StringBuilder_length), "$toString", $rt_wrapFunction0(jl_StringBuilder_toString), "$ensureCapacity", $rt_wrapFunction1(jl_StringBuilder_ensureCapacity), "$insert4", $rt_wrapFunction2(jl_StringBuilder_insert9), "$insert", $rt_wrapFunction2(jl_StringBuilder_insert0), "$insert3", $rt_wrapFunction2(jl_StringBuilder_insert),
 "$insert2", $rt_wrapFunction2(jl_StringBuilder_insert4), "$insert0", $rt_wrapFunction2(jl_StringBuilder_insert10)],
@@ -23350,81 +23540,83 @@ jur_CompositeRangeSet, "CompositeRangeSet", 19, jur_JointSet, [], 0, 0, 0, 0, ["
 jur_RandomGenerator, 0, jl_Object, [], 3, 3, 0, 0, 0,
 jur_LowHighSurrogateRangeSet, "LowHighSurrogateRangeSet", 19, jur_JointSet, [], 0, 0, 0, 0, ["$_init_49", $rt_wrapFunction1(jur_LowHighSurrogateRangeSet__init_), "$setNext", $rt_wrapFunction1(jur_LowHighSurrogateRangeSet_setNext), "$matches", $rt_wrapFunction3(jur_LowHighSurrogateRangeSet_matches), "$getName", $rt_wrapFunction0(jur_LowHighSurrogateRangeSet_getName)],
 oe_NoCapacitySetException, "NoCapacitySetException", 11, jl_Exception, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(oe_NoCapacitySetException__init_)],
-jur_ReluctantGroupQuantifierSet, "ReluctantGroupQuantifierSet", 19, jur_GroupQuantifierSet, [], 0, 0, 0, 0, ["$_init_9", $rt_wrapFunction3(jur_ReluctantGroupQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_ReluctantGroupQuantifierSet_matches)],
+jur_ReluctantGroupQuantifierSet, "ReluctantGroupQuantifierSet", 19, jur_GroupQuantifierSet, [], 0, 0, 0, 0, ["$_init_10", $rt_wrapFunction3(jur_ReluctantGroupQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_ReluctantGroupQuantifierSet_matches)],
 jur_FinalSet, "FinalSet", 19, jur_FSet, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_FinalSet__init_), "$matches", $rt_wrapFunction3(jur_FinalSet_matches), "$getName", $rt_wrapFunction0(jur_FinalSet_getName)],
-oc_Problem, "Problem", 1, jl_Object, [], 1, 3, [0,0,0], oc_Problem_$callClinit, ["$_init_17", $rt_wrapFunction3(oc_Problem__init_), "$getGraph", $rt_wrapFunction0(oc_Problem_getGraph), "$getSol", $rt_wrapFunction0(oc_Problem_getSol), "$setSol", $rt_wrapFunction1(oc_Problem_setSol)],
+oc_Problem, "Problem", 1, jl_Object, [], 1, 3, [0,0,0], oc_Problem_$callClinit, ["$_init_18", $rt_wrapFunction3(oc_Problem__init_), "$getGraph", $rt_wrapFunction0(oc_Problem_getGraph), "$getSol", $rt_wrapFunction0(oc_Problem_getSol), "$setSol", $rt_wrapFunction1(oc_Problem_setSol)],
 ju_Comparator, 0, jl_Object, [], 3, 3, 0, 0, 0,
 ot_TeaVMWrapper$main$lambda$_1_0, 0, jl_Object, [ju_Comparator], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(ot_TeaVMWrapper$main$lambda$_1_0__init_), "$compare1", $rt_wrapFunction2(ot_TeaVMWrapper$main$lambda$_1_0_compare0), "$compare0", $rt_wrapFunction2(ot_TeaVMWrapper$main$lambda$_1_0_compare)],
 jl_ClassCastException, "ClassCastException", 20, jl_RuntimeException, [], 0, 3, 0, 0, 0,
 ot_OARLibParser$VertexData, "OARLibParser$VertexData", 8, jl_Object, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(ot_OARLibParser$VertexData__init_), "$toString", $rt_wrapFunction0(ot_OARLibParser$VertexData_toString)],
-jur_PosPlusGroupQuantifierSet, "PosPlusGroupQuantifierSet", 19, jur_GroupQuantifierSet, [], 0, 0, 0, 0, ["$_init_9", $rt_wrapFunction3(jur_PosPlusGroupQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_PosPlusGroupQuantifierSet_matches)],
-jur_EmptySet, "EmptySet", 19, jur_LeafSet, [], 0, 0, 0, 0, ["$_init_8", $rt_wrapFunction1(jur_EmptySet__init_0), "$accepts", $rt_wrapFunction2(jur_EmptySet_accepts), "$find", $rt_wrapFunction3(jur_EmptySet_find), "$findBack", $rt_wrapFunction4(jur_EmptySet_findBack), "$getName", $rt_wrapFunction0(jur_EmptySet_getName), "$hasConsumed", $rt_wrapFunction1(jur_EmptySet_hasConsumed)],
-opi_ChinesePostmanProblem, "ChinesePostmanProblem", 5, oc_Problem, [], 1, 3, [0,0,0], opi_ChinesePostmanProblem_$callClinit, ["$_init_17", $rt_wrapFunction3(opi_ChinesePostmanProblem__init_)],
+jur_PosPlusGroupQuantifierSet, "PosPlusGroupQuantifierSet", 19, jur_GroupQuantifierSet, [], 0, 0, 0, 0, ["$_init_10", $rt_wrapFunction3(jur_PosPlusGroupQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_PosPlusGroupQuantifierSet_matches)],
+jur_EmptySet, "EmptySet", 19, jur_LeafSet, [], 0, 0, 0, 0, ["$_init_9", $rt_wrapFunction1(jur_EmptySet__init_0), "$accepts", $rt_wrapFunction2(jur_EmptySet_accepts), "$find", $rt_wrapFunction3(jur_EmptySet_find), "$findBack", $rt_wrapFunction4(jur_EmptySet_findBack), "$getName", $rt_wrapFunction0(jur_EmptySet_getName), "$hasConsumed", $rt_wrapFunction1(jur_EmptySet_hasConsumed)],
+opi_ChinesePostmanProblem, "ChinesePostmanProblem", 5, oc_Problem, [], 1, 3, [0,0,0], opi_ChinesePostmanProblem_$callClinit, ["$_init_18", $rt_wrapFunction3(opi_ChinesePostmanProblem__init_)],
 opic_WindyCPP, 0, opi_ChinesePostmanProblem, [], 0, 3, 0, 0, ["$_init_67", $rt_wrapFunction2(opic_WindyCPP__init_), "$getProblemAttributes", $rt_wrapFunction0(opic_WindyCPP_getProblemAttributes)],
-oc_Vertex, "Vertex", 1, jl_Object, [], 1, 3, [0,0,0], oc_Vertex_$callClinit, ["$_init_0", $rt_wrapFunction1(oc_Vertex__init_), "$getLabel", $rt_wrapFunction0(oc_Vertex_getLabel), "$setLabel", $rt_wrapFunction1(oc_Vertex_setLabel), "$getId", $rt_wrapFunction0(oc_Vertex_getId), "$setId", $rt_wrapFunction1(oc_Vertex_setId), "$getDemand", $rt_wrapFunction0(oc_Vertex_getDemand), "$setDemand", $rt_wrapFunction1(oc_Vertex_setDemand), "$isDemandSet", $rt_wrapFunction0(oc_Vertex_isDemandSet), "$setGuid", $rt_wrapFunction1(oc_Vertex_setGuid),
+oc_Vertex, "Vertex", 1, jl_Object, [], 1, 3, [0,0,0], oc_Vertex_$callClinit, ["$_init_1", $rt_wrapFunction1(oc_Vertex__init_), "$getLabel", $rt_wrapFunction0(oc_Vertex_getLabel), "$setLabel", $rt_wrapFunction1(oc_Vertex_setLabel), "$getId", $rt_wrapFunction0(oc_Vertex_getId), "$setId", $rt_wrapFunction1(oc_Vertex_setId), "$getDemand", $rt_wrapFunction0(oc_Vertex_getDemand), "$setDemand", $rt_wrapFunction1(oc_Vertex_setDemand), "$isDemandSet", $rt_wrapFunction0(oc_Vertex_isDemandSet), "$setGuid", $rt_wrapFunction1(oc_Vertex_setGuid),
 "$getMatchId", $rt_wrapFunction0(oc_Vertex_getMatchId), "$setMatchId", $rt_wrapFunction1(oc_Vertex_setMatchId), "$getGraphId", $rt_wrapFunction0(oc_Vertex_getGraphId), "$setGraphId", $rt_wrapFunction1(oc_Vertex_setGraphId), "$isFinalized", $rt_wrapFunction0(oc_Vertex_isFinalized), "$setFinalized", $rt_wrapFunction1(oc_Vertex_setFinalized), "$setCost", $rt_wrapFunction1(oc_Vertex_setCost), "$setSize", $rt_wrapFunction1(oc_Vertex_setSize), "$getX", $rt_wrapFunction0(oc_Vertex_getX), "$setCoordinates", $rt_wrapFunction2(oc_Vertex_setCoordinates),
 "$getY", $rt_wrapFunction0(oc_Vertex_getY)],
-ovi_UndirectedVertex, "UndirectedVertex", 7, oc_Vertex, [], 0, 3, 0, 0, ["$_init_0", $rt_wrapFunction1(ovi_UndirectedVertex__init_0), "$addToNeighbors2", $rt_wrapFunction2(ovi_UndirectedVertex_addToNeighbors), "$removeFromNeighbors1", $rt_wrapFunction2(ovi_UndirectedVertex_removeFromNeighbors), "$getDegree", $rt_wrapFunction0(ovi_UndirectedVertex_getDegree), "$setDegree", $rt_wrapFunction1(ovi_UndirectedVertex_setDegree), "$getNeighbors0", $rt_wrapFunction0(ovi_UndirectedVertex_getNeighbors0), "$getNeighbors",
+ovi_UndirectedVertex, "UndirectedVertex", 7, oc_Vertex, [], 0, 3, 0, 0, ["$_init_1", $rt_wrapFunction1(ovi_UndirectedVertex__init_0), "$addToNeighbors2", $rt_wrapFunction2(ovi_UndirectedVertex_addToNeighbors), "$removeFromNeighbors1", $rt_wrapFunction2(ovi_UndirectedVertex_removeFromNeighbors), "$getDegree", $rt_wrapFunction0(ovi_UndirectedVertex_getDegree), "$setDegree", $rt_wrapFunction1(ovi_UndirectedVertex_setDegree), "$getNeighbors0", $rt_wrapFunction0(ovi_UndirectedVertex_getNeighbors0), "$getNeighbors",
 $rt_wrapFunction0(ovi_UndirectedVertex_getNeighbors)],
 jl_StringBuffer, 0, jl_AbstractStringBuilder, [jl_Appendable], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(jl_StringBuffer__init_), "$append17", $rt_wrapFunction1(jl_StringBuffer_append1), "$append15", $rt_wrapFunction3(jl_StringBuffer_append2), "$append18", $rt_wrapFunction1(jl_StringBuffer_append0), "$insert12", $rt_wrapFunction4(jl_StringBuffer_insert), "$insert13", $rt_wrapFunction2(jl_StringBuffer_insert2), "$insert5", $rt_wrapFunction4(jl_StringBuffer_insert1), "$append5", $rt_wrapFunction3(jl_StringBuffer_append),
 "$charAt", $rt_wrapFunction1(jl_StringBuffer_charAt), "$length", $rt_wrapFunction0(jl_StringBuffer_length), "$toString", $rt_wrapFunction0(jl_StringBuffer_toString), "$ensureCapacity", $rt_wrapFunction1(jl_StringBuffer_ensureCapacity), "$insert3", $rt_wrapFunction2(jl_StringBuffer_insert0)],
 jur_AbstractCharClass$LazyJavaUnicodeIdentifierPart$1, "AbstractCharClass$LazyJavaUnicodeIdentifierPart$1", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_62", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaUnicodeIdentifierPart$1__init_), "$contains", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaUnicodeIdentifierPart$1_contains)],
 jur_AbstractCharClass$PredefinedCharacterClasses, 0, jl_Object, [], 4, 0, 0, jur_AbstractCharClass$PredefinedCharacterClasses_$callClinit, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$PredefinedCharacterClasses__init_), "$getObject", $rt_wrapFunction1(jur_AbstractCharClass$PredefinedCharacterClasses_getObject)],
-oc_Solver, 0, jl_Object, [], 1, 3, 0, oc_Solver_$callClinit, ["$_init_22", $rt_wrapFunction1(oc_Solver__init_), "$trySolve", $rt_wrapFunction0(oc_Solver_trySolve)],
-oc_SingleVehicleSolver, "SingleVehicleSolver", 1, oc_Solver, [], 1, 3, [0,0,0], oc_SingleVehicleSolver_$callClinit, ["$_init_22", $rt_wrapFunction1(oc_SingleVehicleSolver__init_), "$printCurrentSol", $rt_wrapFunction0(oc_SingleVehicleSolver_printCurrentSol)]]);
-$rt_metadata([osi_WRPPSolver_Benavent_H1, 0, oc_SingleVehicleSolver, [], 0, 3, 0, 0, ["$_init_22", $rt_wrapFunction1(osi_WRPPSolver_Benavent_H1__init_0), "$_init_23", $rt_wrapFunction2(osi_WRPPSolver_Benavent_H1__init_), "$solve", $rt_wrapFunction0(osi_WRPPSolver_Benavent_H1_solve), "$getProblemAttributes", $rt_wrapFunction0(osi_WRPPSolver_Benavent_H1_getProblemAttributes), "$getSolverName", $rt_wrapFunction0(osi_WRPPSolver_Benavent_H1_getSolverName), "$checkGraphRequirements", $rt_wrapFunction0(osi_WRPPSolver_Benavent_H1_checkGraphRequirements)],
-ogu_BlossomV, 0, jl_Object, [], 0, 3, 0, 0, 0,
-jur_AbstractCharClass$LazyJavaLetter, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaLetter__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaLetter_computeValue)],
+oc_Solver, 0, jl_Object, [], 1, 3, 0, oc_Solver_$callClinit, ["$_init_23", $rt_wrapFunction1(oc_Solver__init_), "$trySolve", $rt_wrapFunction0(oc_Solver_trySolve)],
+oc_SingleVehicleSolver, "SingleVehicleSolver", 1, oc_Solver, [], 1, 3, [0,0,0], oc_SingleVehicleSolver_$callClinit, ["$_init_23", $rt_wrapFunction1(oc_SingleVehicleSolver__init_), "$printCurrentSol", $rt_wrapFunction0(oc_SingleVehicleSolver_printCurrentSol)],
+osi_WRPPSolver_Benavent_H1, "WRPPSolver_Benavent_H1", 16, oc_SingleVehicleSolver, [], 0, 3, [0,0,0], osi_WRPPSolver_Benavent_H1_$callClinit, ["$_init_23", $rt_wrapFunction1(osi_WRPPSolver_Benavent_H1__init_0), "$_init_24", $rt_wrapFunction2(osi_WRPPSolver_Benavent_H1__init_), "$solve", $rt_wrapFunction0(osi_WRPPSolver_Benavent_H1_solve), "$getProblemAttributes", $rt_wrapFunction0(osi_WRPPSolver_Benavent_H1_getProblemAttributes), "$getSolverName", $rt_wrapFunction0(osi_WRPPSolver_Benavent_H1_getSolverName), "$checkGraphRequirements",
+$rt_wrapFunction0(osi_WRPPSolver_Benavent_H1_checkGraphRequirements)],
+ogu_BlossomV, 0, jl_Object, [], 0, 3, 0, 0, 0]);
+$rt_metadata([jur_AbstractCharClass$LazyJavaLetter, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaLetter__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaLetter_computeValue)],
 ji_Flushable, 0, jl_Object, [], 3, 3, 0, 0, 0,
 om_Metric, 0, jl_Object, [], 1, 3, 0, 0, ["$_init_", $rt_wrapFunction0(om_Metric__init_)],
 om_SumMetric, 0, om_Metric, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(om_SumMetric__init_0)],
-jur_DecomposedCharSet, "DecomposedCharSet", 19, jur_JointSet, [], 0, 0, 0, 0, ["$_init_27", $rt_wrapFunction2(jur_DecomposedCharSet__init_), "$setNext", $rt_wrapFunction1(jur_DecomposedCharSet_setNext), "$matches", $rt_wrapFunction3(jur_DecomposedCharSet_matches), "$getName", $rt_wrapFunction0(jur_DecomposedCharSet_getName), "$codePointAt", $rt_wrapFunction3(jur_DecomposedCharSet_codePointAt), "$first", $rt_wrapFunction1(jur_DecomposedCharSet_first), "$hasConsumed", $rt_wrapFunction1(jur_DecomposedCharSet_hasConsumed)],
-jur_CIDecomposedCharSet, "CIDecomposedCharSet", 19, jur_DecomposedCharSet, [], 0, 0, 0, 0, ["$_init_27", $rt_wrapFunction2(jur_CIDecomposedCharSet__init_)],
+jur_DecomposedCharSet, "DecomposedCharSet", 19, jur_JointSet, [], 0, 0, 0, 0, ["$_init_28", $rt_wrapFunction2(jur_DecomposedCharSet__init_), "$setNext", $rt_wrapFunction1(jur_DecomposedCharSet_setNext), "$matches", $rt_wrapFunction3(jur_DecomposedCharSet_matches), "$getName", $rt_wrapFunction0(jur_DecomposedCharSet_getName), "$codePointAt", $rt_wrapFunction3(jur_DecomposedCharSet_codePointAt), "$first", $rt_wrapFunction1(jur_DecomposedCharSet_first), "$hasConsumed", $rt_wrapFunction1(jur_DecomposedCharSet_hasConsumed)],
+jur_CIDecomposedCharSet, "CIDecomposedCharSet", 19, jur_DecomposedCharSet, [], 0, 0, 0, 0, ["$_init_28", $rt_wrapFunction2(jur_CIDecomposedCharSet__init_)],
 gt_PrimeFinder, 0, jl_Object, [], 4, 3, 0, gt_PrimeFinder_$callClinit, 0,
 gt_TIntIntHashMap, 0, gt_TIntHash, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(gt_TIntIntHashMap__init_), "$setUp", $rt_wrapFunction1(gt_TIntIntHashMap_setUp), "$get2", $rt_wrapFunction1(gt_TIntIntHashMap_get)],
 ot_OARLibParser$LinkData, "OARLibParser$LinkData", 8, jl_Object, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(ot_OARLibParser$LinkData__init_), "$toString", $rt_wrapFunction0(ot_OARLibParser$LinkData_toString)],
-ogu_BlossomV$EdgeInfo, "BlossomV$EdgeInfo", 14, jl_Object, [], 0, 0, 0, 0, ["$_init_25", $rt_wrapFunction3(ogu_BlossomV$EdgeInfo__init_)],
+ogu_BlossomV$EdgeInfo, "BlossomV$EdgeInfo", 14, jl_Object, [], 0, 0, 0, 0, ["$_init_26", $rt_wrapFunction3(ogu_BlossomV$EdgeInfo__init_)],
 jur_AheadFSet, "AheadFSet", 19, jur_FSet, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AheadFSet__init_), "$matches", $rt_wrapFunction3(jur_AheadFSet_matches), "$getName", $rt_wrapFunction0(jur_AheadFSet_getName)],
 jur_AbstractCharClass$LazyASCII, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyASCII__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyASCII_computeValue)],
-jl_ArrayIndexOutOfBoundsException, "ArrayIndexOutOfBoundsException", 20, jl_IndexOutOfBoundsException, [], 0, 3, 0, 0, ["$_init_1", $rt_wrapFunction1(jl_ArrayIndexOutOfBoundsException__init_)],
-jur_NonCapJointSet, "NonCapJointSet", 19, jur_JointSet, [], 0, 0, 0, 0, ["$_init_28", $rt_wrapFunction2(jur_NonCapJointSet__init_), "$matches", $rt_wrapFunction3(jur_NonCapJointSet_matches), "$getName", $rt_wrapFunction0(jur_NonCapJointSet_getName), "$hasConsumed", $rt_wrapFunction1(jur_NonCapJointSet_hasConsumed)],
-jur_AtomicJointSet, "AtomicJointSet", 19, jur_NonCapJointSet, [], 0, 0, 0, 0, ["$_init_28", $rt_wrapFunction2(jur_AtomicJointSet__init_), "$matches", $rt_wrapFunction3(jur_AtomicJointSet_matches), "$setNext", $rt_wrapFunction1(jur_AtomicJointSet_setNext), "$getName", $rt_wrapFunction0(jur_AtomicJointSet_getName)],
-jur_PositiveLookAhead, "PositiveLookAhead", 19, jur_AtomicJointSet, [], 0, 0, 0, 0, ["$_init_28", $rt_wrapFunction2(jur_PositiveLookAhead__init_), "$matches", $rt_wrapFunction3(jur_PositiveLookAhead_matches), "$hasConsumed", $rt_wrapFunction1(jur_PositiveLookAhead_hasConsumed), "$getName", $rt_wrapFunction0(jur_PositiveLookAhead_getName)],
-jur_NegativeLookAhead, "NegativeLookAhead", 19, jur_AtomicJointSet, [], 0, 0, 0, 0, ["$_init_28", $rt_wrapFunction2(jur_NegativeLookAhead__init_), "$matches", $rt_wrapFunction3(jur_NegativeLookAhead_matches), "$hasConsumed", $rt_wrapFunction1(jur_NegativeLookAhead_hasConsumed), "$getName", $rt_wrapFunction0(jur_NegativeLookAhead_getName)],
+jl_ArrayIndexOutOfBoundsException, "ArrayIndexOutOfBoundsException", 20, jl_IndexOutOfBoundsException, [], 0, 3, 0, 0, ["$_init_2", $rt_wrapFunction1(jl_ArrayIndexOutOfBoundsException__init_)],
+jur_NonCapJointSet, "NonCapJointSet", 19, jur_JointSet, [], 0, 0, 0, 0, ["$_init_29", $rt_wrapFunction2(jur_NonCapJointSet__init_), "$matches", $rt_wrapFunction3(jur_NonCapJointSet_matches), "$getName", $rt_wrapFunction0(jur_NonCapJointSet_getName), "$hasConsumed", $rt_wrapFunction1(jur_NonCapJointSet_hasConsumed)],
+jur_AtomicJointSet, "AtomicJointSet", 19, jur_NonCapJointSet, [], 0, 0, 0, 0, ["$_init_29", $rt_wrapFunction2(jur_AtomicJointSet__init_), "$matches", $rt_wrapFunction3(jur_AtomicJointSet_matches), "$setNext", $rt_wrapFunction1(jur_AtomicJointSet_setNext), "$getName", $rt_wrapFunction0(jur_AtomicJointSet_getName)],
+jur_PositiveLookAhead, "PositiveLookAhead", 19, jur_AtomicJointSet, [], 0, 0, 0, 0, ["$_init_29", $rt_wrapFunction2(jur_PositiveLookAhead__init_), "$matches", $rt_wrapFunction3(jur_PositiveLookAhead_matches), "$hasConsumed", $rt_wrapFunction1(jur_PositiveLookAhead_hasConsumed), "$getName", $rt_wrapFunction0(jur_PositiveLookAhead_getName)],
+jur_NegativeLookAhead, "NegativeLookAhead", 19, jur_AtomicJointSet, [], 0, 0, 0, 0, ["$_init_29", $rt_wrapFunction2(jur_NegativeLookAhead__init_), "$matches", $rt_wrapFunction3(jur_NegativeLookAhead_matches), "$hasConsumed", $rt_wrapFunction1(jur_NegativeLookAhead_hasConsumed), "$getName", $rt_wrapFunction0(jur_NegativeLookAhead_getName)],
+ju_Iterator, 0, jl_Object, [], 3, 3, 0, 0, 0,
 ju_AbstractList$1, 0, jl_Object, [ju_Iterator], 0, 0, 0, 0, ["$_init_42", $rt_wrapFunction1(ju_AbstractList$1__init_), "$hasNext", $rt_wrapFunction0(ju_AbstractList$1_hasNext), "$next", $rt_wrapFunction0(ju_AbstractList$1_next)],
-jl_Enum, 0, jl_Object, [jl_Comparable, ji_Serializable], 1, 3, 0, 0, ["$_init_29", $rt_wrapFunction2(jl_Enum__init_), "$ordinal", $rt_wrapFunction0(jl_Enum_ordinal)],
+jl_Enum, 0, jl_Object, [jl_Comparable, ji_Serializable], 1, 3, 0, 0, ["$_init_30", $rt_wrapFunction2(jl_Enum__init_), "$ordinal", $rt_wrapFunction0(jl_Enum_ordinal)],
 oc_Graph$Type, 0, jl_Enum, [], 12, 3, 0, oc_Graph$Type_$callClinit, 0,
 ju_AbstractMap, 0, jl_Object, [ju_Map], 1, 3, 0, 0, ["$_init_", $rt_wrapFunction0(ju_AbstractMap__init_)],
 ju_TemplateCollections$AbstractImmutableMap, 0, ju_AbstractMap, [], 1, 0, 0, 0, ["$_init_", $rt_wrapFunction0(ju_TemplateCollections$AbstractImmutableMap__init_)],
 gt_Equality, 0, jl_Object, [], 3, 3, 0, 0, 0,
-jur_Quantifier, "Quantifier", 19, jur_SpecialToken, [jl_Cloneable], 0, 0, 0, 0, ["$_init_15", $rt_wrapFunction2(jur_Quantifier__init_), "$min", $rt_wrapFunction0(jur_Quantifier_min), "$max", $rt_wrapFunction0(jur_Quantifier_max), "$toString", $rt_wrapFunction0(jur_Quantifier_toString)],
+jur_Quantifier, "Quantifier", 19, jur_SpecialToken, [jl_Cloneable], 0, 0, 0, 0, ["$_init_16", $rt_wrapFunction2(jur_Quantifier__init_), "$min", $rt_wrapFunction0(jur_Quantifier_min), "$max", $rt_wrapFunction0(jur_Quantifier_max), "$toString", $rt_wrapFunction0(jur_Quantifier_toString)],
 oc_MultiEdge$EDGETYPE, 0, jl_Enum, [], 12, 3, 0, oc_MultiEdge$EDGETYPE_$callClinit, 0,
 jur_AbstractCharClass$LazyJavaUpperCase$1, "AbstractCharClass$LazyJavaUpperCase$1", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_50", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaUpperCase$1__init_), "$contains", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaUpperCase$1_contains)],
 jlr_Array, 0, jl_Object, [], 4, 3, 0, 0, 0,
 ju_ListIterator, 0, jl_Object, [ju_Iterator], 3, 3, 0, 0, 0,
 jl_Iterable, 0, jl_Object, [], 3, 3, 0, 0, 0,
 ju_Collection, 0, jl_Object, [jl_Iterable], 3, 3, 0, 0, 0,
-ju_AbstractCollection, 0, jl_Object, [ju_Collection], 1, 3, 0, 0, ["$_init_", $rt_wrapFunction0(ju_AbstractCollection__init_), "$isEmpty", $rt_wrapFunction0(ju_AbstractCollection_isEmpty), "$contains0", $rt_wrapFunction1(ju_AbstractCollection_contains), "$toArray", $rt_wrapFunction1(ju_AbstractCollection_toArray), "$remove0", $rt_wrapFunction1(ju_AbstractCollection_remove), "$addAll", $rt_wrapFunction1(ju_AbstractCollection_addAll), "$toString", $rt_wrapFunction0(ju_AbstractCollection_toString)],
+ju_AbstractCollection, 0, jl_Object, [ju_Collection], 1, 3, 0, 0, ["$_init_", $rt_wrapFunction0(ju_AbstractCollection__init_), "$isEmpty", $rt_wrapFunction0(ju_AbstractCollection_isEmpty), "$contains0", $rt_wrapFunction1(ju_AbstractCollection_contains), "$toArray", $rt_wrapFunction1(ju_AbstractCollection_toArray), "$addAll", $rt_wrapFunction1(ju_AbstractCollection_addAll), "$toString", $rt_wrapFunction0(ju_AbstractCollection_toString)],
 ju_Queue, 0, jl_Object, [ju_Collection], 3, 3, 0, 0, 0,
 ju_AbstractQueue, 0, ju_AbstractCollection, [ju_Queue], 1, 3, 0, 0, ["$_init_", $rt_wrapFunction0(ju_AbstractQueue__init_), "$add2", $rt_wrapFunction1(ju_AbstractQueue_add)],
-ju_PriorityQueue, 0, ju_AbstractQueue, [ji_Serializable], 0, 3, 0, 0, ["$_init_56", $rt_wrapFunction2(ju_PriorityQueue__init_), "$offer", $rt_wrapFunction1(ju_PriorityQueue_offer), "$poll", $rt_wrapFunction0(ju_PriorityQueue_poll), "$size", $rt_wrapFunction0(ju_PriorityQueue_size), "$iterator", $rt_wrapFunction0(ju_PriorityQueue_iterator)],
+ju_PriorityQueue, 0, ju_AbstractQueue, [ji_Serializable], 0, 3, 0, 0, ["$_init_56", $rt_wrapFunction2(ju_PriorityQueue__init_), "$offer", $rt_wrapFunction1(ju_PriorityQueue_offer), "$poll", $rt_wrapFunction0(ju_PriorityQueue_poll), "$size", $rt_wrapFunction0(ju_PriorityQueue_size)],
 otcit_DoubleAnalyzer$Result, 0, jl_Object, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(otcit_DoubleAnalyzer$Result__init_0)],
 ju_Random, 0, jl_Object, [jur_RandomGenerator, ji_Serializable], 0, 3, 0, 0, ["$_init_57", $rt_wrapFunction1(ju_Random__init_), "$nextInt", $rt_wrapFunction1(ju_Random_nextInt), "$nextDouble", $rt_wrapFunction0(ju_Random_nextDouble)],
 otpp_ResourceAccessor, 0, jl_Object, [], 4, 0, 0, 0, 0,
 jur_AbstractCharClass$LazyJavaDigit, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaDigit__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaDigit_computeValue)],
 gt_HashFunctions, 0, jl_Object, [], 4, 3, 0, 0, 0,
-jur_PossessiveQuantifierSet, "PossessiveQuantifierSet", 19, jur_LeafQuantifierSet, [], 0, 0, 0, 0, ["$_init_10", $rt_wrapFunction3(jur_PossessiveQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_PossessiveQuantifierSet_matches)],
+jur_PossessiveQuantifierSet, "PossessiveQuantifierSet", 19, jur_LeafQuantifierSet, [], 0, 0, 0, 0, ["$_init_11", $rt_wrapFunction3(jur_PossessiveQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_PossessiveQuantifierSet_matches)],
 otci_IntegerUtil, 0, jl_Object, [], 4, 3, 0, 0, 0,
-ju_Locale, 0, jl_Object, [jl_Cloneable, ji_Serializable], 4, 3, 0, ju_Locale_$callClinit, ["$_init_33", $rt_wrapFunction2(ju_Locale__init_1), "$_init_19", $rt_wrapFunction3(ju_Locale__init_0), "$toLanguageTag", $rt_wrapFunction0(ju_Locale_toLanguageTag)],
-jur_AltQuantifierSet, "AltQuantifierSet", 19, jur_LeafQuantifierSet, [], 0, 0, 0, 0, ["$_init_10", $rt_wrapFunction3(jur_AltQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_AltQuantifierSet_matches), "$setNext", $rt_wrapFunction1(jur_AltQuantifierSet_setNext)],
-jur_PossessiveAltQuantifierSet, "PossessiveAltQuantifierSet", 19, jur_AltQuantifierSet, [], 0, 0, 0, 0, ["$_init_10", $rt_wrapFunction3(jur_PossessiveAltQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_PossessiveAltQuantifierSet_matches)],
+ju_Locale, 0, jl_Object, [jl_Cloneable, ji_Serializable], 4, 3, 0, ju_Locale_$callClinit, ["$_init_33", $rt_wrapFunction2(ju_Locale__init_1), "$_init_20", $rt_wrapFunction3(ju_Locale__init_0), "$toLanguageTag", $rt_wrapFunction0(ju_Locale_toLanguageTag)],
+jur_AltQuantifierSet, "AltQuantifierSet", 19, jur_LeafQuantifierSet, [], 0, 0, 0, 0, ["$_init_11", $rt_wrapFunction3(jur_AltQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_AltQuantifierSet_matches), "$setNext", $rt_wrapFunction1(jur_AltQuantifierSet_setNext)],
+jur_PossessiveAltQuantifierSet, "PossessiveAltQuantifierSet", 19, jur_AltQuantifierSet, [], 0, 0, 0, 0, ["$_init_11", $rt_wrapFunction3(jur_PossessiveAltQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_PossessiveAltQuantifierSet_matches)],
 jur_AbstractCharClass$LazyJavaIdentifierIgnorable$1, "AbstractCharClass$LazyJavaIdentifierIgnorable$1", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_80", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaIdentifierIgnorable$1__init_), "$contains", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaIdentifierIgnorable$1_contains)],
 otcir_FieldInfo, 0, jl_Object, [], 0, 3, 0, 0, 0,
-osi_WRPPSolver_Win, "WRPPSolver_Win", 16, oc_SingleVehicleSolver, [], 0, 3, [0,0,0], osi_WRPPSolver_Win_$callClinit, ["$_init_22", $rt_wrapFunction1(osi_WRPPSolver_Win__init_), "$solve", $rt_wrapFunction0(osi_WRPPSolver_Win_solve), "$getProblemAttributes", $rt_wrapFunction0(osi_WRPPSolver_Win_getProblemAttributes), "$getSolverName", $rt_wrapFunction0(osi_WRPPSolver_Win_getSolverName), "$checkGraphRequirements", $rt_wrapFunction0(osi_WRPPSolver_Win_checkGraphRequirements)],
-gt_TIntArrayList, 0, jl_Object, [ji_Serializable, jl_Cloneable], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(gt_TIntArrayList__init_3), "$_init_1", $rt_wrapFunction1(gt_TIntArrayList__init_1), "$_init_45", $rt_wrapFunction1(gt_TIntArrayList__init_2), "$ensureCapacity", $rt_wrapFunction1(gt_TIntArrayList_ensureCapacity), "$size", $rt_wrapFunction0(gt_TIntArrayList_size), "$isEmpty", $rt_wrapFunction0(gt_TIntArrayList_isEmpty), "$add6", $rt_wrapFunction1(gt_TIntArrayList_add1), "$add3", $rt_wrapFunction1(gt_TIntArrayList_add),
-"$add4", $rt_wrapFunction3(gt_TIntArrayList_add0), "$get2", $rt_wrapFunction1(gt_TIntArrayList_get), "$toNativeArray1", $rt_wrapFunction0(gt_TIntArrayList_toNativeArray0), "$toNativeArray", $rt_wrapFunction2(gt_TIntArrayList_toNativeArray), "$toNativeArray0", $rt_wrapFunction3(gt_TIntArrayList_toNativeArray1), "$sort1", $rt_wrapFunction0(gt_TIntArrayList_sort)]]);
-$rt_metadata([jur_AbstractCharClass$LazyJavaLetter$1, "AbstractCharClass$LazyJavaLetter$1", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_26", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaLetter$1__init_), "$contains", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaLetter$1_contains)],
-jur_ReluctantQuantifierSet, "ReluctantQuantifierSet", 19, jur_LeafQuantifierSet, [], 0, 0, 0, 0, ["$_init_10", $rt_wrapFunction3(jur_ReluctantQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_ReluctantQuantifierSet_matches)],
+osi_WRPPSolver_Win, "WRPPSolver_Win", 16, oc_SingleVehicleSolver, [], 0, 3, [0,0,0], osi_WRPPSolver_Win_$callClinit, ["$_init_23", $rt_wrapFunction1(osi_WRPPSolver_Win__init_), "$solve", $rt_wrapFunction0(osi_WRPPSolver_Win_solve), "$getProblemAttributes", $rt_wrapFunction0(osi_WRPPSolver_Win_getProblemAttributes), "$getSolverName", $rt_wrapFunction0(osi_WRPPSolver_Win_getSolverName), "$checkGraphRequirements", $rt_wrapFunction0(osi_WRPPSolver_Win_checkGraphRequirements)],
+gt_TIntArrayList, 0, jl_Object, [ji_Serializable, jl_Cloneable], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(gt_TIntArrayList__init_3), "$_init_2", $rt_wrapFunction1(gt_TIntArrayList__init_1), "$_init_45", $rt_wrapFunction1(gt_TIntArrayList__init_2), "$ensureCapacity", $rt_wrapFunction1(gt_TIntArrayList_ensureCapacity), "$size", $rt_wrapFunction0(gt_TIntArrayList_size), "$isEmpty", $rt_wrapFunction0(gt_TIntArrayList_isEmpty), "$add6", $rt_wrapFunction1(gt_TIntArrayList_add1), "$add3", $rt_wrapFunction1(gt_TIntArrayList_add),
+"$add4", $rt_wrapFunction3(gt_TIntArrayList_add0), "$get2", $rt_wrapFunction1(gt_TIntArrayList_get), "$toNativeArray1", $rt_wrapFunction0(gt_TIntArrayList_toNativeArray0), "$toNativeArray", $rt_wrapFunction2(gt_TIntArrayList_toNativeArray), "$toNativeArray0", $rt_wrapFunction3(gt_TIntArrayList_toNativeArray1), "$sort1", $rt_wrapFunction0(gt_TIntArrayList_sort)],
+jur_AbstractCharClass$LazyJavaLetter$1, "AbstractCharClass$LazyJavaLetter$1", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_27", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaLetter$1__init_), "$contains", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaLetter$1_contains)]]);
+$rt_metadata([jur_ReluctantQuantifierSet, "ReluctantQuantifierSet", 19, jur_LeafQuantifierSet, [], 0, 0, 0, 0, ["$_init_11", $rt_wrapFunction3(jur_ReluctantQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_ReluctantQuantifierSet_matches)],
 otji_JS, 0, jl_Object, [], 4, 3, 0, 0, 0,
 jur_AbstractCharClass$LazyJavaUnicodeIdentifierStart$1, "AbstractCharClass$LazyJavaUnicodeIdentifierStart$1", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_83", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaUnicodeIdentifierStart$1__init_), "$contains", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaUnicodeIdentifierStart$1_contains)],
 otciu_UnicodeHelper, 0, jl_Object, [], 4, 3, 0, 0, 0,
@@ -23434,18 +23626,18 @@ jur_AbstractCharClass$LazyGraph, 0, jur_AbstractCharClass$LazyAlnum, [], 0, 0, 0
 jur_AbstractCharClass$LazyPrint, 0, jur_AbstractCharClass$LazyGraph, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyPrint__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyPrint_computeValue)],
 jur_AbstractCharClass$LazyJavaSpaceChar, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaSpaceChar__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaSpaceChar_computeValue)],
 ju_Map$Entry, 0, jl_Object, [], 3, 3, 0, 0, 0,
-ju_MapEntry, 0, jl_Object, [ju_Map$Entry, jl_Cloneable], 0, 0, 0, 0, ["$_init_24", $rt_wrapFunction2(ju_MapEntry__init_), "$equals", $rt_wrapFunction1(ju_MapEntry_equals), "$getKey", $rt_wrapFunction0(ju_MapEntry_getKey), "$getValue0", $rt_wrapFunction0(ju_MapEntry_getValue), "$hashCode0", $rt_wrapFunction0(ju_MapEntry_hashCode), "$toString", $rt_wrapFunction0(ju_MapEntry_toString)],
+ju_MapEntry, 0, jl_Object, [ju_Map$Entry, jl_Cloneable], 0, 0, 0, 0, ["$_init_25", $rt_wrapFunction2(ju_MapEntry__init_), "$equals", $rt_wrapFunction1(ju_MapEntry_equals), "$getKey", $rt_wrapFunction0(ju_MapEntry_getKey), "$getValue0", $rt_wrapFunction0(ju_MapEntry_getValue), "$hashCode0", $rt_wrapFunction0(ju_MapEntry_hashCode), "$toString", $rt_wrapFunction0(ju_MapEntry_toString)],
 ju_HashMap$HashEntry, "HashMap$HashEntry", 18, ju_MapEntry, [], 0, 0, 0, 0, ["$_init_81", $rt_wrapFunction2(ju_HashMap$HashEntry__init_)],
-jur_PositiveLookBehind, "PositiveLookBehind", 19, jur_AtomicJointSet, [], 0, 0, 0, 0, ["$_init_28", $rt_wrapFunction2(jur_PositiveLookBehind__init_), "$matches", $rt_wrapFunction3(jur_PositiveLookBehind_matches), "$hasConsumed", $rt_wrapFunction1(jur_PositiveLookBehind_hasConsumed), "$getName", $rt_wrapFunction0(jur_PositiveLookBehind_getName)],
+jur_PositiveLookBehind, "PositiveLookBehind", 19, jur_AtomicJointSet, [], 0, 0, 0, 0, ["$_init_29", $rt_wrapFunction2(jur_PositiveLookBehind__init_), "$matches", $rt_wrapFunction3(jur_PositiveLookBehind_matches), "$hasConsumed", $rt_wrapFunction1(jur_PositiveLookBehind_hasConsumed), "$getName", $rt_wrapFunction0(jur_PositiveLookBehind_getName)],
 ju_Comparator$NaturalOrder, 0, jl_Object, [ju_Comparator], 0, 3, 0, ju_Comparator$NaturalOrder_$callClinit, ["$_init_", $rt_wrapFunction0(ju_Comparator$NaturalOrder__init_), "$compare1", $rt_wrapFunction2(ju_Comparator$NaturalOrder_compare)],
 jur_SequenceSet, "SequenceSet", 19, jur_LeafSet, [], 0, 0, 0, 0, ["$_init_72", $rt_wrapFunction1(jur_SequenceSet__init_), "$accepts", $rt_wrapFunction2(jur_SequenceSet_accepts), "$find", $rt_wrapFunction3(jur_SequenceSet_find), "$findBack", $rt_wrapFunction4(jur_SequenceSet_findBack), "$getName", $rt_wrapFunction0(jur_SequenceSet_getName), "$first", $rt_wrapFunction1(jur_SequenceSet_first), "$indexOf1", $rt_wrapFunction3(jur_SequenceSet_indexOf), "$lastIndexOf", $rt_wrapFunction3(jur_SequenceSet_lastIndexOf),
 "$startsWith", $rt_wrapFunction2(jur_SequenceSet_startsWith)],
-oli_Arc, "Arc", 10, oc_Link, [], 0, 3, 0, 0, ["$_init_13", $rt_wrapFunction3(oli_Arc__init_0), "$getHead", $rt_wrapFunction0(oli_Arc_getHead), "$getTail", $rt_wrapFunction0(oli_Arc_getTail), "$isWindy", $rt_wrapFunction0(oli_Arc_isWindy)],
+oli_Arc, "Arc", 10, oc_Link, [], 0, 3, 0, 0, ["$_init_14", $rt_wrapFunction3(oli_Arc__init_0), "$getHead", $rt_wrapFunction0(oli_Arc_getHead), "$getTail", $rt_wrapFunction0(oli_Arc_getTail), "$isWindy", $rt_wrapFunction0(oli_Arc_isWindy)],
 jur_EOISet, "EOISet", 19, jur_AbstractSet, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_EOISet__init_), "$matches", $rt_wrapFunction3(jur_EOISet_matches), "$hasConsumed", $rt_wrapFunction1(jur_EOISet_hasConsumed), "$getName", $rt_wrapFunction0(jur_EOISet_getName)],
 oe_GraphInfeasibleException, "GraphInfeasibleException", 11, jl_Exception, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(oe_GraphInfeasibleException__init_)],
 jl_ArrayStoreException, "ArrayStoreException", 20, jl_RuntimeException, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(jl_ArrayStoreException__init_0)],
 ju_SequencedCollection, 0, jl_Object, [ju_Collection], 3, 3, 0, 0, 0,
-jur_AltGroupQuantifierSet, "AltGroupQuantifierSet", 19, jur_GroupQuantifierSet, [], 0, 0, 0, 0, ["$_init_9", $rt_wrapFunction3(jur_AltGroupQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_AltGroupQuantifierSet_matches), "$setNext", $rt_wrapFunction1(jur_AltGroupQuantifierSet_setNext)],
+jur_AltGroupQuantifierSet, "AltGroupQuantifierSet", 19, jur_GroupQuantifierSet, [], 0, 0, 0, 0, ["$_init_10", $rt_wrapFunction3(jur_AltGroupQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_AltGroupQuantifierSet_matches), "$setNext", $rt_wrapFunction1(jur_AltGroupQuantifierSet_setNext)],
 jur_AbstractCharClass$LazyUpper, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyUpper__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyUpper_computeValue)],
 jur_MatchResult, 0, jl_Object, [], 3, 3, 0, 0, 0,
 jur_MatchResultImpl, 0, jl_Object, [jur_MatchResult], 0, 0, 0, 0, ["$_init_48", function(var_1, var_2, var_3, var_4, var_5, var_6) { jur_MatchResultImpl__init_(this, var_1, var_2, var_3, var_4, var_5, var_6); }, "$setConsumed", $rt_wrapFunction2(jur_MatchResultImpl_setConsumed), "$getConsumed", $rt_wrapFunction1(jur_MatchResultImpl_getConsumed), "$end0", $rt_wrapFunction0(jur_MatchResultImpl_end), "$end", $rt_wrapFunction1(jur_MatchResultImpl_end0), "$setStart", $rt_wrapFunction2(jur_MatchResultImpl_setStart),
@@ -23454,7 +23646,7 @@ jur_MatchResultImpl, 0, jl_Object, [jur_MatchResult], 0, 0, 0, 0, ["$_init_48", 
 "$setMode", $rt_wrapFunction1(jur_MatchResultImpl_setMode), "$mode", $rt_wrapFunction0(jur_MatchResultImpl_mode), "$useAnchoringBounds", $rt_wrapFunction1(jur_MatchResultImpl_useAnchoringBounds), "$hasAnchoringBounds", $rt_wrapFunction0(jur_MatchResultImpl_hasAnchoringBounds), "$hasTransparentBounds", $rt_wrapFunction0(jur_MatchResultImpl_hasTransparentBounds), "$getPreviousMatchEnd", $rt_wrapFunction0(jur_MatchResultImpl_getPreviousMatchEnd)],
 ju_HashMap$AbstractMapIterator, 0, jl_Object, [], 0, 0, 0, 0, ["$_init_37", $rt_wrapFunction1(ju_HashMap$AbstractMapIterator__init_), "$hasNext", $rt_wrapFunction0(ju_HashMap$AbstractMapIterator_hasNext), "$checkConcurrentMod", $rt_wrapFunction0(ju_HashMap$AbstractMapIterator_checkConcurrentMod), "$makeNext", $rt_wrapFunction0(ju_HashMap$AbstractMapIterator_makeNext)],
 ju_HashMap$KeyIterator, 0, ju_HashMap$AbstractMapIterator, [ju_Iterator], 0, 0, 0, 0, ["$_init_37", $rt_wrapFunction1(ju_HashMap$KeyIterator__init_), "$next", $rt_wrapFunction0(ju_HashMap$KeyIterator_next)],
-osi_MCPPSolver_Frederickson, "MCPPSolver_Frederickson", 16, oc_SingleVehicleSolver, [], 0, 3, [0,0,0], osi_MCPPSolver_Frederickson_$callClinit, ["$_init_22", $rt_wrapFunction1(osi_MCPPSolver_Frederickson__init_), "$solve", $rt_wrapFunction0(osi_MCPPSolver_Frederickson_solve), "$getProblemAttributes", $rt_wrapFunction0(osi_MCPPSolver_Frederickson_getProblemAttributes), "$getSolverName", $rt_wrapFunction0(osi_MCPPSolver_Frederickson_getSolverName), "$checkGraphRequirements", $rt_wrapFunction0(osi_MCPPSolver_Frederickson_checkGraphRequirements)],
+osi_MCPPSolver_Frederickson, "MCPPSolver_Frederickson", 16, oc_SingleVehicleSolver, [], 0, 3, [0,0,0], osi_MCPPSolver_Frederickson_$callClinit, ["$_init_23", $rt_wrapFunction1(osi_MCPPSolver_Frederickson__init_), "$solve", $rt_wrapFunction0(osi_MCPPSolver_Frederickson_solve), "$getProblemAttributes", $rt_wrapFunction0(osi_MCPPSolver_Frederickson_getProblemAttributes), "$getSolverName", $rt_wrapFunction0(osi_MCPPSolver_Frederickson_getSolverName), "$checkGraphRequirements", $rt_wrapFunction0(osi_MCPPSolver_Frederickson_checkGraphRequirements)],
 jur_UCIRangeSet, "UCIRangeSet", 19, jur_LeafSet, [], 0, 0, 0, 0, ["$_init_49", $rt_wrapFunction1(jur_UCIRangeSet__init_), "$accepts", $rt_wrapFunction2(jur_UCIRangeSet_accepts), "$getName", $rt_wrapFunction0(jur_UCIRangeSet_getName)],
 jl_AutoCloseable, 0, jl_Object, [], 3, 3, 0, 0, 0,
 ji_Closeable, 0, jl_Object, [jl_AutoCloseable], 3, 3, 0, 0, 0,
@@ -23478,26 +23670,26 @@ oli_WindyEdge, "WindyEdge", 10, oc_Link, [oli_AsymmetricLink], 0, 3, 0, 0, ["$_i
 opic_MixedCPP, 0, opi_ChinesePostmanProblem, [], 0, 3, 0, 0, ["$_init_65", $rt_wrapFunction2(opic_MixedCPP__init_), "$getProblemAttributes", $rt_wrapFunction0(opic_MixedCPP_getProblemAttributes)],
 jl_Boolean, "Boolean", 20, jl_Object, [ji_Serializable, jl_Comparable], 0, 3, 0, jl_Boolean_$callClinit, ["$_init_41", $rt_wrapFunction1(jl_Boolean__init_0), "$compareTo1", $rt_wrapFunction1(jl_Boolean_compareTo), "$booleanValue", $rt_wrapFunction0(jl_Boolean_booleanValue), "$toString", $rt_wrapFunction0(jl_Boolean_toString), "$hashCode0", $rt_wrapFunction0(jl_Boolean_hashCode), "$equals", $rt_wrapFunction1(jl_Boolean_equals), "$compareTo0", $rt_wrapFunction1(jl_Boolean_compareTo0)],
 jur_MultiLineSOLSet, "MultiLineSOLSet", 19, jur_AbstractSet, [], 0, 0, 0, 0, ["$_init_77", $rt_wrapFunction1(jur_MultiLineSOLSet__init_), "$matches", $rt_wrapFunction3(jur_MultiLineSOLSet_matches), "$hasConsumed", $rt_wrapFunction1(jur_MultiLineSOLSet_hasConsumed), "$getName", $rt_wrapFunction0(jur_MultiLineSOLSet_getName)],
-ju_List, 0, jl_Object, [ju_SequencedCollection], 3, 3, 0, 0, 0]);
-$rt_metadata([ju_AbstractList, 0, ju_AbstractCollection, [ju_List], 1, 3, 0, 0, ["$_init_", $rt_wrapFunction0(ju_AbstractList__init_), "$add2", $rt_wrapFunction1(ju_AbstractList_add), "$iterator", $rt_wrapFunction0(ju_AbstractList_iterator), "$indexOf0", $rt_wrapFunction1(ju_AbstractList_indexOf), "$equals", $rt_wrapFunction1(ju_AbstractList_equals)],
-ju_AbstractSequentialList, 0, ju_AbstractList, [], 1, 3, 0, 0, ["$_init_", $rt_wrapFunction0(ju_AbstractSequentialList__init_), "$add1", $rt_wrapFunction2(ju_AbstractSequentialList_add)],
+ju_List, 0, jl_Object, [ju_SequencedCollection], 3, 3, 0, 0, 0,
+ju_AbstractList, 0, ju_AbstractCollection, [ju_List], 1, 3, 0, 0, ["$_init_", $rt_wrapFunction0(ju_AbstractList__init_), "$add2", $rt_wrapFunction1(ju_AbstractList_add), "$iterator", $rt_wrapFunction0(ju_AbstractList_iterator), "$indexOf0", $rt_wrapFunction1(ju_AbstractList_indexOf), "$equals", $rt_wrapFunction1(ju_AbstractList_equals)]]);
+$rt_metadata([ju_AbstractSequentialList, 0, ju_AbstractList, [], 1, 3, 0, 0, ["$_init_", $rt_wrapFunction0(ju_AbstractSequentialList__init_), "$add1", $rt_wrapFunction2(ju_AbstractSequentialList_add)],
 ju_Deque, 0, jl_Object, [ju_Queue, ju_SequencedCollection], 3, 3, 0, 0, 0,
-ju_LinkedList, 0, ju_AbstractSequentialList, [ju_Deque], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(ju_LinkedList__init_0), "$size", $rt_wrapFunction0(ju_LinkedList_size), "$listIterator", $rt_wrapFunction1(ju_LinkedList_listIterator), "$remove3", $rt_wrapFunction0(ju_LinkedList_remove), "$poll", $rt_wrapFunction0(ju_LinkedList_poll), "$peek", $rt_wrapFunction0(ju_LinkedList_peek), "$addFirst", $rt_wrapFunction1(ju_LinkedList_addFirst), "$addLast", $rt_wrapFunction1(ju_LinkedList_addLast)],
-ju_NoSuchElementException, "NoSuchElementException", 18, jl_RuntimeException, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(ju_NoSuchElementException__init_0)],
+ju_LinkedList, 0, ju_AbstractSequentialList, [ju_Deque], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(ju_LinkedList__init_0), "$size", $rt_wrapFunction0(ju_LinkedList_size), "$listIterator", $rt_wrapFunction1(ju_LinkedList_listIterator), "$remove2", $rt_wrapFunction0(ju_LinkedList_remove), "$poll", $rt_wrapFunction0(ju_LinkedList_poll), "$peek", $rt_wrapFunction0(ju_LinkedList_peek), "$addFirst", $rt_wrapFunction1(ju_LinkedList_addFirst), "$addLast", $rt_wrapFunction1(ju_LinkedList_addLast)],
+ju_NoSuchElementException, "NoSuchElementException", 18, jl_RuntimeException, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(ju_NoSuchElementException__init_)],
 otcic_JSStderrPrintStream, 0, otcic_JsConsolePrintStream, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(otcic_JSStderrPrintStream__init_), "$print", $rt_wrapFunction1(otcic_JSStderrPrintStream_print)],
-jur_NegativeLookBehind, "NegativeLookBehind", 19, jur_AtomicJointSet, [], 0, 0, 0, 0, ["$_init_28", $rt_wrapFunction2(jur_NegativeLookBehind__init_), "$matches", $rt_wrapFunction3(jur_NegativeLookBehind_matches), "$hasConsumed", $rt_wrapFunction1(jur_NegativeLookBehind_hasConsumed), "$getName", $rt_wrapFunction0(jur_NegativeLookBehind_getName)],
-osi_DCPPSolver_Edmonds, 0, oc_SingleVehicleSolver, [], 0, 3, 0, 0, ["$_init_22", $rt_wrapFunction1(osi_DCPPSolver_Edmonds__init_), "$solve", $rt_wrapFunction0(osi_DCPPSolver_Edmonds_solve), "$getProblemAttributes", $rt_wrapFunction0(osi_DCPPSolver_Edmonds_getProblemAttributes), "$getSolverName", $rt_wrapFunction0(osi_DCPPSolver_Edmonds_getSolverName), "$checkGraphRequirements", $rt_wrapFunction0(osi_DCPPSolver_Edmonds_checkGraphRequirements)],
-jur_BackReferenceSet, "BackReferenceSet", 19, jur_CIBackReferenceSet, [], 0, 0, 0, 0, ["$_init_15", $rt_wrapFunction2(jur_BackReferenceSet__init_), "$matches", $rt_wrapFunction3(jur_BackReferenceSet_matches), "$find", $rt_wrapFunction3(jur_BackReferenceSet_find), "$findBack", $rt_wrapFunction4(jur_BackReferenceSet_findBack), "$first", $rt_wrapFunction1(jur_BackReferenceSet_first), "$getName", $rt_wrapFunction0(jur_BackReferenceSet_getName)],
+jur_NegativeLookBehind, "NegativeLookBehind", 19, jur_AtomicJointSet, [], 0, 0, 0, 0, ["$_init_29", $rt_wrapFunction2(jur_NegativeLookBehind__init_), "$matches", $rt_wrapFunction3(jur_NegativeLookBehind_matches), "$hasConsumed", $rt_wrapFunction1(jur_NegativeLookBehind_hasConsumed), "$getName", $rt_wrapFunction0(jur_NegativeLookBehind_getName)],
+osi_DCPPSolver_Edmonds, 0, oc_SingleVehicleSolver, [], 0, 3, 0, 0, ["$_init_23", $rt_wrapFunction1(osi_DCPPSolver_Edmonds__init_), "$solve", $rt_wrapFunction0(osi_DCPPSolver_Edmonds_solve), "$getProblemAttributes", $rt_wrapFunction0(osi_DCPPSolver_Edmonds_getProblemAttributes), "$getSolverName", $rt_wrapFunction0(osi_DCPPSolver_Edmonds_getSolverName), "$checkGraphRequirements", $rt_wrapFunction0(osi_DCPPSolver_Edmonds_checkGraphRequirements)],
+jur_BackReferenceSet, "BackReferenceSet", 19, jur_CIBackReferenceSet, [], 0, 0, 0, 0, ["$_init_16", $rt_wrapFunction2(jur_BackReferenceSet__init_), "$matches", $rt_wrapFunction3(jur_BackReferenceSet_matches), "$find", $rt_wrapFunction3(jur_BackReferenceSet_find), "$findBack", $rt_wrapFunction4(jur_BackReferenceSet_findBack), "$first", $rt_wrapFunction1(jur_BackReferenceSet_first), "$getName", $rt_wrapFunction0(jur_BackReferenceSet_getName)],
 jur_AbstractCharClass$LazyLower, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyLower__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyLower_computeValue)],
 jur_DotQuantifierSet, "DotQuantifierSet", 19, jur_QuantifierSet, [], 0, 0, 0, 0, ["$_init_76", $rt_wrapFunction4(jur_DotQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_DotQuantifierSet_matches), "$find", $rt_wrapFunction3(jur_DotQuantifierSet_find), "$getName", $rt_wrapFunction0(jur_DotQuantifierSet_getName)],
 jur_AbstractCharClass$LazyJavaJavaIdentifierPart, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaJavaIdentifierPart__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaJavaIdentifierPart_computeValue)],
 oc_Graph, 0, jl_Object, [], 1, 3, 0, oc_Graph_$callClinit, ["$_init_", $rt_wrapFunction0(oc_Graph__init_), "$assignVertexId", $rt_wrapFunction0(oc_Graph_assignVertexId), "$assignEdgeId", $rt_wrapFunction0(oc_Graph_assignEdgeId), "$assignGraphId", $rt_wrapFunction0(oc_Graph_assignGraphId), "$getEidCounter", $rt_wrapFunction0(oc_Graph_getEidCounter), "$getGraphId", $rt_wrapFunction0(oc_Graph_getGraphId), "$getDepotId", $rt_wrapFunction0(oc_Graph_getDepotId), "$setDepotId", $rt_wrapFunction1(oc_Graph_setDepotId),
 "$getAllPairsDistMatrix", $rt_wrapFunction0(oc_Graph_getAllPairsDistMatrix), "$getAllPairsPathMatrix", $rt_wrapFunction0(oc_Graph_getAllPairsPathMatrix), "$getAllPairsEdgePathMatrix", $rt_wrapFunction0(oc_Graph_getAllPairsEdgePathMatrix), "$onStateChange", $rt_wrapFunction0(oc_Graph_onStateChange), "$resetEdgeCounter", $rt_wrapFunction0(oc_Graph_resetEdgeCounter)],
-oc_MutableGraph, "MutableGraph", 1, oc_Graph, [], 1, 3, [0,0,0], oc_MutableGraph_$callClinit, ["$_init_", $rt_wrapFunction0(oc_MutableGraph__init_), "$_init_1", $rt_wrapFunction1(oc_MutableGraph__init_0), "$addEdge7", $rt_wrapFunction2(oc_MutableGraph_addEdge6), "$addEdge", function(var_1, var_2, var_3, var_4, var_5) { oc_MutableGraph_addEdge3(this, var_1, var_2, var_3, var_4, var_5); }, "$addEdge6", function(var_1, var_2, var_3, var_4, var_5, var_6) { oc_MutableGraph_addEdge5(this, var_1, var_2, var_3, var_4,
+oc_MutableGraph, "MutableGraph", 1, oc_Graph, [], 1, 3, [0,0,0], oc_MutableGraph_$callClinit, ["$_init_", $rt_wrapFunction0(oc_MutableGraph__init_), "$_init_2", $rt_wrapFunction1(oc_MutableGraph__init_0), "$addEdge7", $rt_wrapFunction2(oc_MutableGraph_addEdge6), "$addEdge", function(var_1, var_2, var_3, var_4, var_5) { oc_MutableGraph_addEdge3(this, var_1, var_2, var_3, var_4, var_5); }, "$addEdge6", function(var_1, var_2, var_3, var_4, var_5, var_6) { oc_MutableGraph_addEdge5(this, var_1, var_2, var_3, var_4,
 var_5, var_6); }, "$addEdge13", $rt_wrapFunction4(oc_MutableGraph_addEdge1), "$addVertex0", $rt_wrapFunction2(oc_MutableGraph_addVertex0), "$getVertices0", $rt_wrapFunction0(oc_MutableGraph_getVertices0), "$getEdges0", $rt_wrapFunction0(oc_MutableGraph_getEdges), "$clearEdges", $rt_wrapFunction0(oc_MutableGraph_clearEdges), "$addEdge9", $rt_wrapFunction1(oc_MutableGraph_addEdge), "$addEdge12", $rt_wrapFunction3(oc_MutableGraph_addEdge2), "$addEdge5", $rt_wrapFunction4(oc_MutableGraph_addEdge0), "$addEdge2",
 $rt_wrapFunction4(oc_MutableGraph_addEdge7), "$addEdge4", function(var_1, var_2, var_3, var_4, var_5) { oc_MutableGraph_addEdge4(this, var_1, var_2, var_3, var_4, var_5); }, "$getEdge", $rt_wrapFunction1(oc_MutableGraph_getEdge), "$addVertex3", $rt_wrapFunction1(oc_MutableGraph_addVertex), "$getVertex", $rt_wrapFunction1(oc_MutableGraph_getVertex), "$removeEdge1", $rt_wrapFunction1(oc_MutableGraph_removeEdge), "$getInternalVertexMap", $rt_wrapFunction0(oc_MutableGraph_getInternalVertexMap), "$getInternalEdgeMap",
 $rt_wrapFunction0(oc_MutableGraph_getInternalEdgeMap), "$getEdges", $rt_wrapFunction0(oc_MutableGraph_getEdges0), "$getVertices", $rt_wrapFunction0(oc_MutableGraph_getVertices)],
-ogi_MixedGraph, "MixedGraph", 13, oc_MutableGraph, [], 0, 3, [0,0,0], ogi_MixedGraph_$callClinit, ["$_init_", $rt_wrapFunction0(ogi_MixedGraph__init_1), "$_init_1", $rt_wrapFunction1(ogi_MixedGraph__init_0), "$constructEdge1", function(var_1, var_2, var_3, var_4, var_5, var_6) { return ogi_MixedGraph_constructEdge(this, var_1, var_2, var_3, var_4, var_5, var_6); }, "$addEdge11", function(var_1, var_2, var_3, var_4, var_5) { ogi_MixedGraph_addEdge0(this, var_1, var_2, var_3, var_4, var_5); }, "$addVertex4", $rt_wrapFunction1(ogi_MixedGraph_addVertex0),
+ogi_MixedGraph, "MixedGraph", 13, oc_MutableGraph, [], 0, 3, [0,0,0], ogi_MixedGraph_$callClinit, ["$_init_", $rt_wrapFunction0(ogi_MixedGraph__init_1), "$_init_2", $rt_wrapFunction1(ogi_MixedGraph__init_0), "$constructEdge1", function(var_1, var_2, var_3, var_4, var_5, var_6) { return ogi_MixedGraph_constructEdge(this, var_1, var_2, var_3, var_4, var_5, var_6); }, "$addEdge11", function(var_1, var_2, var_3, var_4, var_5) { ogi_MixedGraph_addEdge0(this, var_1, var_2, var_3, var_4, var_5); }, "$addVertex4", $rt_wrapFunction1(ogi_MixedGraph_addVertex0),
 "$addEdge8", $rt_wrapFunction1(ogi_MixedGraph_addEdge), "$clearEdges", $rt_wrapFunction0(ogi_MixedGraph_clearEdges), "$removeEdge0", $rt_wrapFunction1(ogi_MixedGraph_removeEdge), "$findEdges", $rt_wrapFunction1(ogi_MixedGraph_findEdges), "$getDeepCopy1", $rt_wrapFunction0(ogi_MixedGraph_getDeepCopy), "$constructVertex0", $rt_wrapFunction1(ogi_MixedGraph_constructVertex0), "$addVertex3", $rt_wrapFunction1(ogi_MixedGraph_addVertex), "$addEdge9", $rt_wrapFunction1(ogi_MixedGraph_addEdge1), "$constructVertex", $rt_wrapFunction1(ogi_MixedGraph_constructVertex)],
 jur_AbstractCharClass$LazyJavaTitleCase, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaTitleCase__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaTitleCase_computeValue)],
 ot_OARLibParser, "OARLibParser", 8, jl_Object, [], 0, 3, [0,0,0], ot_OARLibParser_$callClinit, 0,
@@ -23508,15 +23700,15 @@ jur_UnifiedQuantifierSet, "UnifiedQuantifierSet", 19, jur_LeafQuantifierSet, [],
 jlr_AnnotatedElement, 0, jl_Object, [], 3, 3, 0, 0, 0,
 jlr_Type, 0, jl_Object, [], 3, 3, 0, 0, 0,
 jl_Class, 0, jl_Object, [jlr_AnnotatedElement, jlr_Type], 4, 3, 0, 0, ["$getPlatformClass", $rt_wrapFunction0(jl_Class_getPlatformClass), "$isInstance0", $rt_wrapFunction1(jl_Class_isInstance), "$getName", $rt_wrapFunction0(jl_Class_getName), "$getSimpleName", $rt_wrapFunction0(jl_Class_getSimpleName), "$isPrimitive0", $rt_wrapFunction0(jl_Class_isPrimitive), "$isArray", $rt_wrapFunction0(jl_Class_isArray), "$getComponentType", $rt_wrapFunction0(jl_Class_getComponentType), "$getEnclosingClass", $rt_wrapFunction0(jl_Class_getEnclosingClass)],
-ju_BitSet, 0, jl_Object, [jl_Cloneable, ji_Serializable], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(ju_BitSet__init_0), "$_init_1", $rt_wrapFunction1(ju_BitSet__init_), "$set1", $rt_wrapFunction1(ju_BitSet_set), "$set", $rt_wrapFunction2(ju_BitSet_set0), "$clear0", $rt_wrapFunction1(ju_BitSet_clear0), "$clear1", $rt_wrapFunction2(ju_BitSet_clear), "$get0", $rt_wrapFunction1(ju_BitSet_get), "$nextSetBit", $rt_wrapFunction1(ju_BitSet_nextSetBit), "$nextClearBit", $rt_wrapFunction1(ju_BitSet_nextClearBit), "$intersects",
+ju_BitSet, 0, jl_Object, [jl_Cloneable, ji_Serializable], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(ju_BitSet__init_0), "$_init_2", $rt_wrapFunction1(ju_BitSet__init_), "$set1", $rt_wrapFunction1(ju_BitSet_set), "$set", $rt_wrapFunction2(ju_BitSet_set0), "$clear0", $rt_wrapFunction1(ju_BitSet_clear0), "$clear1", $rt_wrapFunction2(ju_BitSet_clear), "$get0", $rt_wrapFunction1(ju_BitSet_get), "$nextSetBit", $rt_wrapFunction1(ju_BitSet_nextSetBit), "$nextClearBit", $rt_wrapFunction1(ju_BitSet_nextClearBit), "$intersects",
 $rt_wrapFunction1(ju_BitSet_intersects), "$and", $rt_wrapFunction1(ju_BitSet_and), "$andNot", $rt_wrapFunction1(ju_BitSet_andNot), "$or", $rt_wrapFunction1(ju_BitSet_or), "$xor", $rt_wrapFunction1(ju_BitSet_xor), "$isEmpty", $rt_wrapFunction0(ju_BitSet_isEmpty)],
-jur_AbstractCharClass$LazyJavaJavaIdentifierStart$1, "AbstractCharClass$LazyJavaJavaIdentifierStart$1", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_4", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaJavaIdentifierStart$1__init_), "$contains", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaJavaIdentifierStart$1_contains)],
-jur_NonCapFSet, "NonCapFSet", 19, jur_FSet, [], 0, 0, 0, 0, ["$_init_1", $rt_wrapFunction1(jur_NonCapFSet__init_), "$matches", $rt_wrapFunction3(jur_NonCapFSet_matches), "$getName", $rt_wrapFunction0(jur_NonCapFSet_getName), "$hasConsumed", $rt_wrapFunction1(jur_NonCapFSet_hasConsumed)],
+jur_AbstractCharClass$LazyJavaJavaIdentifierStart$1, "AbstractCharClass$LazyJavaJavaIdentifierStart$1", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_5", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaJavaIdentifierStart$1__init_), "$contains", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaJavaIdentifierStart$1_contains)],
+jur_NonCapFSet, "NonCapFSet", 19, jur_FSet, [], 0, 0, 0, 0, ["$_init_2", $rt_wrapFunction1(jur_NonCapFSet__init_), "$matches", $rt_wrapFunction3(jur_NonCapFSet_matches), "$getName", $rt_wrapFunction0(jur_NonCapFSet_getName), "$hasConsumed", $rt_wrapFunction1(jur_NonCapFSet_hasConsumed)],
 jl_Float, 0, jl_Number, [jl_Comparable], 0, 3, 0, jl_Float_$callClinit, 0,
-osi_UCPPSolver_Edmonds, 0, oc_SingleVehicleSolver, [], 0, 3, 0, 0, ["$_init_22", $rt_wrapFunction1(osi_UCPPSolver_Edmonds__init_), "$solve", $rt_wrapFunction0(osi_UCPPSolver_Edmonds_solve), "$getProblemAttributes", $rt_wrapFunction0(osi_UCPPSolver_Edmonds_getProblemAttributes), "$getSolverName", $rt_wrapFunction0(osi_UCPPSolver_Edmonds_getSolverName), "$checkGraphRequirements", $rt_wrapFunction0(osi_UCPPSolver_Edmonds_checkGraphRequirements)],
+osi_UCPPSolver_Edmonds, 0, oc_SingleVehicleSolver, [], 0, 3, 0, 0, ["$_init_23", $rt_wrapFunction1(osi_UCPPSolver_Edmonds__init_), "$solve", $rt_wrapFunction0(osi_UCPPSolver_Edmonds_solve), "$getProblemAttributes", $rt_wrapFunction0(osi_UCPPSolver_Edmonds_getProblemAttributes), "$getSolverName", $rt_wrapFunction0(osi_UCPPSolver_Edmonds_getSolverName), "$checkGraphRequirements", $rt_wrapFunction0(osi_UCPPSolver_Edmonds_checkGraphRequirements)],
 ju_Arrays, 0, jl_Object, [], 0, 3, 0, 0, 0,
 jur_CharSet, "CharSet", 19, jur_LeafSet, [], 0, 0, 0, 0, ["$_init_74", $rt_wrapFunction1(jur_CharSet__init_0), "$charCount", $rt_wrapFunction0(jur_CharSet_charCount), "$accepts", $rt_wrapFunction2(jur_CharSet_accepts), "$find", $rt_wrapFunction3(jur_CharSet_find), "$findBack", $rt_wrapFunction4(jur_CharSet_findBack), "$getName", $rt_wrapFunction0(jur_CharSet_getName), "$getChar", $rt_wrapFunction0(jur_CharSet_getChar), "$first", $rt_wrapFunction1(jur_CharSet_first)],
-jur_UCISupplCharSet, "UCISupplCharSet", 19, jur_LeafSet, [], 0, 0, 0, 0, ["$_init_1", $rt_wrapFunction1(jur_UCISupplCharSet__init_), "$accepts", $rt_wrapFunction2(jur_UCISupplCharSet_accepts), "$getName", $rt_wrapFunction0(jur_UCISupplCharSet_getName)],
+jur_UCISupplCharSet, "UCISupplCharSet", 19, jur_LeafSet, [], 0, 0, 0, 0, ["$_init_2", $rt_wrapFunction1(jur_UCISupplCharSet__init_), "$accepts", $rt_wrapFunction2(jur_UCISupplCharSet_accepts), "$getName", $rt_wrapFunction0(jur_UCISupplCharSet_getName)],
 jl_System, 0, jl_Object, [], 4, 3, 0, 0, 0,
 ot_OARLibParser$LinkFormatType, 0, jl_Enum, [], 12, 0, 0, ot_OARLibParser$LinkFormatType_$callClinit, 0,
 jur_CharClass$3, 0, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_86", $rt_wrapFunction3(jur_CharClass$3__init_), "$contains", $rt_wrapFunction1(jur_CharClass$3_contains)],
@@ -23524,7 +23716,7 @@ jur_CharClass$4, 0, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_84", $rt_wra
 opi_ProblemAttributes$NumVehicles, 0, jl_Enum, [], 12, 3, 0, opi_ProblemAttributes$NumVehicles_$callClinit, 0,
 jur_CharClass$1, 0, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_85", $rt_wrapFunction2(jur_CharClass$1__init_), "$contains", $rt_wrapFunction1(jur_CharClass$1_contains)],
 jur_CharClass$2, 0, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_86", $rt_wrapFunction3(jur_CharClass$2__init_), "$contains", $rt_wrapFunction1(jur_CharClass$2_contains)],
-jur_AbstractCharClass$LazyRange, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_15", $rt_wrapFunction2(jur_AbstractCharClass$LazyRange__init_0), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyRange_computeValue)],
+jur_AbstractCharClass$LazyRange, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_16", $rt_wrapFunction2(jur_AbstractCharClass$LazyRange__init_0), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyRange_computeValue)],
 jur_CharClass$7, 0, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_85", $rt_wrapFunction2(jur_CharClass$7__init_), "$contains", $rt_wrapFunction1(jur_CharClass$7_contains)],
 jur_AbstractCharClass$LazyXDigit, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyXDigit__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyXDigit_computeValue)],
 jur_CharClass$8, 0, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_87", $rt_wrapFunction3(jur_CharClass$8__init_), "$contains", $rt_wrapFunction1(jur_CharClass$8_contains)],
@@ -23534,9 +23726,9 @@ jur_CharClass$6, 0, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_85", $rt_wra
 ju_Collections$5, 0, jl_Object, [ju_ListIterator], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(ju_Collections$5__init_)],
 ju_LinkedList$Entry, 0, jl_Object, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(ju_LinkedList$Entry__init_0)],
 ju_RandomAccess, 0, jl_Object, [], 3, 3, 0, 0, 0,
-ju_TemplateCollections$AbstractImmutableList, 0, ju_AbstractList, [ju_RandomAccess], 1, 0, 0, 0, ["$_init_", $rt_wrapFunction0(ju_TemplateCollections$AbstractImmutableList__init_)]]);
-$rt_metadata([ju_Collections$3, 0, ju_TemplateCollections$AbstractImmutableList, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(ju_Collections$3__init_)],
-jur_DotSet, "DotSet", 19, jur_JointSet, [], 4, 0, 0, 0, ["$_init_77", $rt_wrapFunction1(jur_DotSet__init_), "$matches", $rt_wrapFunction3(jur_DotSet_matches), "$getName", $rt_wrapFunction0(jur_DotSet_getName), "$setNext", $rt_wrapFunction1(jur_DotSet_setNext), "$getType0", $rt_wrapFunction0(jur_DotSet_getType), "$hasConsumed", $rt_wrapFunction1(jur_DotSet_hasConsumed)],
+ju_TemplateCollections$AbstractImmutableList, 0, ju_AbstractList, [ju_RandomAccess], 1, 0, 0, 0, ["$_init_", $rt_wrapFunction0(ju_TemplateCollections$AbstractImmutableList__init_)],
+ju_Collections$3, 0, ju_TemplateCollections$AbstractImmutableList, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(ju_Collections$3__init_)]]);
+$rt_metadata([jur_DotSet, "DotSet", 19, jur_JointSet, [], 4, 0, 0, 0, ["$_init_77", $rt_wrapFunction1(jur_DotSet__init_), "$matches", $rt_wrapFunction3(jur_DotSet_matches), "$getName", $rt_wrapFunction0(jur_DotSet_getName), "$setNext", $rt_wrapFunction1(jur_DotSet_setNext), "$getType0", $rt_wrapFunction0(jur_DotSet_getType), "$hasConsumed", $rt_wrapFunction1(jur_DotSet_hasConsumed)],
 jur_CharClass$9, 0, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_87", $rt_wrapFunction3(jur_CharClass$9__init_), "$contains", $rt_wrapFunction1(jur_CharClass$9_contains)],
 ju_Collections$4, 0, jl_Object, [ju_Iterator], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(ju_Collections$4__init_)],
 jur_Matcher, 0, jl_Object, [jur_MatchResult], 4, 3, 0, 0, ["$find0", $rt_wrapFunction1(jur_Matcher_find), "$find1", $rt_wrapFunction0(jur_Matcher_find0), "$start", $rt_wrapFunction1(jur_Matcher_start0), "$end", $rt_wrapFunction1(jur_Matcher_end), "$start0", $rt_wrapFunction0(jur_Matcher_start), "$end0", $rt_wrapFunction0(jur_Matcher_end0), "$hasTransparentBounds", $rt_wrapFunction0(jur_Matcher_hasTransparentBounds), "$_init_69", $rt_wrapFunction2(jur_Matcher__init_)],
@@ -23546,14 +23738,14 @@ ju_Collections$1, 0, ju_TemplateCollections$AbstractImmutableSet, [], 0, 0, 0, 0
 jur_DotAllSet, "DotAllSet", 19, jur_JointSet, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_DotAllSet__init_), "$matches", $rt_wrapFunction3(jur_DotAllSet_matches), "$getName", $rt_wrapFunction0(jur_DotAllSet_getName), "$setNext", $rt_wrapFunction1(jur_DotAllSet_setNext), "$getType0", $rt_wrapFunction0(jur_DotAllSet_getType), "$hasConsumed", $rt_wrapFunction1(jur_DotAllSet_hasConsumed)],
 ju_Collections$2, 0, ju_TemplateCollections$AbstractImmutableMap, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(ju_Collections$2__init_)],
 jur_CICharSet, "CICharSet", 19, jur_LeafSet, [], 0, 0, 0, 0, ["$_init_74", $rt_wrapFunction1(jur_CICharSet__init_0), "$accepts", $rt_wrapFunction2(jur_CICharSet_accepts), "$getName", $rt_wrapFunction0(jur_CICharSet_getName)],
-jur_SupplCharSet, "SupplCharSet", 19, jur_LeafSet, [], 0, 0, 0, 0, ["$_init_1", $rt_wrapFunction1(jur_SupplCharSet__init_), "$accepts", $rt_wrapFunction2(jur_SupplCharSet_accepts), "$find", $rt_wrapFunction3(jur_SupplCharSet_find), "$findBack", $rt_wrapFunction4(jur_SupplCharSet_findBack), "$getName", $rt_wrapFunction0(jur_SupplCharSet_getName), "$getCodePoint", $rt_wrapFunction0(jur_SupplCharSet_getCodePoint), "$first", $rt_wrapFunction1(jur_SupplCharSet_first)],
-jur_AbstractCharClass$LazyJavaLowerCase$1, "AbstractCharClass$LazyJavaLowerCase$1", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_7", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaLowerCase$1__init_), "$contains", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaLowerCase$1_contains)],
+jur_SupplCharSet, "SupplCharSet", 19, jur_LeafSet, [], 0, 0, 0, 0, ["$_init_2", $rt_wrapFunction1(jur_SupplCharSet__init_), "$accepts", $rt_wrapFunction2(jur_SupplCharSet_accepts), "$find", $rt_wrapFunction3(jur_SupplCharSet_find), "$findBack", $rt_wrapFunction4(jur_SupplCharSet_findBack), "$getName", $rt_wrapFunction0(jur_SupplCharSet_getName), "$getCodePoint", $rt_wrapFunction0(jur_SupplCharSet_getCodePoint), "$first", $rt_wrapFunction1(jur_SupplCharSet_first)],
+jur_AbstractCharClass$LazyJavaLowerCase$1, "AbstractCharClass$LazyJavaLowerCase$1", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_8", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaLowerCase$1__init_), "$contains", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaLowerCase$1_contains)],
 gt_TObjectHash$NULL, 0, jl_Object, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(gt_TObjectHash$NULL__init_)],
-ovi_MixedVertex, "MixedVertex", 7, oc_Vertex, [], 0, 3, 0, 0, ["$_init_0", $rt_wrapFunction1(ovi_MixedVertex__init_0), "$addToNeighbors", $rt_wrapFunction2(ovi_MixedVertex_addToNeighbors), "$removeFromNeighbors", $rt_wrapFunction2(ovi_MixedVertex_removeFromNeighbors), "$getInDegree", $rt_wrapFunction0(ovi_MixedVertex_getInDegree), "$setInDegree", $rt_wrapFunction1(ovi_MixedVertex_setInDegree), "$getOutDegree", $rt_wrapFunction0(ovi_MixedVertex_getOutDegree), "$setOutDegree", $rt_wrapFunction1(ovi_MixedVertex_setOutDegree),
+ovi_MixedVertex, "MixedVertex", 7, oc_Vertex, [], 0, 3, 0, 0, ["$_init_1", $rt_wrapFunction1(ovi_MixedVertex__init_0), "$addToNeighbors", $rt_wrapFunction2(ovi_MixedVertex_addToNeighbors), "$removeFromNeighbors", $rt_wrapFunction2(ovi_MixedVertex_removeFromNeighbors), "$getInDegree", $rt_wrapFunction0(ovi_MixedVertex_getInDegree), "$setInDegree", $rt_wrapFunction1(ovi_MixedVertex_setInDegree), "$getOutDegree", $rt_wrapFunction0(ovi_MixedVertex_getOutDegree), "$setOutDegree", $rt_wrapFunction1(ovi_MixedVertex_setOutDegree),
 "$getDegree", $rt_wrapFunction0(ovi_MixedVertex_getDegree), "$setDegree", $rt_wrapFunction1(ovi_MixedVertex_setDegree), "$getDelta", $rt_wrapFunction0(ovi_MixedVertex_getDelta), "$getNeighbors0", $rt_wrapFunction0(ovi_MixedVertex_getNeighbors), "$clearNeighbors", $rt_wrapFunction0(ovi_MixedVertex_clearNeighbors), "$getNeighbors", $rt_wrapFunction0(ovi_MixedVertex_getNeighbors0)],
 gt_TIntObjectHashMap, 0, gt_THash, [gt_TIntHashingStrategy], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(gt_TIntObjectHashMap__init_0), "$setUp", $rt_wrapFunction1(gt_TIntObjectHashMap_setUp), "$contains", $rt_wrapFunction1(gt_TIntObjectHashMap_contains), "$capacity", $rt_wrapFunction0(gt_TIntObjectHashMap_capacity), "$put1", $rt_wrapFunction2(gt_TIntObjectHashMap_put), "$rehash", $rt_wrapFunction1(gt_TIntObjectHashMap_rehash), "$get", $rt_wrapFunction1(gt_TIntObjectHashMap_get), "$remove", $rt_wrapFunction1(gt_TIntObjectHashMap_remove),
 "$index", $rt_wrapFunction1(gt_TIntObjectHashMap_index), "$insertionIndex", $rt_wrapFunction1(gt_TIntObjectHashMap_insertionIndex), "$removeAt", $rt_wrapFunction1(gt_TIntObjectHashMap_removeAt), "$keys", $rt_wrapFunction0(gt_TIntObjectHashMap_keys), "$containsKey0", $rt_wrapFunction1(gt_TIntObjectHashMap_containsKey), "$computeHashCode", $rt_wrapFunction1(gt_TIntObjectHashMap_computeHashCode)],
-jur_AbstractCharClass$LazyCategoryScope, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_20", $rt_wrapFunction2(jur_AbstractCharClass$LazyCategoryScope__init_1), "$_init_21", $rt_wrapFunction3(jur_AbstractCharClass$LazyCategoryScope__init_0), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyCategoryScope_computeValue)],
+jur_AbstractCharClass$LazyCategoryScope, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_21", $rt_wrapFunction2(jur_AbstractCharClass$LazyCategoryScope__init_1), "$_init_22", $rt_wrapFunction3(jur_AbstractCharClass$LazyCategoryScope__init_0), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyCategoryScope_computeValue)],
 jur_SupplRangeSet, "SupplRangeSet", 19, jur_JointSet, [], 0, 0, 0, 0, ["$_init_49", $rt_wrapFunction1(jur_SupplRangeSet__init_), "$matches", $rt_wrapFunction3(jur_SupplRangeSet_matches), "$getName", $rt_wrapFunction0(jur_SupplRangeSet_getName), "$contains", $rt_wrapFunction1(jur_SupplRangeSet_contains), "$first", $rt_wrapFunction1(jur_SupplRangeSet_first), "$getChars", $rt_wrapFunction0(jur_SupplRangeSet_getChars), "$setNext", $rt_wrapFunction1(jur_SupplRangeSet_setNext), "$hasConsumed", $rt_wrapFunction1(jur_SupplRangeSet_hasConsumed)],
 jur_UCISupplRangeSet, "UCISupplRangeSet", 19, jur_SupplRangeSet, [], 0, 0, 0, 0, ["$_init_49", $rt_wrapFunction1(jur_UCISupplRangeSet__init_0), "$contains", $rt_wrapFunction1(jur_UCISupplRangeSet_contains), "$getName", $rt_wrapFunction0(jur_UCISupplRangeSet_getName)],
 jur_AbstractCharClass$LazyJavaUpperCase, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaUpperCase__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaUpperCase_computeValue)],
@@ -23568,51 +23760,51 @@ jur_AbstractCharClass$LazyJavaMirrored$1, "AbstractCharClass$LazyJavaMirrored$1"
 opic_UndirectedCPP, 0, opi_ChinesePostmanProblem, [], 0, 3, 0, 0, ["$_init_64", $rt_wrapFunction2(opic_UndirectedCPP__init_), "$getProblemAttributes", $rt_wrapFunction0(opic_UndirectedCPP_getProblemAttributes)],
 jur_AbstractCharClass$LazyJavaISOControl$1, "AbstractCharClass$LazyJavaISOControl$1", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_59", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaISOControl$1__init_), "$contains", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaISOControl$1_contains)],
 jur_WordBoundary, "WordBoundary", 19, jur_AbstractSet, [], 0, 0, 0, 0, ["$_init_41", $rt_wrapFunction1(jur_WordBoundary__init_0), "$matches", $rt_wrapFunction3(jur_WordBoundary_matches), "$hasConsumed", $rt_wrapFunction1(jur_WordBoundary_hasConsumed), "$getName", $rt_wrapFunction0(jur_WordBoundary_getName)],
-jur_UEOLSet, "UEOLSet", 19, jur_AbstractSet, [], 4, 0, 0, 0, ["$_init_1", $rt_wrapFunction1(jur_UEOLSet__init_), "$matches", $rt_wrapFunction3(jur_UEOLSet_matches), "$hasConsumed", $rt_wrapFunction1(jur_UEOLSet_hasConsumed), "$getName", $rt_wrapFunction0(jur_UEOLSet_getName)],
+jur_UEOLSet, "UEOLSet", 19, jur_AbstractSet, [], 4, 0, 0, 0, ["$_init_2", $rt_wrapFunction1(jur_UEOLSet__init_), "$matches", $rt_wrapFunction3(jur_UEOLSet_matches), "$hasConsumed", $rt_wrapFunction1(jur_UEOLSet_hasConsumed), "$getName", $rt_wrapFunction0(jur_UEOLSet_getName)],
 jur_AbstractCharClass$LazySpace, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazySpace__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazySpace_computeValue)],
 ju_HashMap$1, 0, ju_AbstractSet, [], 0, 0, 0, 0, ["$_init_37", $rt_wrapFunction1(ju_HashMap$1__init_), "$size", $rt_wrapFunction0(ju_HashMap$1_size), "$iterator", $rt_wrapFunction0(ju_HashMap$1_iterator)],
 jur_UCICharSet, "UCICharSet", 19, jur_LeafSet, [], 0, 0, 0, 0, ["$_init_74", $rt_wrapFunction1(jur_UCICharSet__init_), "$accepts", $rt_wrapFunction2(jur_UCICharSet_accepts), "$getName", $rt_wrapFunction0(jur_UCICharSet_getName)],
 ju_HashMap$2, 0, ju_AbstractCollection, [], 0, 0, 0, 0, ["$_init_37", $rt_wrapFunction1(ju_HashMap$2__init_), "$iterator", $rt_wrapFunction0(ju_HashMap$2_iterator)],
 jl_Double, 0, jl_Number, [jl_Comparable], 0, 3, 0, jl_Double_$callClinit, ["$_init_51", $rt_wrapFunction1(jl_Double__init_), "$doubleValue", $rt_wrapFunction0(jl_Double_doubleValue)],
-jur_AtomicFSet, "AtomicFSet", 19, jur_FSet, [], 0, 0, 0, 0, ["$_init_1", $rt_wrapFunction1(jur_AtomicFSet__init_), "$matches", $rt_wrapFunction3(jur_AtomicFSet_matches), "$getIndex", $rt_wrapFunction0(jur_AtomicFSet_getIndex), "$getName", $rt_wrapFunction0(jur_AtomicFSet_getName), "$hasConsumed", $rt_wrapFunction1(jur_AtomicFSet_hasConsumed)],
+jur_AtomicFSet, "AtomicFSet", 19, jur_FSet, [], 0, 0, 0, 0, ["$_init_2", $rt_wrapFunction1(jur_AtomicFSet__init_), "$matches", $rt_wrapFunction3(jur_AtomicFSet_matches), "$getIndex", $rt_wrapFunction0(jur_AtomicFSet_getIndex), "$getName", $rt_wrapFunction0(jur_AtomicFSet_getName), "$hasConsumed", $rt_wrapFunction1(jur_AtomicFSet_hasConsumed)],
 jur_LowSurrogateCharSet, "LowSurrogateCharSet", 19, jur_JointSet, [], 0, 0, 0, 0, ["$_init_74", $rt_wrapFunction1(jur_LowSurrogateCharSet__init_0), "$setNext", $rt_wrapFunction1(jur_LowSurrogateCharSet_setNext), "$matches", $rt_wrapFunction3(jur_LowSurrogateCharSet_matches), "$find", $rt_wrapFunction3(jur_LowSurrogateCharSet_find), "$findBack", $rt_wrapFunction4(jur_LowSurrogateCharSet_findBack), "$getName", $rt_wrapFunction0(jur_LowSurrogateCharSet_getName), "$first", $rt_wrapFunction1(jur_LowSurrogateCharSet_first),
 "$hasConsumed", $rt_wrapFunction1(jur_LowSurrogateCharSet_hasConsumed)],
-ogu_Pair, "Pair", 14, jl_Object, [], 0, 3, 0, 0, ["$_init_24", $rt_wrapFunction2(ogu_Pair__init_0), "$getFirst", $rt_wrapFunction0(ogu_Pair_getFirst), "$setFirst", $rt_wrapFunction1(ogu_Pair_setFirst), "$getSecond", $rt_wrapFunction0(ogu_Pair_getSecond), "$setSecond", $rt_wrapFunction1(ogu_Pair_setSecond), "$equals", $rt_wrapFunction1(ogu_Pair_equals), "$hashCode0", $rt_wrapFunction0(ogu_Pair_hashCode)],
+ogu_Pair, "Pair", 14, jl_Object, [], 0, 3, 0, 0, ["$_init_25", $rt_wrapFunction2(ogu_Pair__init_0), "$getFirst", $rt_wrapFunction0(ogu_Pair_getFirst), "$setFirst", $rt_wrapFunction1(ogu_Pair_setFirst), "$getSecond", $rt_wrapFunction0(ogu_Pair_getSecond), "$setSecond", $rt_wrapFunction1(ogu_Pair_setSecond), "$equals", $rt_wrapFunction1(ogu_Pair_equals), "$hashCode0", $rt_wrapFunction0(ogu_Pair_hashCode)],
 jur_CompositeGroupQuantifierSet, "CompositeGroupQuantifierSet", 19, jur_GroupQuantifierSet, [], 0, 0, 0, 0, ["$_init_52", function(var_1, var_2, var_3, var_4, var_5) { jur_CompositeGroupQuantifierSet__init_(this, var_1, var_2, var_3, var_4, var_5); }, "$matches", $rt_wrapFunction3(jur_CompositeGroupQuantifierSet_matches), "$getName", $rt_wrapFunction0(jur_CompositeGroupQuantifierSet_getName)],
 jur_RelCompositeGroupQuantifierSet, "RelCompositeGroupQuantifierSet", 19, jur_CompositeGroupQuantifierSet, [], 0, 0, 0, 0, ["$_init_52", function(var_1, var_2, var_3, var_4, var_5) { jur_RelCompositeGroupQuantifierSet__init_(this, var_1, var_2, var_3, var_4, var_5); }, "$matches", $rt_wrapFunction3(jur_RelCompositeGroupQuantifierSet_matches)],
-ju_ArrayList, "ArrayList", 18, ju_AbstractList, [jl_Cloneable, ji_Serializable, ju_RandomAccess], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(ju_ArrayList__init_2), "$_init_1", $rt_wrapFunction1(ju_ArrayList__init_0), "$_init_66", $rt_wrapFunction1(ju_ArrayList__init_1), "$ensureCapacity", $rt_wrapFunction1(ju_ArrayList_ensureCapacity), "$get", $rt_wrapFunction1(ju_ArrayList_get), "$size", $rt_wrapFunction0(ju_ArrayList_size), "$set0", $rt_wrapFunction2(ju_ArrayList_set), "$add2", $rt_wrapFunction1(ju_ArrayList_add),
+ju_ArrayList, "ArrayList", 18, ju_AbstractList, [jl_Cloneable, ji_Serializable, ju_RandomAccess], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(ju_ArrayList__init_2), "$_init_2", $rt_wrapFunction1(ju_ArrayList__init_0), "$_init_66", $rt_wrapFunction1(ju_ArrayList__init_1), "$ensureCapacity", $rt_wrapFunction1(ju_ArrayList_ensureCapacity), "$get", $rt_wrapFunction1(ju_ArrayList_get), "$size", $rt_wrapFunction0(ju_ArrayList_size), "$set0", $rt_wrapFunction2(ju_ArrayList_set), "$add2", $rt_wrapFunction1(ju_ArrayList_add),
 "$add1", $rt_wrapFunction2(ju_ArrayList_add0), "$remove", $rt_wrapFunction1(ju_ArrayList_remove), "$remove0", $rt_wrapFunction1(ju_ArrayList_remove0), "$clear", $rt_wrapFunction0(ju_ArrayList_clear), "$addAll0", $rt_wrapFunction2(ju_ArrayList_addAll), "$toString", $rt_wrapFunction0(ju_ArrayList_toString), "$hashCode0", $rt_wrapFunction0(ju_ArrayList_hashCode)],
 ju_LinkedList$SequentialListIterator, 0, jl_Object, [ju_ListIterator], 0, 0, 0, 0, ["$_init_43", $rt_wrapFunction4(ju_LinkedList$SequentialListIterator__init_0), "$add5", $rt_wrapFunction1(ju_LinkedList$SequentialListIterator_add)],
 oe_WrongEdgeTypeException, "WrongEdgeTypeException", 11, jl_Exception, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(oe_WrongEdgeTypeException__init_0)],
-jur_RelAltGroupQuantifierSet, "RelAltGroupQuantifierSet", 19, jur_AltGroupQuantifierSet, [], 0, 0, 0, 0, ["$_init_9", $rt_wrapFunction3(jur_RelAltGroupQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_RelAltGroupQuantifierSet_matches)],
+jur_RelAltGroupQuantifierSet, "RelAltGroupQuantifierSet", 19, jur_AltGroupQuantifierSet, [], 0, 0, 0, 0, ["$_init_10", $rt_wrapFunction3(jur_RelAltGroupQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_RelAltGroupQuantifierSet_matches)],
 jur_IntHash, 0, jl_Object, [], 0, 0, 0, 0, 0,
-jl_String, "String", 20, jl_Object, [ji_Serializable, jl_Comparable, jl_CharSequence], 0, 3, 0, jl_String_$callClinit, ["$_init_", $rt_wrapFunction0(jl_String__init_3), "$_init_32", $rt_wrapFunction1(jl_String__init_0), "$_init_53", $rt_wrapFunction1(jl_String__init_4), "$_init_16", $rt_wrapFunction3(jl_String__init_6), "$charAt", $rt_wrapFunction1(jl_String_charAt), "$length", $rt_wrapFunction0(jl_String_length), "$isEmpty", $rt_wrapFunction0(jl_String_isEmpty), "$compareTo2", $rt_wrapFunction1(jl_String_compareTo0),
+jl_String, "String", 20, jl_Object, [ji_Serializable, jl_Comparable, jl_CharSequence], 0, 3, 0, jl_String_$callClinit, ["$_init_", $rt_wrapFunction0(jl_String__init_3), "$_init_32", $rt_wrapFunction1(jl_String__init_1), "$_init_53", $rt_wrapFunction1(jl_String__init_4), "$_init_17", $rt_wrapFunction3(jl_String__init_6), "$charAt", $rt_wrapFunction1(jl_String_charAt), "$length", $rt_wrapFunction0(jl_String_length), "$isEmpty", $rt_wrapFunction0(jl_String_isEmpty), "$compareTo2", $rt_wrapFunction1(jl_String_compareTo0),
 "$startsWith0", $rt_wrapFunction2(jl_String_startsWith), "$startsWith1", $rt_wrapFunction1(jl_String_startsWith0), "$indexOf4", $rt_wrapFunction2(jl_String_indexOf), "$indexOf", $rt_wrapFunction1(jl_String_indexOf2), "$lastIndexOf2", $rt_wrapFunction2(jl_String_lastIndexOf), "$lastIndexOf1", $rt_wrapFunction1(jl_String_lastIndexOf1), "$indexOf2", $rt_wrapFunction2(jl_String_indexOf1), "$indexOf3", $rt_wrapFunction1(jl_String_indexOf0), "$lastIndexOf0", $rt_wrapFunction2(jl_String_lastIndexOf0), "$substring",
 $rt_wrapFunction2(jl_String_substring), "$substring0", $rt_wrapFunction1(jl_String_substring0), "$subSequence", $rt_wrapFunction2(jl_String_subSequence), "$replace0", $rt_wrapFunction2(jl_String_replace0), "$contains1", $rt_wrapFunction1(jl_String_contains), "$replace", $rt_wrapFunction2(jl_String_replace), "$trim", $rt_wrapFunction0(jl_String_trim), "$toString", $rt_wrapFunction0(jl_String_toString), "$toCharArray", $rt_wrapFunction0(jl_String_toCharArray), "$equals", $rt_wrapFunction1(jl_String_equals), "$equalsIgnoreCase",
-$rt_wrapFunction1(jl_String_equalsIgnoreCase), "$hashCode0", $rt_wrapFunction0(jl_String_hashCode), "$toUpperCase0", $rt_wrapFunction1(jl_String_toUpperCase), "$split", $rt_wrapFunction1(jl_String_split), "$compareTo0", $rt_wrapFunction1(jl_String_compareTo)],
+$rt_wrapFunction1(jl_String_equalsIgnoreCase), "$hashCode0", $rt_wrapFunction0(jl_String_hashCode), "$toLowerCase0", $rt_wrapFunction0(jl_String_toLowerCase), "$toUpperCase0", $rt_wrapFunction1(jl_String_toUpperCase), "$split", $rt_wrapFunction1(jl_String_split), "$compareTo0", $rt_wrapFunction1(jl_String_compareTo)],
 jl_NegativeArraySizeException, "NegativeArraySizeException", 20, jl_RuntimeException, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(jl_NegativeArraySizeException__init_)],
-oe_NoDemandSetException, "NoDemandSetException", 11, jl_Exception, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(oe_NoDemandSetException__init_)]]);
-$rt_metadata([jur_ReluctantAltQuantifierSet, "ReluctantAltQuantifierSet", 19, jur_AltQuantifierSet, [], 0, 0, 0, 0, ["$_init_10", $rt_wrapFunction3(jur_ReluctantAltQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_ReluctantAltQuantifierSet_matches)],
-jur_AbstractCharClass$LazyJavaWhitespace, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaWhitespace__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaWhitespace_computeValue)],
+oe_NoDemandSetException, "NoDemandSetException", 11, jl_Exception, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(oe_NoDemandSetException__init_)],
+jur_ReluctantAltQuantifierSet, "ReluctantAltQuantifierSet", 19, jur_AltQuantifierSet, [], 0, 0, 0, 0, ["$_init_11", $rt_wrapFunction3(jur_ReluctantAltQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_ReluctantAltQuantifierSet_matches)]]);
+$rt_metadata([jur_AbstractCharClass$LazyJavaWhitespace, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaWhitespace__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaWhitespace_computeValue)],
 ogu_CommonAlgorithms, "CommonAlgorithms", 14, jl_Object, [], 0, 3, [0,0,0], ogu_CommonAlgorithms_$callClinit, 0,
 jur_FSet$PossessiveFSet, "FSet$PossessiveFSet", 19, jur_AbstractSet, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_FSet$PossessiveFSet__init_), "$matches", $rt_wrapFunction3(jur_FSet$PossessiveFSet_matches), "$getName", $rt_wrapFunction0(jur_FSet$PossessiveFSet_getName), "$hasConsumed", $rt_wrapFunction1(jur_FSet$PossessiveFSet_hasConsumed)],
-jl_IllegalArgumentException, "IllegalArgumentException", 20, jl_RuntimeException, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(jl_IllegalArgumentException__init_1), "$_init_0", $rt_wrapFunction1(jl_IllegalArgumentException__init_2)],
-jl_NumberFormatException, "NumberFormatException", 20, jl_IllegalArgumentException, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(jl_NumberFormatException__init_2), "$_init_0", $rt_wrapFunction1(jl_NumberFormatException__init_0)],
-oli_Edge, "Edge", 10, oc_Link, [], 0, 3, 0, 0, ["$_init_13", $rt_wrapFunction3(oli_Edge__init_0), "$getCopy", $rt_wrapFunction0(oli_Edge_getCopy), "$isWindy", $rt_wrapFunction0(oli_Edge_isWindy)],
+jl_IllegalArgumentException, "IllegalArgumentException", 20, jl_RuntimeException, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(jl_IllegalArgumentException__init_1), "$_init_1", $rt_wrapFunction1(jl_IllegalArgumentException__init_2)],
+jl_NumberFormatException, "NumberFormatException", 20, jl_IllegalArgumentException, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(jl_NumberFormatException__init_2), "$_init_1", $rt_wrapFunction1(jl_NumberFormatException__init_0)],
+oli_Edge, "Edge", 10, oc_Link, [], 0, 3, 0, 0, ["$_init_14", $rt_wrapFunction3(oli_Edge__init_0), "$getCopy", $rt_wrapFunction0(oli_Edge_getCopy), "$isWindy", $rt_wrapFunction0(oli_Edge_isWindy)],
 jur_PosCompositeGroupQuantifierSet, "PosCompositeGroupQuantifierSet", 19, jur_CompositeGroupQuantifierSet, [], 0, 0, 0, 0, ["$_init_52", function(var_1, var_2, var_3, var_4, var_5) { jur_PosCompositeGroupQuantifierSet__init_(this, var_1, var_2, var_3, var_4, var_5); }, "$matches", $rt_wrapFunction3(jur_PosCompositeGroupQuantifierSet_matches)],
 oc_Route, "Route", 1, jl_Object, [], 1, 3, [0,0,0], oc_Route_$callClinit, ["$_init_", $rt_wrapFunction0(oc_Route__init_), "$getCost", $rt_wrapFunction0(oc_Route_getCost), "$getPath", $rt_wrapFunction0(oc_Route_getPath), "$appendEdge0", $rt_wrapFunction1(oc_Route_appendEdge), "$appendEdge", $rt_wrapFunction2(oc_Route_appendEdge0), "$toString", $rt_wrapFunction0(oc_Route_toString)],
-jur_MultiLineEOLSet, "MultiLineEOLSet", 19, jur_AbstractSet, [], 0, 0, 0, 0, ["$_init_1", $rt_wrapFunction1(jur_MultiLineEOLSet__init_), "$matches", $rt_wrapFunction3(jur_MultiLineEOLSet_matches), "$hasConsumed", $rt_wrapFunction1(jur_MultiLineEOLSet_hasConsumed), "$getName", $rt_wrapFunction0(jur_MultiLineEOLSet_getName)],
+jur_MultiLineEOLSet, "MultiLineEOLSet", 19, jur_AbstractSet, [], 0, 0, 0, 0, ["$_init_2", $rt_wrapFunction1(jur_MultiLineEOLSet__init_), "$matches", $rt_wrapFunction3(jur_MultiLineEOLSet_matches), "$hasConsumed", $rt_wrapFunction1(jur_MultiLineEOLSet_hasConsumed), "$getName", $rt_wrapFunction0(jur_MultiLineEOLSet_getName)],
 jur_IntArrHash, 0, jl_Object, [], 0, 0, 0, 0, 0,
 jur_AbstractCharClass$LazyJavaMirrored, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaMirrored__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaMirrored_computeValue)],
 jur_AbstractCharClass$LazyJavaDigit$1, "AbstractCharClass$LazyJavaDigit$1", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_31", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaDigit$1__init_), "$contains", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaDigit$1_contains)],
 jur_AbstractCharClass$LazyJavaISOControl, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaISOControl__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaISOControl_computeValue)],
-jl_IllegalStateException, "IllegalStateException", 20, jl_RuntimeException, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(jl_IllegalStateException__init_0)],
+jl_IllegalStateException, "IllegalStateException", 20, jl_RuntimeException, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(jl_IllegalStateException__init_2), "$_init_1", $rt_wrapFunction1(jl_IllegalStateException__init_1)],
 oc_Link$Zone, 0, jl_Enum, [], 12, 3, 0, oc_Link$Zone_$callClinit, 0,
 jur_HighSurrogateCharSet, "HighSurrogateCharSet", 19, jur_JointSet, [], 0, 0, 0, 0, ["$_init_74", $rt_wrapFunction1(jur_HighSurrogateCharSet__init_), "$setNext", $rt_wrapFunction1(jur_HighSurrogateCharSet_setNext), "$matches", $rt_wrapFunction3(jur_HighSurrogateCharSet_matches), "$find", $rt_wrapFunction3(jur_HighSurrogateCharSet_find), "$findBack", $rt_wrapFunction4(jur_HighSurrogateCharSet_findBack), "$getName", $rt_wrapFunction0(jur_HighSurrogateCharSet_getName), "$first", $rt_wrapFunction1(jur_HighSurrogateCharSet_first),
 "$hasConsumed", $rt_wrapFunction1(jur_HighSurrogateCharSet_hasConsumed)],
-osi_MCPPSolver_Yaoyuenyong, 0, oc_SingleVehicleSolver, [], 0, 3, 0, 0, ["$_init_22", $rt_wrapFunction1(osi_MCPPSolver_Yaoyuenyong__init_), "$solve", $rt_wrapFunction0(osi_MCPPSolver_Yaoyuenyong_solve), "$getProblemAttributes", $rt_wrapFunction0(osi_MCPPSolver_Yaoyuenyong_getProblemAttributes), "$getSolverName", $rt_wrapFunction0(osi_MCPPSolver_Yaoyuenyong_getSolverName), "$checkGraphRequirements", $rt_wrapFunction0(osi_MCPPSolver_Yaoyuenyong_checkGraphRequirements)],
-jur_ReluctantCompositeQuantifierSet, "ReluctantCompositeQuantifierSet", 19, jur_CompositeQuantifierSet, [], 0, 0, 0, 0, ["$_init_11", $rt_wrapFunction4(jur_ReluctantCompositeQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_ReluctantCompositeQuantifierSet_matches)],
-jl_NullPointerException, "NullPointerException", 20, jl_RuntimeException, [], 0, 3, 0, 0, ["$_init_0", $rt_wrapFunction1(jl_NullPointerException__init_2), "$_init_", $rt_wrapFunction0(jl_NullPointerException__init_0)],
+osi_MCPPSolver_Yaoyuenyong, 0, oc_SingleVehicleSolver, [], 0, 3, 0, 0, ["$_init_23", $rt_wrapFunction1(osi_MCPPSolver_Yaoyuenyong__init_), "$solve", $rt_wrapFunction0(osi_MCPPSolver_Yaoyuenyong_solve), "$getProblemAttributes", $rt_wrapFunction0(osi_MCPPSolver_Yaoyuenyong_getProblemAttributes), "$getSolverName", $rt_wrapFunction0(osi_MCPPSolver_Yaoyuenyong_getSolverName), "$checkGraphRequirements", $rt_wrapFunction0(osi_MCPPSolver_Yaoyuenyong_checkGraphRequirements)],
+jur_ReluctantCompositeQuantifierSet, "ReluctantCompositeQuantifierSet", 19, jur_CompositeQuantifierSet, [], 0, 0, 0, 0, ["$_init_12", $rt_wrapFunction4(jur_ReluctantCompositeQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_ReluctantCompositeQuantifierSet_matches)],
+jl_NullPointerException, "NullPointerException", 20, jl_RuntimeException, [], 0, 3, 0, 0, ["$_init_1", $rt_wrapFunction1(jl_NullPointerException__init_2), "$_init_", $rt_wrapFunction0(jl_NullPointerException__init_0)],
 jur_SOLSet, "SOLSet", 19, jur_AbstractSet, [], 4, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_SOLSet__init_), "$matches", $rt_wrapFunction3(jur_SOLSet_matches), "$hasConsumed", $rt_wrapFunction1(jur_SOLSet_hasConsumed), "$getName", $rt_wrapFunction0(jur_SOLSet_getName)],
 oe_InvalidEndpointsException, "InvalidEndpointsException", 11, jl_Exception, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(oe_InvalidEndpointsException__init_0)],
 jur_AbstractCharClass$LazyJavaSpaceChar$1, "AbstractCharClass$LazyJavaSpaceChar$1", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_36", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaSpaceChar$1__init_), "$contains", $rt_wrapFunction1(jur_AbstractCharClass$LazyJavaSpaceChar$1_contains)],
@@ -23620,60 +23812,60 @@ ori_Tour, "Tour", 3, oc_Route, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(ori
 gt_TObjectHash, 0, gt_THash, [gt_TObjectHashingStrategy], 1, 3, 0, gt_TObjectHash_$callClinit, 0,
 ogu_BlossomV$1, 0, jl_Object, [ju_Comparator], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(ogu_BlossomV$1__init_), "$compare6", $rt_wrapFunction2(ogu_BlossomV$1_compare), "$compare1", $rt_wrapFunction2(ogu_BlossomV$1_compare0)],
 jl_Math, 0, jl_Object, [], 4, 3, 0, 0, 0,
-ogi_WindyGraph, "WindyGraph", 13, oc_MutableGraph, [], 0, 3, [0,0,0], ogi_WindyGraph_$callClinit, ["$_init_", $rt_wrapFunction0(ogi_WindyGraph__init_1), "$_init_1", $rt_wrapFunction1(ogi_WindyGraph__init_0), "$addEdge", function(var_1, var_2, var_3, var_4, var_5) { ogi_WindyGraph_addEdge2(this, var_1, var_2, var_3, var_4, var_5); }, "$addEdge10", function(var_1, var_2, var_3, var_4, var_5) { ogi_WindyGraph_addEdge1(this, var_1, var_2, var_3, var_4, var_5); }, "$addEdge6", function(var_1, var_2, var_3, var_4,
+ogi_WindyGraph, "WindyGraph", 13, oc_MutableGraph, [], 0, 3, [0,0,0], ogi_WindyGraph_$callClinit, ["$_init_", $rt_wrapFunction0(ogi_WindyGraph__init_1), "$_init_2", $rt_wrapFunction1(ogi_WindyGraph__init_0), "$addEdge", function(var_1, var_2, var_3, var_4, var_5) { ogi_WindyGraph_addEdge2(this, var_1, var_2, var_3, var_4, var_5); }, "$addEdge10", function(var_1, var_2, var_3, var_4, var_5) { ogi_WindyGraph_addEdge1(this, var_1, var_2, var_3, var_4, var_5); }, "$addEdge6", function(var_1, var_2, var_3, var_4,
 var_5, var_6) { ogi_WindyGraph_addEdge4(this, var_1, var_2, var_3, var_4, var_5, var_6); }, "$addEdge1", function(var_1, var_2, var_3, var_4, var_5, var_6, var_7) { ogi_WindyGraph_addEdge3(this, var_1, var_2, var_3, var_4, var_5, var_6, var_7); }, "$constructEdge2", function(var_1, var_2, var_3, var_4, var_5) { return ogi_WindyGraph_constructEdge0(this, var_1, var_2, var_3, var_4, var_5); }, "$constructEdge3", function(var_1, var_2, var_3, var_4, var_5, var_6) { return ogi_WindyGraph_constructEdge(this, var_1,
 var_2, var_3, var_4, var_5, var_6); }, "$addVertex", $rt_wrapFunction1(ogi_WindyGraph_addVertex), "$addEdge14", $rt_wrapFunction1(ogi_WindyGraph_addEdge0), "$getDeepCopy", $rt_wrapFunction0(ogi_WindyGraph_getDeepCopy), "$constructVertex1", $rt_wrapFunction1(ogi_WindyGraph_constructVertex0), "$addVertex3", $rt_wrapFunction1(ogi_WindyGraph_addVertex0), "$addEdge9", $rt_wrapFunction1(ogi_WindyGraph_addEdge), "$constructVertex", $rt_wrapFunction1(ogi_WindyGraph_constructVertex)],
 ju_HashMap$HashMapEntrySet, 0, ju_AbstractSet, [], 0, 0, 0, 0, ["$_init_37", $rt_wrapFunction1(ju_HashMap$HashMapEntrySet__init_), "$iterator", $rt_wrapFunction0(ju_HashMap$HashMapEntrySet_iterator)],
-ogi_DirectedGraph, "DirectedGraph", 13, oc_MutableGraph, [], 0, 3, [0,0,0], ogi_DirectedGraph_$callClinit, ["$_init_", $rt_wrapFunction0(ogi_DirectedGraph__init_2), "$_init_1", $rt_wrapFunction1(ogi_DirectedGraph__init_1), "$addVertex1", $rt_wrapFunction1(ogi_DirectedGraph_addVertex0), "$addEdge3", $rt_wrapFunction1(ogi_DirectedGraph_addEdge), "$removeEdge", $rt_wrapFunction1(ogi_DirectedGraph_removeEdge), "$getDeepCopy0", $rt_wrapFunction0(ogi_DirectedGraph_getDeepCopy), "$constructEdge", $rt_wrapFunction4(ogi_DirectedGraph_constructEdge),
+ogi_DirectedGraph, "DirectedGraph", 13, oc_MutableGraph, [], 0, 3, [0,0,0], ogi_DirectedGraph_$callClinit, ["$_init_", $rt_wrapFunction0(ogi_DirectedGraph__init_2), "$_init_2", $rt_wrapFunction1(ogi_DirectedGraph__init_1), "$addVertex1", $rt_wrapFunction1(ogi_DirectedGraph_addVertex0), "$addEdge3", $rt_wrapFunction1(ogi_DirectedGraph_addEdge), "$removeEdge", $rt_wrapFunction1(ogi_DirectedGraph_removeEdge), "$getDeepCopy0", $rt_wrapFunction0(ogi_DirectedGraph_getDeepCopy), "$constructEdge", $rt_wrapFunction4(ogi_DirectedGraph_constructEdge),
 "$constructVertex2", $rt_wrapFunction1(ogi_DirectedGraph_constructVertex), "$addVertex3", $rt_wrapFunction1(ogi_DirectedGraph_addVertex), "$addEdge9", $rt_wrapFunction1(ogi_DirectedGraph_addEdge0), "$getDeepCopy3", $rt_wrapFunction0(ogi_DirectedGraph_getDeepCopy0), "$constructEdge0", $rt_wrapFunction4(ogi_DirectedGraph_constructEdge0), "$constructVertex", $rt_wrapFunction1(ogi_DirectedGraph_constructVertex0)],
 jur_AbstractCharClass$LazyJavaUnicodeIdentifierPart, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaUnicodeIdentifierPart__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaUnicodeIdentifierPart_computeValue)],
 jur_PatternSyntaxException, "PatternSyntaxException", 19, jl_IllegalArgumentException, [], 0, 3, 0, 0, ["$_init_70", $rt_wrapFunction3(jur_PatternSyntaxException__init_0), "$getMessage", $rt_wrapFunction0(jur_PatternSyntaxException_getMessage)],
 ot_TeaVMWrapper, "TeaVMWrapper", 8, jl_Object, [], 0, 3, [0,0,0], ot_TeaVMWrapper_$callClinit, 0,
-opi_RuralPostmanProblem, "RuralPostmanProblem", 5, oc_Problem, [], 1, 3, [0,0,0], opi_RuralPostmanProblem_$callClinit, ["$_init_17", $rt_wrapFunction3(opi_RuralPostmanProblem__init_)],
+opi_RuralPostmanProblem, "RuralPostmanProblem", 5, oc_Problem, [], 1, 3, [0,0,0], opi_RuralPostmanProblem_$callClinit, ["$_init_18", $rt_wrapFunction3(opi_RuralPostmanProblem__init_)],
 jur_AbstractCharClass$LazyJavaDefined, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaDefined__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaDefined_computeValue)],
-opi_ProblemAttributes, 0, jl_Object, [], 0, 3, 0, 0, ["$_init_18", function(var_1, var_2, var_3, var_4, var_5) { opi_ProblemAttributes__init_(this, var_1, var_2, var_3, var_4, var_5); }, "$getmGraphType", $rt_wrapFunction0(opi_ProblemAttributes_getmGraphType), "$getmProblemType", $rt_wrapFunction0(opi_ProblemAttributes_getmProblemType), "$getmNumVehicles", $rt_wrapFunction0(opi_ProblemAttributes_getmNumVehicles), "$getmNumDepots", $rt_wrapFunction0(opi_ProblemAttributes_getmNumDepots), "$getmProperties", $rt_wrapFunction0(opi_ProblemAttributes_getmProperties),
+opi_ProblemAttributes, 0, jl_Object, [], 0, 3, 0, 0, ["$_init_19", function(var_1, var_2, var_3, var_4, var_5) { opi_ProblemAttributes__init_(this, var_1, var_2, var_3, var_4, var_5); }, "$getmGraphType", $rt_wrapFunction0(opi_ProblemAttributes_getmGraphType), "$getmProblemType", $rt_wrapFunction0(opi_ProblemAttributes_getmProblemType), "$getmNumVehicles", $rt_wrapFunction0(opi_ProblemAttributes_getmNumVehicles), "$getmNumDepots", $rt_wrapFunction0(opi_ProblemAttributes_getmNumDepots), "$getmProperties", $rt_wrapFunction0(opi_ProblemAttributes_getmProperties),
 "$isCompatibleWith", $rt_wrapFunction1(opi_ProblemAttributes_isCompatibleWith)],
 opi_ProblemAttributes$Type, 0, jl_Enum, [], 12, 3, 0, opi_ProblemAttributes$Type_$callClinit, 0,
 jur_Pattern, 0, jl_Object, [ji_Serializable], 4, 3, 0, 0, ["$matcher", $rt_wrapFunction1(jur_Pattern_matcher), "$split1", $rt_wrapFunction2(jur_Pattern_split0), "$split0", $rt_wrapFunction1(jur_Pattern_split), "$pattern", $rt_wrapFunction0(jur_Pattern_pattern), "$groupCount", $rt_wrapFunction0(jur_Pattern_groupCount), "$compCount", $rt_wrapFunction0(jur_Pattern_compCount), "$consCount", $rt_wrapFunction0(jur_Pattern_consCount)],
 oc_Link$HighwayType, 0, jl_Enum, [], 12, 3, 0, oc_Link$HighwayType_$callClinit, 0,
-jur_PosAltGroupQuantifierSet, "PosAltGroupQuantifierSet", 19, jur_AltGroupQuantifierSet, [], 0, 0, 0, 0, ["$_init_9", $rt_wrapFunction3(jur_PosAltGroupQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_PosAltGroupQuantifierSet_matches), "$setNext", $rt_wrapFunction1(jur_PosAltGroupQuantifierSet_setNext)],
+jur_PosAltGroupQuantifierSet, "PosAltGroupQuantifierSet", 19, jur_AltGroupQuantifierSet, [], 0, 0, 0, 0, ["$_init_10", $rt_wrapFunction3(jur_PosAltGroupQuantifierSet__init_), "$matches", $rt_wrapFunction3(jur_PosAltGroupQuantifierSet_matches), "$setNext", $rt_wrapFunction1(jur_PosAltGroupQuantifierSet_setNext)],
 ou_SimpleLogger, 0, jl_Object, [], 0, 3, 0, 0, ["$debug", $rt_wrapFunction1(ou_SimpleLogger_debug), "$info", $rt_wrapFunction1(ou_SimpleLogger_info), "$warn", $rt_wrapFunction1(ou_SimpleLogger_warn), "$error", $rt_wrapFunction1(ou_SimpleLogger_error0), "$error0", $rt_wrapFunction2(ou_SimpleLogger_error)],
-ovi_WindyVertex, "WindyVertex", 7, oc_Vertex, [], 0, 3, 0, 0, ["$_init_0", $rt_wrapFunction1(ovi_WindyVertex__init_0), "$addToNeighbors0", $rt_wrapFunction2(ovi_WindyVertex_addToNeighbors), "$getDegree", $rt_wrapFunction0(ovi_WindyVertex_getDegree), "$setDegree", $rt_wrapFunction1(ovi_WindyVertex_setDegree), "$getNeighbors0", $rt_wrapFunction0(ovi_WindyVertex_getNeighbors), "$getNeighbors", $rt_wrapFunction0(ovi_WindyVertex_getNeighbors0)],
+ovi_WindyVertex, "WindyVertex", 7, oc_Vertex, [], 0, 3, 0, 0, ["$_init_1", $rt_wrapFunction1(ovi_WindyVertex__init_0), "$addToNeighbors0", $rt_wrapFunction2(ovi_WindyVertex_addToNeighbors), "$getDegree", $rt_wrapFunction0(ovi_WindyVertex_getDegree), "$setDegree", $rt_wrapFunction1(ovi_WindyVertex_setDegree), "$getNeighbors0", $rt_wrapFunction0(ovi_WindyVertex_getNeighbors), "$getNeighbors", $rt_wrapFunction0(ovi_WindyVertex_getNeighbors0)],
 jur_AbstractCharClass$LazyJavaIdentifierIgnorable, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaIdentifierIgnorable__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaIdentifierIgnorable_computeValue)],
-ju_HashMap, 0, ju_AbstractMap, [jl_Cloneable, ji_Serializable], 0, 3, 0, 0, ["$newElementArray", $rt_wrapFunction1(ju_HashMap_newElementArray), "$_init_", $rt_wrapFunction0(ju_HashMap__init_2), "$_init_1", $rt_wrapFunction1(ju_HashMap__init_0), "$_init_14", $rt_wrapFunction2(ju_HashMap__init_1), "$clear", $rt_wrapFunction0(ju_HashMap_clear), "$containsKey", $rt_wrapFunction1(ju_HashMap_containsKey), "$entrySet", $rt_wrapFunction0(ju_HashMap_entrySet), "$get1", $rt_wrapFunction1(ju_HashMap_get), "$entryByKey",
+ju_HashMap, 0, ju_AbstractMap, [jl_Cloneable, ji_Serializable], 0, 3, 0, 0, ["$newElementArray", $rt_wrapFunction1(ju_HashMap_newElementArray), "$_init_", $rt_wrapFunction0(ju_HashMap__init_2), "$_init_2", $rt_wrapFunction1(ju_HashMap__init_0), "$_init_15", $rt_wrapFunction2(ju_HashMap__init_1), "$clear", $rt_wrapFunction0(ju_HashMap_clear), "$containsKey", $rt_wrapFunction1(ju_HashMap_containsKey), "$entrySet", $rt_wrapFunction0(ju_HashMap_entrySet), "$get1", $rt_wrapFunction1(ju_HashMap_get), "$entryByKey",
 $rt_wrapFunction1(ju_HashMap_entryByKey), "$findNonNullKeyEntry", $rt_wrapFunction3(ju_HashMap_findNonNullKeyEntry), "$findNullKeyEntry", $rt_wrapFunction0(ju_HashMap_findNullKeyEntry), "$keySet", $rt_wrapFunction0(ju_HashMap_keySet), "$put", $rt_wrapFunction2(ju_HashMap_put), "$rehash", $rt_wrapFunction1(ju_HashMap_rehash0), "$rehash0", $rt_wrapFunction0(ju_HashMap_rehash), "$remove1", $rt_wrapFunction1(ju_HashMap_remove), "$removeByKey", $rt_wrapFunction1(ju_HashMap_removeByKey), "$size", $rt_wrapFunction0(ju_HashMap_size),
 "$values", $rt_wrapFunction0(ju_HashMap_values)],
-jur_UMultiLineEOLSet, "UMultiLineEOLSet", 19, jur_AbstractSet, [], 0, 0, 0, 0, ["$_init_1", $rt_wrapFunction1(jur_UMultiLineEOLSet__init_), "$matches", $rt_wrapFunction3(jur_UMultiLineEOLSet_matches), "$hasConsumed", $rt_wrapFunction1(jur_UMultiLineEOLSet_hasConsumed), "$getName", $rt_wrapFunction0(jur_UMultiLineEOLSet_getName)],
-ovi_DirectedVertex, "DirectedVertex", 7, oc_Vertex, [], 0, 3, 0, 0, ["$_init_0", $rt_wrapFunction1(ovi_DirectedVertex__init_0), "$addToNeighbors1", $rt_wrapFunction2(ovi_DirectedVertex_addToNeighbors), "$removeFromNeighbors0", $rt_wrapFunction2(ovi_DirectedVertex_removeFromNeighbors), "$getInDegree", $rt_wrapFunction0(ovi_DirectedVertex_getInDegree), "$setInDegree", $rt_wrapFunction1(ovi_DirectedVertex_setInDegree), "$getOutDegree", $rt_wrapFunction0(ovi_DirectedVertex_getOutDegree), "$setOutDegree", $rt_wrapFunction1(ovi_DirectedVertex_setOutDegree),
+jur_UMultiLineEOLSet, "UMultiLineEOLSet", 19, jur_AbstractSet, [], 0, 0, 0, 0, ["$_init_2", $rt_wrapFunction1(jur_UMultiLineEOLSet__init_), "$matches", $rt_wrapFunction3(jur_UMultiLineEOLSet_matches), "$hasConsumed", $rt_wrapFunction1(jur_UMultiLineEOLSet_hasConsumed), "$getName", $rt_wrapFunction0(jur_UMultiLineEOLSet_getName)],
+ovi_DirectedVertex, "DirectedVertex", 7, oc_Vertex, [], 0, 3, 0, 0, ["$_init_1", $rt_wrapFunction1(ovi_DirectedVertex__init_0), "$addToNeighbors1", $rt_wrapFunction2(ovi_DirectedVertex_addToNeighbors), "$removeFromNeighbors0", $rt_wrapFunction2(ovi_DirectedVertex_removeFromNeighbors), "$getInDegree", $rt_wrapFunction0(ovi_DirectedVertex_getInDegree), "$setInDegree", $rt_wrapFunction1(ovi_DirectedVertex_setInDegree), "$getOutDegree", $rt_wrapFunction0(ovi_DirectedVertex_getOutDegree), "$setOutDegree", $rt_wrapFunction1(ovi_DirectedVertex_setOutDegree),
 "$getDelta", $rt_wrapFunction0(ovi_DirectedVertex_getDelta), "$getNeighbors0", $rt_wrapFunction0(ovi_DirectedVertex_getNeighbors0), "$getNeighbors", $rt_wrapFunction0(ovi_DirectedVertex_getNeighbors)],
 jur_AbstractCharClass$LazyJavaLetterOrDigit, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaLetterOrDigit__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaLetterOrDigit_computeValue)],
 otciu_UnicodeHelper$Range, "UnicodeHelper$Range", 25, jl_Object, [], 0, 3, 0, 0, ["$_init_35", $rt_wrapFunction3(otciu_UnicodeHelper$Range__init_)],
 otcit_DoubleAnalyzer, 0, jl_Object, [], 4, 3, 0, otcit_DoubleAnalyzer_$callClinit, 0,
-jur_EOLSet, "EOLSet", 19, jur_AbstractSet, [], 4, 0, 0, 0, ["$_init_1", $rt_wrapFunction1(jur_EOLSet__init_), "$matches", $rt_wrapFunction3(jur_EOLSet_matches), "$hasConsumed", $rt_wrapFunction1(jur_EOLSet_hasConsumed), "$getName", $rt_wrapFunction0(jur_EOLSet_getName)]]);
-$rt_metadata([jur_AbstractLineTerminator$2, 0, jur_AbstractLineTerminator, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractLineTerminator$2__init_), "$isLineTerminator", $rt_wrapFunction1(jur_AbstractLineTerminator$2_isLineTerminator), "$isAfterLineTerminator", $rt_wrapFunction2(jur_AbstractLineTerminator$2_isAfterLineTerminator)],
-otciu_CharMapping, 0, jl_Object, [], 0, 3, 0, 0, ["$_init_34", $rt_wrapFunction2(otciu_CharMapping__init_)],
+jur_EOLSet, "EOLSet", 19, jur_AbstractSet, [], 4, 0, 0, 0, ["$_init_2", $rt_wrapFunction1(jur_EOLSet__init_), "$matches", $rt_wrapFunction3(jur_EOLSet_matches), "$hasConsumed", $rt_wrapFunction1(jur_EOLSet_hasConsumed), "$getName", $rt_wrapFunction0(jur_EOLSet_getName)],
+jur_AbstractLineTerminator$2, 0, jur_AbstractLineTerminator, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractLineTerminator$2__init_), "$isLineTerminator", $rt_wrapFunction1(jur_AbstractLineTerminator$2_isLineTerminator), "$isAfterLineTerminator", $rt_wrapFunction2(jur_AbstractLineTerminator$2_isAfterLineTerminator)]]);
+$rt_metadata([otciu_CharMapping, 0, jl_Object, [], 0, 3, 0, 0, ["$_init_34", $rt_wrapFunction2(otciu_CharMapping__init_)],
 jur_AbstractLineTerminator$1, 0, jur_AbstractLineTerminator, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractLineTerminator$1__init_), "$isLineTerminator", $rt_wrapFunction1(jur_AbstractLineTerminator$1_isLineTerminator), "$isAfterLineTerminator", $rt_wrapFunction2(jur_AbstractLineTerminator$1_isAfterLineTerminator)],
 opir_WindyRPP, 0, opi_RuralPostmanProblem, [], 0, 3, 0, 0, ["$_init_67", $rt_wrapFunction2(opir_WindyRPP__init_), "$getProblemAttributes", $rt_wrapFunction0(opir_WindyRPP_getProblemAttributes)],
 jur_AbstractCharClass$LazyJavaUnicodeIdentifierStart, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaUnicodeIdentifierStart__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyJavaUnicodeIdentifierStart_computeValue)],
-jur_Lexer, 0, jl_Object, [], 0, 0, 0, 0, ["$_init_29", $rt_wrapFunction2(jur_Lexer__init_), "$peek0", $rt_wrapFunction0(jur_Lexer_peek), "$setMode", $rt_wrapFunction1(jur_Lexer_setMode), "$restoreFlags", $rt_wrapFunction1(jur_Lexer_restoreFlags), "$peekSpecial", $rt_wrapFunction0(jur_Lexer_peekSpecial), "$isSpecial", $rt_wrapFunction0(jur_Lexer_isSpecial), "$isNextSpecial", $rt_wrapFunction0(jur_Lexer_isNextSpecial), "$next0", $rt_wrapFunction0(jur_Lexer_next), "$nextSpecial", $rt_wrapFunction0(jur_Lexer_nextSpecial),
+jur_Lexer, 0, jl_Object, [], 0, 0, 0, 0, ["$_init_30", $rt_wrapFunction2(jur_Lexer__init_), "$peek0", $rt_wrapFunction0(jur_Lexer_peek), "$setMode", $rt_wrapFunction1(jur_Lexer_setMode), "$restoreFlags", $rt_wrapFunction1(jur_Lexer_restoreFlags), "$peekSpecial", $rt_wrapFunction0(jur_Lexer_peekSpecial), "$isSpecial", $rt_wrapFunction0(jur_Lexer_isSpecial), "$isNextSpecial", $rt_wrapFunction0(jur_Lexer_isNextSpecial), "$next0", $rt_wrapFunction0(jur_Lexer_next), "$nextSpecial", $rt_wrapFunction0(jur_Lexer_nextSpecial),
 "$lookAhead", $rt_wrapFunction0(jur_Lexer_lookAhead), "$back", $rt_wrapFunction0(jur_Lexer_back), "$toString", $rt_wrapFunction0(jur_Lexer_toString), "$isEmpty", $rt_wrapFunction0(jur_Lexer_isEmpty), "$isLetter0", $rt_wrapFunction0(jur_Lexer_isLetter0), "$isHighSurrogate0", $rt_wrapFunction0(jur_Lexer_isHighSurrogate0), "$isLowSurrogate0", $rt_wrapFunction0(jur_Lexer_isLowSurrogate0), "$getIndex", $rt_wrapFunction0(jur_Lexer_getIndex)],
 jur_AbstractCharClass$LazySpecialsBlock, 0, jur_AbstractCharClass$LazyCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazySpecialsBlock__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazySpecialsBlock_computeValue)],
 jur_AbstractCharClass$LazyNonSpace, 0, jur_AbstractCharClass$LazySpace, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_AbstractCharClass$LazyNonSpace__init_), "$computeValue", $rt_wrapFunction0(jur_AbstractCharClass$LazyNonSpace_computeValue)],
 otci_CharFlow, 0, jl_Object, [], 0, 3, 0, 0, ["$_init_32", $rt_wrapFunction1(otci_CharFlow__init_)],
 jur_RangeSet, "RangeSet", 19, jur_LeafSet, [], 0, 0, 0, 0, ["$_init_49", $rt_wrapFunction1(jur_RangeSet__init_), "$accepts", $rt_wrapFunction2(jur_RangeSet_accepts), "$getName", $rt_wrapFunction0(jur_RangeSet_getName), "$first", $rt_wrapFunction1(jur_RangeSet_first), "$getChars", $rt_wrapFunction0(jur_RangeSet_getChars)],
-jur_UnicodeCategory, "UnicodeCategory", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_1", $rt_wrapFunction1(jur_UnicodeCategory__init_), "$contains", $rt_wrapFunction1(jur_UnicodeCategory_contains)],
-jur_UnicodeCategoryScope, "UnicodeCategoryScope", 19, jur_UnicodeCategory, [], 0, 0, 0, 0, ["$_init_1", $rt_wrapFunction1(jur_UnicodeCategoryScope__init_), "$contains", $rt_wrapFunction1(jur_UnicodeCategoryScope_contains)],
+jur_UnicodeCategory, "UnicodeCategory", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_2", $rt_wrapFunction1(jur_UnicodeCategory__init_), "$contains", $rt_wrapFunction1(jur_UnicodeCategory_contains)],
+jur_UnicodeCategoryScope, "UnicodeCategoryScope", 19, jur_UnicodeCategory, [], 0, 0, 0, 0, ["$_init_2", $rt_wrapFunction1(jur_UnicodeCategoryScope__init_), "$contains", $rt_wrapFunction1(jur_UnicodeCategoryScope_contains)],
 opic_DirectedCPP, 0, opi_ChinesePostmanProblem, [], 0, 3, 0, 0, ["$_init_63", $rt_wrapFunction2(opic_DirectedCPP__init_), "$getProblemAttributes", $rt_wrapFunction0(opic_DirectedCPP_getProblemAttributes)],
 jur_CharClass, "CharClass", 19, jur_AbstractCharClass, [], 0, 0, 0, 0, ["$_init_", $rt_wrapFunction0(jur_CharClass__init_2), "$_init_71", $rt_wrapFunction2(jur_CharClass__init_0), "$_init_78", $rt_wrapFunction3(jur_CharClass__init_1), "$add", $rt_wrapFunction1(jur_CharClass_add), "$add7", $rt_wrapFunction1(jur_CharClass_add1), "$add0", $rt_wrapFunction2(jur_CharClass_add0), "$union", $rt_wrapFunction1(jur_CharClass_union), "$intersection", $rt_wrapFunction1(jur_CharClass_intersection), "$contains", $rt_wrapFunction1(jur_CharClass_contains),
 "$getBits", $rt_wrapFunction0(jur_CharClass_getBits), "$getLowHighSurrogates", $rt_wrapFunction0(jur_CharClass_getLowHighSurrogates), "$getInstance", $rt_wrapFunction0(jur_CharClass_getInstance), "$toString", $rt_wrapFunction0(jur_CharClass_toString), "$hasUCI", $rt_wrapFunction0(jur_CharClass_hasUCI)],
 otcit_DoubleSynthesizer, 0, jl_Object, [], 4, 3, 0, otcit_DoubleSynthesizer_$callClinit, 0,
 otcit_FloatAnalyzer$Result, 0, jl_Object, [], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(otcit_FloatAnalyzer$Result__init_)],
 oe_NegativeCycleException, "NegativeCycleException", 11, jl_Exception, [], 0, 3, 0, 0, ["$_init_55", $rt_wrapFunction4(oe_NegativeCycleException__init_0), "$getViolatingEdgePath", $rt_wrapFunction0(oe_NegativeCycleException_getViolatingEdgePath)],
-jur_UCIDecomposedCharSet, "UCIDecomposedCharSet", 19, jur_DecomposedCharSet, [], 0, 0, 0, 0, ["$_init_27", $rt_wrapFunction2(jur_UCIDecomposedCharSet__init_)],
+jur_UCIDecomposedCharSet, "UCIDecomposedCharSet", 19, jur_DecomposedCharSet, [], 0, 0, 0, 0, ["$_init_28", $rt_wrapFunction2(jur_UCIDecomposedCharSet__init_)],
 jl_String$_clinit_$lambda$_115_0, 0, jl_Object, [ju_Comparator], 0, 3, 0, 0, ["$_init_", $rt_wrapFunction0(jl_String$_clinit_$lambda$_115_0__init_)],
 ju_HashMap$EntryIterator, 0, ju_HashMap$AbstractMapIterator, [ju_Iterator], 0, 0, 0, 0, ["$_init_37", $rt_wrapFunction1(ju_HashMap$EntryIterator__init_), "$next1", $rt_wrapFunction0(ju_HashMap$EntryIterator_next), "$next", $rt_wrapFunction0(ju_HashMap$EntryIterator_next0)],
 ju_Collections, 0, jl_Object, [], 0, 3, 0, ju_Collections_$callClinit, 0,
-ogi_UndirectedGraph, "UndirectedGraph", 13, oc_MutableGraph, [], 0, 3, [0,0,0], ogi_UndirectedGraph_$callClinit, ["$_init_", $rt_wrapFunction0(ogi_UndirectedGraph__init_0), "$_init_1", $rt_wrapFunction1(ogi_UndirectedGraph__init_1), "$addVertex2", $rt_wrapFunction1(ogi_UndirectedGraph_addVertex), "$addEdge0", $rt_wrapFunction1(ogi_UndirectedGraph_addEdge0), "$removeEdge2", $rt_wrapFunction1(ogi_UndirectedGraph_removeEdge), "$getDeepCopy2", $rt_wrapFunction0(ogi_UndirectedGraph_getDeepCopy0), "$constructEdge4",
+ogi_UndirectedGraph, "UndirectedGraph", 13, oc_MutableGraph, [], 0, 3, [0,0,0], ogi_UndirectedGraph_$callClinit, ["$_init_", $rt_wrapFunction0(ogi_UndirectedGraph__init_0), "$_init_2", $rt_wrapFunction1(ogi_UndirectedGraph__init_1), "$addVertex2", $rt_wrapFunction1(ogi_UndirectedGraph_addVertex), "$addEdge0", $rt_wrapFunction1(ogi_UndirectedGraph_addEdge0), "$removeEdge2", $rt_wrapFunction1(ogi_UndirectedGraph_removeEdge), "$getDeepCopy2", $rt_wrapFunction0(ogi_UndirectedGraph_getDeepCopy0), "$constructEdge4",
 $rt_wrapFunction4(ogi_UndirectedGraph_constructEdge0), "$constructVertex3", $rt_wrapFunction1(ogi_UndirectedGraph_constructVertex0), "$addVertex3", $rt_wrapFunction1(ogi_UndirectedGraph_addVertex0), "$addEdge9", $rt_wrapFunction1(ogi_UndirectedGraph_addEdge), "$getDeepCopy3", $rt_wrapFunction0(ogi_UndirectedGraph_getDeepCopy), "$constructEdge0", $rt_wrapFunction4(ogi_UndirectedGraph_constructEdge), "$constructVertex", $rt_wrapFunction1(ogi_UndirectedGraph_constructVertex)]]);
 let $rt_booleanArrayCls = $rt_arraycls($rt_booleancls),
 $rt_charArrayCls = $rt_arraycls($rt_charcls),
@@ -23689,16 +23881,21 @@ $rt_stringPool([": ", "\tat ", "Caused by: ", "String is null", "String is empty
 "SupplementalMathematicalOperators", "MiscellaneousSymbolsandArrows", "Glagolitic", "Coptic", "GeorgianSupplement", "Tifinagh", "EthiopicExtended", "SupplementalPunctuation", "CJKRadicalsSupplement", "KangxiRadicals", "IdeographicDescriptionCharacters", "CJKSymbolsandPunctuation", "Hiragana", "Katakana", "Bopomofo", "HangulCompatibilityJamo", "Kanbun", "BopomofoExtended", "CJKStrokes", "KatakanaPhoneticExtensions", "EnclosedCJKLettersandMonths", "CJKCompatibility", "CJKUnifiedIdeographsExtensionA", "YijingHexagramSymbols",
 "CJKUnifiedIdeographs", "YiSyllables", "YiRadicals", "ModifierToneLetters", "SylotiNagri", "HangulSyllables", "HighSurrogates", "HighPrivateUseSurrogates", "LowSurrogates", "PrivateUseArea", "CJKCompatibilityIdeographs", "AlphabeticPresentationForms", "ArabicPresentationForms-A", "VariationSelectors", "VerticalForms", "CombiningHalfMarks", "CJKCompatibilityForms", "SmallFormVariants", "ArabicPresentationForms-B", "HalfwidthandFullwidthForms", "all", "Specials", "Cn", "IsL", "Lu", "Ll", "Lt", "Lm", "Lo", "IsM",
 "Mn", "Me", "Mc", "N", "Nd", "Nl", "No", "IsZ", "Zs", "Zl", "Zp", "IsC", "Cc", "Cf", "Co", "Cs", "IsP", "Pd", "Ps", "Pe", "Pc", "Po", "IsS", "Sm", "Sc", "Sk", "So", "Pi", "Pf", "It appears that this problem does not match the problem type handled by this solver.", "It appears as though this solution contains multiple routes to a single vehicle problem.", "It does not appear as though this solver has been run yet!", "=======================================================\n", ": Printing current solution...",
-"\n", "=======================================================", "Vertices: ", "Edges: ", "Route Cost: ", "orig", "oddVertex", "matchingEdge", "to make even", "Gdr", "Gaux", "Benavent\'s H1 Heuristic for the Windy Rural Postman Problem", "Warning: Greedy matching failed to find perfect matching for vertex ", "decomposed char:", "LinkData{v1=", ", v2=", ", cost=", ", reverseCost=", ", isDirected=", ", isRequired=", "AheadFSet", "NonCapJointSet", "PosLookaheadJointSet", "NegLookaheadJointSet", "DIRECTED", "UNDIRECTED",
-"MIXED", "WINDY", "A", "B", "C", "E", "F", "(this Collection)", ", ", "0", "und", "en", "CA", "fr", "zh", "CN", "FR", "de", "DE", "it", "IT", "ja", "JP", "ko", "KR", "TW", "GB", "US", "original", "MST Graph", "mst added", "flow", "a", "b", "c", "DEBUG", "swapDir", "reconnection step", "connection step", "forward", "backward", "final", "ans", "The flow augmentation failed.", "Cost is: ", "The UCPP augmentation failed.", "real insertion", "BADDD: In the third improvement procedure for Benavent\'s Solver, we have a flow arc that isn\'t recognized as real or artificial.",
-"Win\'s Heuristic for the Windy Rural Postman Problem", "PosBehindJointSet", "sequence: ", "EOI", "symmetric setup graph", "matching graph", "matching edge", "from largeCycles", "parity graph", "from U", "from M", "duplicate from M\'\'", "directed from U", "even setup graph", "added in phase I", "copy from symmetry", "ans2 chosen: ", "ans1 chosen: ", "Frederickson\'s Mixed Chinese Postman Heuristic", "UCI range:", "You may only direct a type A or type D edge.", "Cannot copy an undirected edge, direct it first",
-"Cannot copy a type D edge, please decide on a direction first", "Can only add a reverse copy if we are of type B.", "^", "NegBehindJointSet", "added from flow", "Edmonds\' Directed Chinese Postman Solver (Exact)", "back reference: ", "<DotQuant>", "from constructor", "The link with this id does not appear to exist in this graph.", "You are trying to add a vertex to a second graph.  Behavior beyond this point is not guaranteed.", "No vertex with the specified id exists in this graph.", "Could not remove edge because it wasn\'t detected as existing in the first place!",
-"The endpoint indices passed in do not seem to fall within the valid range of this graph.", "The specified endpoints do not appear to exist in this graph.", "This graph does not appear to contain the specified link.", "deep copy original", "Parsing OARLIB content...", "%", "Depot ID", "N:", "LINKS", "END", "END LINKS", "VERTICES", "END VERTICES", "LINE FORMAT", "Skipping malformed link line: ", "Skipping malformed vertex line: ", "No valid LINKS section found in OARLIB content.", "Creating WindyGraph with ",
-" vertices and ", " edges", "Failed to add edge: ", "; reason: ", "Failed to set vertex coordinates: ", "Graph parsing complete. Vertices: ", ", Edges: ", "OARLIB content is empty.", "Parsing OARLIB content for DirectedGraph...", "Unable to determine vertex count from OARLIB content.", "Creating DirectedGraph with ", "edge", "Parsing OARLIB content for UndirectedGraph...", "Creating UndirectedGraph with ", "Parsing OARLIB content for MixedGraph...", "Creating MixedGraph with ", "﻿", "\r\n", "\r", "ISDIRECTED",
-"REVERSE", "ISREQUIRED", "REQUIRED", ",", "t", "yes", "y", "f", "no", "n", "1", ":", "PreviousMatch", "[]", "NonCapFSet", "Edmonds\' Exact Undirected Chinese Postman Solver", "UCI ", "Either src or dest is null", "UNKNOWN", "SINGLE_VEHICLE", "MULTI_VEHICLE", "NO_VEHICLES", ".", "DotAll", "CI ", "decomposed Hangul syllable:", "SINGLE_DEPOT", "MULTI_DEPOT", "NO_DEPOTS", "WordBoundary", "<EOL>", "AtomicFSet", "You are attempting to run hierholzer\'s algorithm on a non eulerian graph.", "Running hierholzer\'s algorithm on an empty graph.",
-"You are attempting to run hierholzer\'s algorithm on a non-strongly connected graph.", "There\'s something wrong; a vertex is completely detached from the rest of the graph.", "The input arrays to the Bellman-Ford procedure is not of the expected size.", "This graph contains a negative cycle.  It is being logged.", "This graph contains a negative cycle.", "dijsktrasWidestPathAlgorithm: The passed in dist and path arrays have the wrong size.", "Tried to run directUndirectedCycles on a non-eulerian Mixed Graph.",
-"temp", "directing cycle", "The input arrays to the Floyd-Warshall procedure is not of the expected size.", "The input arrays to the Floyd-Warshall least cost paths procedure is not of the expected size.", "source", "sink", "Your graph is not connected, or this is not a valid flow problem", "source arc", "sink arc", "posFSet", "copy", "You cannot service a link that does not demand service.", "The link you\'re attempting to add doens\'t share an endpoint with the previous one.", "Adjacent links in this route didn\'t share a common vertex.  Please try running checkRoutes to verify the integrity of the route.",
-"<MultiLine $>", "RESIDENTIAL", "COMMERCIAL", "CIVIC", "OTHER", "NOT_SET", "for cycle elimination", "Am is malformed.", "Wrong type.", "Em is malformed.", "special zero case", "New cost: ", ".  Old cost: ", "Adding path from: ", ", to ", "Improvement detected: ", "Yaoyuenyong\'s Mixed Chinese Postman Heuristic Solver", "<SOL>", "This graph does not appear to contain the specified arc.", "7", "instance", "Vertex degrees:", "Vertex ", ": degree=", ", inDegree=", ", outDegree=", "Instance", "ERROR: DRPP Solver is not supported in TeaVM due to native library dependencies (MSArbor).",
+"\n", "=======================================================", "Vertices: ", "Edges: ", "Route Cost: ", "Missing WindyEdge with id ", "orig", "oddVertex", "matchingEdge", "to make even", "Gdr", "Gaux", "Benavent solve: deep copy built. vertices=", ", edges=", "Benavent solve: windyReq built. vertices=", "Benavent solve: Gdr not Eulerian; proceeding with flow adjustments. vertices=", "Benavent solve: Gaux built. vertices=", "Benavent\'s H1 Heuristic for the Windy Rural Postman Problem", "Warning: Greedy matching failed to find perfect matching for vertex ",
+"decomposed char:", "LinkData{v1=", ", v2=", ", cost=", ", reverseCost=", ", isDirected=", ", isRequired=", "AheadFSet", "NonCapJointSet", "PosLookaheadJointSet", "NegLookaheadJointSet", "DIRECTED", "UNDIRECTED", "MIXED", "WINDY", "A", "B", "C", "E", "F", "(this Collection)", ", ", "0", "und", "en", "CA", "fr", "zh", "CN", "FR", "de", "DE", "it", "IT", "ja", "JP", "ko", "KR", "TW", "GB", "US", "Win connectRequiredComponents: n=", ", m=", "Win connectRequiredComponents: vertex map size=", "original", "connectRequiredComponents missing vertex id ",
+" of ", "Win connectRequiredComponents: edge map size=", "connectRequiredComponents missing edge id ", "Win connectRequiredComponents: required edges count=", "Win connectRequiredComponents: invoking connectedComponents with n=", ", mreq=", "Win connectRequiredComponents: extraComponents size=", "Win connectRequiredComponents: mst graph vertex count=", "MST Graph", "mst added", "flow", "a", "b", "c", "DEBUG", "swapDir", "reconnection step", "connection step", "forward", "backward", "final", "ans", "The flow augmentation failed.",
+"Cost is: ", "The UCPP augmentation failed.", "real insertion", "BADDD: In the third improvement procedure for Benavent\'s Solver, we have a flow arc that isn\'t recognized as real or artificial.", "calculateAveragePathCost encountered invalid predecessor; start=", ", currentEnd=", ", next=", "calculateAveragePathCost failed: predecessor index <= 0 before reaching start", "calculateAveragePathCost encountered non-positive edge id; start=", ", edgeId=", "calculateAveragePathCost failed: edgePath <= 0 for current segment",
+"calculateAveragePathCost missing edge id ", "; start=", "calculateAveragePathCost failed: missing edge id ", "Win\'s Heuristic for the Windy Rural Postman Problem", "PosBehindJointSet", "sequence: ", "EOI", "symmetric setup graph", "matching graph", "matching edge", "from largeCycles", "parity graph", "from U", "from M", "duplicate from M\'\'", "directed from U", "even setup graph", "added in phase I", "copy from symmetry", "ans2 chosen: ", "ans1 chosen: ", "Frederickson\'s Mixed Chinese Postman Heuristic",
+"UCI range:", "You may only direct a type A or type D edge.", "Cannot copy an undirected edge, direct it first", "Cannot copy a type D edge, please decide on a direction first", "Can only add a reverse copy if we are of type B.", "^", "NegBehindJointSet", "added from flow", "Edmonds\' Directed Chinese Postman Solver (Exact)", "back reference: ", "<DotQuant>", "from constructor", "The link with this id does not appear to exist in this graph.", "You are trying to add a vertex to a second graph.  Behavior beyond this point is not guaranteed.",
+"No vertex with the specified id exists in this graph.", "Could not remove edge because it wasn\'t detected as existing in the first place!", "The endpoint indices passed in do not seem to fall within the valid range of this graph.", "The specified endpoints do not appear to exist in this graph.", "This graph does not appear to contain the specified link.", "deep copy original", "Parsing OARLIB content...", "%", "Depot ID", "N:", "LINKS", "END", "END LINKS", "VERTICES", "END VERTICES", "LINE FORMAT", "Skipping malformed link line: ",
+"Skipping malformed vertex line: ", "No valid LINKS section found in OARLIB content.", "Creating WindyGraph with ", " vertices and ", " edges", "Failed to add edge: ", "; reason: ", "Failed to set vertex coordinates: ", "Graph parsing complete. Vertices: ", ", Edges: ", "OARLIB content is empty.", "Parsing WindyGraph with format auto-detection...", "Attempting to parse as Corberan format...", "Could not read file in Corberan format; attempting to read in OARLib format.", "Failed to parse WindyGraph in both Corberan and OARLib formats",
+"Parsing Corberan format content...", "corberan", "Corberan", "Content does not appear to be in Corberan format", "Corberan content is empty.", "Parsing OARLIB content for DirectedGraph...", "Unable to determine vertex count from OARLIB content.", "Creating DirectedGraph with ", "edge", "Parsing OARLIB content for UndirectedGraph...", "Creating UndirectedGraph with ", "Parsing OARLIB content for MixedGraph...", "Creating MixedGraph with ", "﻿", "\r\n", "\r", "ISDIRECTED", "REVERSE", "ISREQUIRED", "REQUIRED",
+",", "t", "yes", "y", "f", "no", "n", "1", ":", "PreviousMatch", "[]", "NonCapFSet", "Edmonds\' Exact Undirected Chinese Postman Solver", "UCI ", "Either src or dest is null", "UNKNOWN", "SINGLE_VEHICLE", "MULTI_VEHICLE", "NO_VEHICLES", ".", "DotAll", "CI ", "decomposed Hangul syllable:", "SINGLE_DEPOT", "MULTI_DEPOT", "NO_DEPOTS", "WordBoundary", "<EOL>", "AtomicFSet", "You are attempting to run hierholzer\'s algorithm on a non eulerian graph.", "Running hierholzer\'s algorithm on an empty graph.", "You are attempting to run hierholzer\'s algorithm on a non-strongly connected graph.",
+"There\'s something wrong; a vertex is completely detached from the rest of the graph.", "The input arrays to the Bellman-Ford procedure is not of the expected size.", "This graph contains a negative cycle.  It is being logged.", "This graph contains a negative cycle.", "dijsktrasWidestPathAlgorithm: The passed in dist and path arrays have the wrong size.", "Tried to run directUndirectedCycles on a non-eulerian Mixed Graph.", "temp", "directing cycle", "The input arrays to the Floyd-Warshall procedure is not of the expected size.",
+"The input arrays to the Floyd-Warshall least cost paths procedure is not of the expected size.", "source", "sink", "Your graph is not connected, or this is not a valid flow problem", "source arc", "sink arc", "posFSet", "copy", "You cannot service a link that does not demand service.", "The link you\'re attempting to add doens\'t share an endpoint with the previous one.", "Adjacent links in this route didn\'t share a common vertex.  Please try running checkRoutes to verify the integrity of the route.", "<MultiLine $>",
+"RESIDENTIAL", "COMMERCIAL", "CIVIC", "OTHER", "NOT_SET", "for cycle elimination", "Am is malformed.", "Wrong type.", "Em is malformed.", "special zero case", "New cost: ", ".  Old cost: ", "Adding path from: ", ", to ", "Improvement detected: ", "Yaoyuenyong\'s Mixed Chinese Postman Heuristic Solver", "<SOL>", "WindyGraph.getDeepCopy: vertices=", ", vertexKeys=", "WindyGraph deep copy missing vertex id ", "WindyGraph deep copy missing edge id ", " (index ", ")", "This graph does not appear to contain the specified arc.",
+"7", "instance", "Vertex degrees:", "Vertex ", ": degree=", ", inDegree=", ", outDegree=", "Instance", "[DEBUG] Parsing WindyGraph with format detection...", "[DEBUG] WindyGraph parsed successfully. Vertices: ", "[DEBUG] Inspecting graph collections...", "[DEBUG] wg2.getEdges() returned null", "[DEBUG] Edge sample id=", " cost=", " revCost=", " required=", "[DEBUG] Encountered null edge in collection", "[DEBUG] Edge collection size observed: ", "[DEBUG] wg2.getVertices() returned null", "[DEBUG] Vertex sample id=",
+" degree=", "[DEBUG] Encountered null vertex in collection", "[DEBUG] Vertex collection size observed: ", "[DEBUG] Error while inspecting graph: ", "[DEBUG] Creating WindyRPP problem instance...", "[DEBUG] WindyRPP created successfully", "[DEBUG] Creating WRPPSolver_Benavent_H1...", "[DEBUG] Solver created successfully", "[DEBUG] Calling trySolve()...", "[DEBUG] trySolve() completed", "[DEBUG] Attempting to get solution...", "[ERROR] Exception in WRPP solver:", "ERROR: DRPP Solver is not supported in TeaVM due to native library dependencies (MSArbor).",
 "Please use solver 1, 2, 3, 4, 5, or 7 instead.", "===================", "Welcome to the Open Source Arc Routing Library (OARLib).\n", "If you would like to use this software as a command-line utility,\n", "please use the call structure: oarlib.jar [solver] [instance file path].\n\n", "[solver] - \n\n", "  1 - Directed Chinese Postman Exact Solver (Edmonds\'s Algorithm).\n", "  2 - Undirected Chinese Postman Exact Solver (Edmonds\'s Algorithm).\n", "  3 - Mixed Chinese Postman (Frederickson\'s Heuristic).\n",
 "  4 - Mixed Chinese Postman (Yaoyuenyong et al.\'s Heuristic)\n", "  5 - Windy Chinese Postman (Win\'s Heuristic)\n", "  6 - Directed Rural Postman (Christofides\'s Heuristic)\n", "  7 - Windy Rural Postman (Benavent et al.\'s Heuristic)\n", "If you would like to extend this code, or use its API directly,\n", "please see the README and docs for additional details.\n", "===================\n", "It appears as though every link in this graph is required.  Consider running a Chinese Postman solver.", "CHINESE_POSTMAN",
 "RURAL_POSTMAN", "PARTITIONING", "Patter is null", "\\Q", "\\E", "\\\\E\\Q", "TRUNK", "PRIMARY", "SECONDARY", "TERTIARY", "RESIDENTIAL_ACCESS", "[DEBUG] ", " - ", "[INFO] ", "[WARN] ", "[ERROR] ", "<Unix MultiLine $>", "Is", "In"]);
