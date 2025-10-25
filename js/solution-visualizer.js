@@ -121,18 +121,8 @@ export class SolutionVisualizer {
             // Create a feature group to hold solution elements (path only)
             this.cppSolutionLayer = L.featureGroup([pathLayer]);
         
-        // Add popup with solution information
-        const pathDescription = `${vertexPath.length} vertices`;
-        const mappingStatus = hasCoordinateMappings ? 
-            '<br><span style="color: green;">✓</span> <em>Mapped to actual road coordinates</em>' : 
-            '<br><span style="color: orange;">⚠</span> <em>Using demonstration path (no roads fetched yet)</em>';
-        
-        const pathInfo = `
-            <strong>Chinese Postman Solution (Vertex Path)</strong><br>
-            ${pathDescription}${mappingStatus}
-        `;
-        
-        pathLayer.bindPopup(pathInfo);
+        // No popup for CPP solution path to avoid intrusive popups in the UI.
+        // (Previously displayed "Chinese Postman Solution (Vertex Path)")
         this.cppSolutionLayer.addTo(this.mapManager.getMap());
 
         // Fit map to show the solution path

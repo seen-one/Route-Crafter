@@ -502,8 +502,8 @@ export class MapManager {
             })
         }).addTo(this.map);
 
-        // Add popup to the marker
-        this.depotMarker.bindPopup(`<strong>Starting Location (Depot)</strong><br>Node ID: ${nearestNodeId}`).openPopup();
+    // Do not bind or open a popup for the depot marker by default
+    // This keeps the map cleaner and prevents automatic popups when setting the starting location.
 
         // Store the selected depot ID
         this.selectedDepotId = nearestNodeId;
