@@ -267,10 +267,6 @@ export class MapManager {
                         <input type="number" id="bufferSize" min="1" max="100" value="1" style="width: 80px;">
                     </div>
                     <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                        <label for="consolidateTolerance" style="flex: 1;">Consolidate intersections tolerance (meters):</label>
-                        <input type="number" id="consolidateTolerance" min="1" max="100" value="15" style="width: 80px;">
-                    </div>
-                    <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
                         <label for="truncateByEdge" style="flex: 1;">Trim roads to polygon boundary</label>
                         <input type="checkbox" id="truncateByEdge" checked>
                     </div>

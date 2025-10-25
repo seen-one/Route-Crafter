@@ -159,18 +159,7 @@ export class RouteCrafterApp {
             this.areaManager.previewCombinedPolygon();
         });
 
-        // Consolidate tolerance wheel
-        document.getElementById('consolidateTolerance').addEventListener('wheel', (event) => {
-            event.preventDefault();
-            let currentValue = parseInt(event.target.value, 10);
-            if (isNaN(currentValue)) currentValue = 15;
-            const step = 1;
-            if (event.deltaY < 0) {
-                event.target.value = Math.min(currentValue + step, 100);
-            } else if (event.deltaY > 0) {
-                event.target.value = Math.max(currentValue - step, 1);
-            }
-        });
+        // (Consolidate tolerance control removed)
 
         // Coverage threshold wheel
         document.getElementById('coverageThreshold').addEventListener('wheel', (event) => {
@@ -212,9 +201,8 @@ export class RouteCrafterApp {
         });
 
         // Disable zooming when hovering over inputs
-        const bufferInput = document.getElementById('bufferSize');
-        const consolidateToleranceInput = document.getElementById('consolidateTolerance');
-        const coverageThresholdInput = document.getElementById('coverageThreshold');
+    const bufferInput = document.getElementById('bufferSize');
+    const coverageThresholdInput = document.getElementById('coverageThreshold');
         const proximityThresholdInput = document.getElementById('proximityThreshold');
         const boundaryBufferInput = document.getElementById('boundaryBuffer');
 
@@ -226,13 +214,7 @@ export class RouteCrafterApp {
             this.mapManager.getMap().scrollWheelZoom.enable();
         });
 
-        consolidateToleranceInput.addEventListener('mouseover', () => {
-            this.mapManager.getMap().scrollWheelZoom.disable();
-        });
-
-        consolidateToleranceInput.addEventListener('mouseout', () => {
-            this.mapManager.getMap().scrollWheelZoom.enable();
-        });
+        // (Consolidate tolerance control removed)
 
         coverageThresholdInput.addEventListener('mouseover', () => {
             this.mapManager.getMap().scrollWheelZoom.disable();
@@ -886,12 +868,11 @@ export class RouteCrafterApp {
         // Reset UI elements (but not the dropdown)
         document.getElementById('routeLength').innerHTML = '';
         document.getElementById('searchBox').value = '';
-        document.getElementById('bufferSize').value = '1';
-        document.getElementById('truncateByEdge').checked = true;
-        document.getElementById('allowNavigationPastBoundary').checked = false;
-        document.getElementById('boundaryBuffer').value = '500';
-        document.getElementById('consolidateTolerance').value = '15';
-        document.getElementById('navigationFilter').value = '[highway][area!~"yes"][highway!~"bridleway|bus_guideway|construction|corridor|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path|steps"][access!~"customers|no|private"][public_transport!~"platform"][fee!~"yes"][service!~"drive-through|driveway|parking_aisle"][toll!~"yes"]';
+    document.getElementById('bufferSize').value = '1';
+    document.getElementById('truncateByEdge').checked = true;
+    document.getElementById('allowNavigationPastBoundary').checked = false;
+    document.getElementById('boundaryBuffer').value = '500';
+    document.getElementById('navigationFilter').value = '[highway][area!~"yes"][highway!~"bridleway|bus_guideway|construction|corridor|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path|steps"][access!~"customers|no|private"][public_transport!~"platform"][fee!~"yes"][service!~"drive-through|driveway|parking_aisle"][toll!~"yes"]';
         document.getElementById('routeFilter').value = '';
     }
 
