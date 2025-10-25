@@ -300,8 +300,8 @@ export class MapManager {
                         <label for="boundaryBuffer" style="flex: 1;">Boundary buffer (meters):</label>
                         <input type="number" id="boundaryBuffer" min="1" max="2000" value="500" style="width: 80px;">
                     </div>
-                    <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                        <label for="filterMapillaryCoverage" style="flex: 1;">Filter roads with street-level coverage</label>
+                    <div id="filterMapillaryContainer" style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
+                        <label for="filterMapillaryCoverage" style="flex: 1;">Skip route sections with street-level coverage*</label>
                         <input type="checkbox" id="filterMapillaryCoverage">
                     </div>
                     <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
@@ -332,6 +332,32 @@ export class MapManager {
         };
 
         this.controlsContainer.addTo(this.map);
+
+        // Show/enable the Mapillary coverage filter only for Windy Rural export formats
+        setTimeout(() => {
+            try {
+                const exportFormatSelect = this.controlsDiv.querySelector('#exportFormatSelect');
+                const filterContainer = this.controlsDiv.querySelector('#filterMapillaryContainer');
+                const filterCheckbox = this.controlsDiv.querySelector('#filterMapillaryCoverage');
+
+                const updateFilterVisibility = () => {
+                    const val = exportFormatSelect ? exportFormatSelect.value : '';
+                    const isWindy = typeof val === 'string' && val.startsWith('windy_rural');
+                    if (filterContainer) filterContainer.style.display = isWindy ? 'flex' : 'none';
+                    if (filterCheckbox) filterCheckbox.disabled = !isWindy;
+                };
+
+                if (exportFormatSelect) {
+                    exportFormatSelect.addEventListener('change', updateFilterVisibility);
+                }
+
+                // Initialize visibility based on current selection
+                updateFilterVisibility();
+            } catch (e) {
+                // Fail silently - UI enhancement only
+                console.error('Error setting up Mapillary filter visibility:', e);
+            }
+        }, 50);
 
         // Create a dedicated stats panel on the right side to avoid cluttering main controls
         this.statsContainer = L.control({ position: 'topright' });
