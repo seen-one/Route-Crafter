@@ -176,53 +176,64 @@ export class MapManager {
     }
 
     setupControls() {
-        // Debug menu in top-left corner
-        this.debugMenuContainer = L.control({ position: 'topleft' });
-
-        this.debugMenuContainer.onAdd = () => {
-            const div = L.DomUtil.create('div', 'leaflet-bar debug-menu-container');
-            div.innerHTML = `
-                <div style="background: white; border-radius: 4px;">
-                    <button id="debugMenuToggle" style="width: 100%; background-color: #6c757d; color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-size: 14px; margin: 0;">
-                        🛠️ Debug Menu
-                    </button>
-                    <div id="debugMenuContent" style="display: none; padding: 5px; background: white; border-top: 1px solid #ddd; margin-top: 2px;">
-                        <button id="downloadButton" style="width: 100%; margin: 2px 0;">Download Overpass Response</button>
-                        <button id="uploadOverpassButton" style="width: 100%; margin: 2px 0;">Upload Overpass Response</button>
-                        <button id="exportCPPButton" style="width: 100%; margin: 2px 0;">Export OARLib Format</button>
-                        <button id="exportLargestComponentButton" style="width: 100%; margin: 2px 0;">Export Largest Component OARLib</button>
-                        <label for="oarlibSolutionTextarea" style="display: block; margin-top: 5px; font-size: 12px;">OARLib Solution:</label>
-                        <textarea id="oarlibSolutionTextarea" placeholder="Paste OARLib solution here..." style="width: 100%; min-height: 80px; margin: 2px 0; padding: 5px; font-size: 11px; font-family: monospace; resize: vertical; box-sizing: border-box;"></textarea>
-                        <button id="applyCPPSolutionButton" style="width: 100%; margin: 2px 0;">Apply Solution</button>
-                        <button id="applyLargestComponentSolutionButton" style="width: 100%; margin: 2px 0;">Apply Solution (Largest Component)</button>
-                        <label style="display: block; margin-top: 5px; font-size: 12px;"><input type="checkbox" id="showVertexMarkersCheckbox" style="margin-right: 5px;">Show Vertex Markers</label>
-                    </div>
-                </div>
-            `;
-            L.DomEvent.disableClickPropagation(div);
-            
-            return div;
-        };
-
-        this.debugMenuContainer.addTo(this.map);
-
-        // Add toggle functionality for debug menu
-        setTimeout(() => {
-            const debugMenuToggle = document.getElementById('debugMenuToggle');
-            const debugMenuContent = document.getElementById('debugMenuContent');
-            
-            if (debugMenuToggle && debugMenuContent) {
-                debugMenuToggle.addEventListener('click', () => {
-                    if (debugMenuContent.style.display === 'none') {
-                        debugMenuContent.style.display = 'block';
-                        debugMenuToggle.textContent = '🛠️ Debug Menu ▼';
-                    } else {
-                        debugMenuContent.style.display = 'none';
-                        debugMenuToggle.textContent = '🛠️ Debug Menu';
-                    }
-                });
+        // Debug menu in top-left corner (only enable when URL contains debug flag)
+        const debugEnabled = (() => {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                return params.has('debug');
+            } catch (e) {
+                return false;
             }
-        }, 100);
+        })();
+
+        if (debugEnabled) {
+            this.debugMenuContainer = L.control({ position: 'topleft' });
+
+            this.debugMenuContainer.onAdd = () => {
+                const div = L.DomUtil.create('div', 'leaflet-bar debug-menu-container');
+                div.innerHTML = `
+                    <div style="background: white; border-radius: 4px;">
+                        <button id="debugMenuToggle" style="width: 100%; background-color: #6c757d; color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-size: 14px; margin: 0;">
+                            🛠️ Debug Menu
+                        </button>
+                        <div id="debugMenuContent" style="display: none; padding: 5px; background: white; border-top: 1px solid #ddd; margin-top: 2px;">
+                            <button id="downloadButton" style="width: 100%; margin: 2px 0;">Download Overpass Response</button>
+                            <button id="uploadOverpassButton" style="width: 100%; margin: 2px 0;">Upload Overpass Response</button>
+                            <button id="exportCPPButton" style="width: 100%; margin: 2px 0;">Export OARLib Format</button>
+                            <button id="exportLargestComponentButton" style="width: 100%; margin: 2px 0;">Export Largest Component OARLib</button>
+                            <label for="oarlibSolutionTextarea" style="display: block; margin-top: 5px; font-size: 12px;">OARLib Solution:</label>
+                            <textarea id="oarlibSolutionTextarea" placeholder="Paste OARLib solution here..." style="width: 100%; min-height: 80px; margin: 2px 0; padding: 5px; font-size: 11px; font-family: monospace; resize: vertical; box-sizing: border-box;"></textarea>
+                            <button id="applyCPPSolutionButton" style="width: 100%; margin: 2px 0;">Apply Solution</button>
+                            <button id="applyLargestComponentSolutionButton" style="width: 100%; margin: 2px 0;">Apply Solution (Largest Component)</button>
+                            <label style="display: block; margin-top: 5px; font-size: 12px;"><input type="checkbox" id="showVertexMarkersCheckbox" style="margin-right: 5px;">Show Vertex Markers</label>
+                        </div>
+                    </div>
+                `;
+                L.DomEvent.disableClickPropagation(div);
+                
+                return div;
+            };
+
+            this.debugMenuContainer.addTo(this.map);
+
+            // Add toggle functionality for debug menu
+            setTimeout(() => {
+                const debugMenuToggle = document.getElementById('debugMenuToggle');
+                const debugMenuContent = document.getElementById('debugMenuContent');
+                
+                if (debugMenuToggle && debugMenuContent) {
+                    debugMenuToggle.addEventListener('click', () => {
+                        if (debugMenuContent.style.display === 'none') {
+                            debugMenuContent.style.display = 'block';
+                            debugMenuToggle.textContent = '🛠️ Debug Menu ▼';
+                        } else {
+                            debugMenuContent.style.display = 'none';
+                            debugMenuToggle.textContent = '🛠️ Debug Menu';
+                        }
+                    });
+                }
+            }, 100);
+        }
 
         // Custom controls container for Route Crafter features
         this.controlsContainer = L.control({ position: 'bottomleft' });
