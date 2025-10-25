@@ -117,25 +117,9 @@ export class SolutionVisualizer {
             dashArray: '10, 10'
         });
 
-        // Add markers for start and end points
-        const startMarker = L.marker(reconstructedPath[0], {
-            icon: L.divIcon({
-                className: 'cpp-start-marker',
-                html: '<div style="background-color: #00ff00; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;"></div>',
-                iconSize: [20, 20]
-            })
-        });
 
-        const endMarker = L.marker(reconstructedPath[reconstructedPath.length - 1], {
-            icon: L.divIcon({
-                className: 'cpp-end-marker',
-                html: '<div style="background-color: #ff0000; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;"></div>',
-                iconSize: [20, 20]
-            })
-        });
-
-        // Create a feature group to hold all solution elements
-        this.cppSolutionLayer = L.featureGroup([pathLayer, startMarker, endMarker]);
+            // Create a feature group to hold solution elements (path only)
+            this.cppSolutionLayer = L.featureGroup([pathLayer]);
         
         // Add popup with solution information
         const pathDescription = `${vertexPath.length} vertices`;
