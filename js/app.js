@@ -538,7 +538,7 @@ export class RouteCrafterApp {
         // Check if we have route points set (either from CPP solution or regular roads)
         const routePoints = this.routingManager.getRoutePoints();
         if (routePoints.length === 0) {
-            alert('No route to animate. Please upload a CPP solution or generate a route first.');
+            alert('No route to animate. Please generate the route first.');
             return;
         }
         
