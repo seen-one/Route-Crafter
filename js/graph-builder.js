@@ -124,18 +124,43 @@ export class GraphBuilder {
         const numEdges = roadGraph.edges.length;
         
         // Determine depot - use selected depot if available, otherwise default to vertex 1
+        // If a coordinate->node mapping was provided (for largest-component export),
+        // try to remap the selected depot into that renumbered map.
         let depotId = 1;
+        const defaultDepot = roadGraph.nodes.length > 0 ? roadGraph.nodes[0].id : 1;
+
         if (window.app && window.app.mapManager) {
             const selectedDepotId = window.app.mapManager.getSelectedDepotId();
-            if (selectedDepotId !== null) {
-                depotId = selectedDepotId;
-                console.log(`Using user-selected depot: ${depotId}`);
+            if (selectedDepotId !== null && selectedDepotId !== undefined) {
+                // Attempt to translate the selected depot into the passed coordinate->nodeId map
+                try {
+                    const originalNodeMap = window.app.nodeIdToCoordinateMap;
+                    const coord = originalNodeMap.get(selectedDepotId);
+                    if (coord && coordinateToNodeIdMap) {
+                        const coordKey = `${coord[0].toFixed(8)},${coord[1].toFixed(8)}`;
+                        if (coordinateToNodeIdMap.has(coordKey)) {
+                            depotId = coordinateToNodeIdMap.get(coordKey);
+                            console.log(`Remapped user-selected depot ${selectedDepotId} -> ${depotId}`);
+                        } else {
+                            // Selected depot coordinate not present in this export's coordinate map
+                            console.warn(`Selected depot coordinate not found in export mapping; falling back to default depot (${defaultDepot})`);
+                            depotId = defaultDepot;
+                        }
+                    } else {
+                        // Fallback to using the raw selected depot id
+                        depotId = selectedDepotId;
+                        console.log(`Using user-selected depot (no remap possible): ${depotId}`);
+                    }
+                } catch (err) {
+                    console.warn('Error while remapping selected depot:', err);
+                    depotId = defaultDepot;
+                }
             } else {
-                depotId = roadGraph.nodes.length > 0 ? roadGraph.nodes[0].id : 1;
+                depotId = defaultDepot;
                 console.log(`Using default depot: ${depotId}`);
             }
         } else {
-            depotId = roadGraph.nodes.length > 0 ? roadGraph.nodes[0].id : 1;
+            depotId = defaultDepot;
         }
         
         // Determine problem type based on export format

@@ -391,6 +391,27 @@ export class RouteCrafterApp {
                 this.largestComponentCoordinateToNodeIdMap = mappings.coordinateToNodeIdMap;
                 this.largestComponentNodeIdToCoordinateMap = mappings.nodeIdToCoordinateMap;
                 console.log('Stored largest component coordinate mappings for solution application');
+                // Remap the currently selected depot into the renumbered node IDs, if possible
+                try {
+                    const oldDepotId = this.mapManager.getSelectedDepotId && this.mapManager.getSelectedDepotId();
+                    if (oldDepotId) {
+                        const oldCoord = this.nodeIdToCoordinateMap.get(oldDepotId);
+                        if (oldCoord) {
+                            const coordKey = `${oldCoord[0].toFixed(8)},${oldCoord[1].toFixed(8)}`;
+                            const newDepotId = this.largestComponentCoordinateToNodeIdMap.get(coordKey);
+                            if (newDepotId) {
+                                this.largestComponentDepotId = newDepotId;
+                                console.log('Remapped depot', oldDepotId, '->', newDepotId);
+                            } else {
+                                // Depot not in largest component
+                                this.largestComponentDepotId = null;
+                                alert('Selected starting location is not part of the exported largest component.');
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Failed to remap selected depot for largest component:', err);
+                }
             }
         });
 
@@ -596,6 +617,27 @@ export class RouteCrafterApp {
 
             this.largestComponentCoordinateToNodeIdMap = exportResult.coordinateToNodeIdMap;
             this.largestComponentNodeIdToCoordinateMap = exportResult.nodeIdToCoordinateMap;
+
+            // Remap selected depot to the renumbered IDs used for the largest component
+            try {
+                const oldDepotId = this.mapManager.getSelectedDepotId && this.mapManager.getSelectedDepotId();
+                if (oldDepotId) {
+                    const oldCoord = this.nodeIdToCoordinateMap.get(oldDepotId);
+                    if (oldCoord) {
+                        const coordKey = `${oldCoord[0].toFixed(8)},${oldCoord[1].toFixed(8)}`;
+                        const newDepotId = this.largestComponentCoordinateToNodeIdMap.get(coordKey);
+                        if (newDepotId) {
+                            this.largestComponentDepotId = newDepotId;
+                            console.log('Remapped depot for TeaVM run', oldDepotId, '->', newDepotId);
+                        } else {
+                            this.largestComponentDepotId = null;
+                            console.warn('Selected starting location is not part of the exported largest component.');
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn('Failed to remap selected depot after export for TeaVM:', err);
+            }
 
             const teaVMResult = await this.runTeaVMAndCaptureOutput(solverId, exportResult.oarlibContent);
 
