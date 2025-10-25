@@ -17,7 +17,7 @@ export class RoutingManager {
         // Animation state
         this.animationInProgress = false;
         this.animationPaused = false;
-        this.animationSpeed = 1;
+    this.animationSpeed = 0.25;
         this.animationInterval = null;
         this.totalAnimationTime = 0;
         this.currentAnimationTime = 0;
