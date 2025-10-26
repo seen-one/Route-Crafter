@@ -115,29 +115,23 @@ export class MapManager {
 
         // Add long-press event listener for touch devices
         let touchStartTime = 0;
-        let touchTimer = null;
         
         this.map.on('touchstart', (e) => {
             touchStartTime = Date.now();
             // Store the touch location
             this.lastClickLatLng = e.latlng;
-            touchTimer = setTimeout(() => {
-                this.displayContextMenu(e);
-            }, 500); // 500ms long press
         });
 
         this.map.on('touchend', (e) => {
-            if (touchTimer) {
-                clearTimeout(touchTimer);
-                touchTimer = null;
+            const duration = Date.now() - touchStartTime;
+            if (duration >= 1000) { // 1 second hold
+                this.displayContextMenu(e);
             }
         });
 
         this.map.on('touchmove', (e) => {
-            if (touchTimer) {
-                clearTimeout(touchTimer);
-                touchTimer = null;
-            }
+            // Cancel long press if finger moves
+            touchStartTime = 0;
         });
 
         // Hide context menu when clicking elsewhere
