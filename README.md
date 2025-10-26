@@ -1,4 +1,4 @@
-# Route Crafter
+# Route Crafter (everystreet)
 
 ![Screenshot](https://github.com/user-attachments/assets/8563137e-301b-443b-9da1-5693049e9651)
 
@@ -24,7 +24,7 @@ Use this if want to generate a route to collect your own street-view/360 imagery
 Route Crafter uses Python, the [everystreet](https://github.com/matejker/everystreet) algorithm to solve the Chinese Postman Problem (aka Route Inspection Problem), OpenStreetMap and the Overpass API for the map and data, Leaflet as the main frontend UI and Flask as the backend. Vibe coded using ChatGPT.
 
 ## Google Colab
-[Click here to open this repo in Colab](https://colab.research.google.com/github/seen-one/Route-Crafter/blob/main/colab.ipynb)
+[Click here to open this repo in Colab](https://colab.research.google.com/github/seen-one/Route-Crafter/blob/everystreet/colab.ipynb)
 1. Click on Run all
 2. If asked to Restart session, click Cancel
 3. Scroll down and click on the URL generated below
@@ -33,7 +33,7 @@ Route Crafter uses Python, the [everystreet](https://github.com/matejker/everyst
 1. Install the latest version of Python (from [python.org](https://www.python.org/downloads/windows/) and not from Microsoft Store) and tick 'Add Python.exe to PATH'
 2. Install Git
 3. Download Visual Studio Community 2022, select and install the Python Development and Python Native Development Tools
-4. `git clone --recursive https://github.com/seen-one/Route-Crafter.git`
+4. `git clone --recursive --single-branch --branch everystreet https://github.com/seen-one/Route-Crafter.git`
 5. `cd Route-Crafter`
 6. `python -m venv env`
 7. `.\env\Scripts\activate`
@@ -48,7 +48,7 @@ To run subsequently
 
 ## Linux (Ubuntu example)
 1. `sudo apt install git`
-2. `git clone --recursive https://github.com/seen-one/Route-Crafter.git`
+2. `git clone --recursive --single-branch --branch everystreet https://github.com/seen-one/Route-Crafter.git`
 3. `cd Route-Crafter`
 4. `python3 -m venv env`
 5. `source env/bin/activate`
@@ -83,14 +83,14 @@ eulerian_path = hierholzer(network)
 #eulerian_path = hierholzer_forward_prefer(network)
 ```
 
-One-way road rules are ignored. To enforce one-way rules, uncomment these lines in generate_gpx.py. The routing is not currently optimal and the route length will increase significantly, even in areas without one-way roads.
+~~One-way road rules are ignored. To enforce one-way rules, uncomment these lines in generate_gpx.py. The routing is not currently optimal and the route length will increase significantly, even in areas without one-way roads.~~
 ```python
 #largest_scc = max(nx.strongly_connected_components(org_graph), key=len)`
 #graph = org_graph.subgraph(largest_scc).copy()
 ```
-to
+~~to~~
 ```python
-largest_scc = max(nx.strongly_connected_components(org_graph), key=len)
+~~largest_scc = max(nx.strongly_connected_components(org_graph), key=len)~~
 graph = org_graph.subgraph(largest_scc).copy()
 ```
 
