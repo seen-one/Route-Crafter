@@ -316,7 +316,7 @@ export class MapManager {
                         <label for="navigationFilter" style="flex: 1;">Navigation filter:</label>
                         <input type="text" id="navigationFilter" style="width: 100%; margin-left: 10px;" value='[highway][area!~"yes"][highway!~"bridleway|bus_guideway|construction|corridor|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path|steps"][access!~"customers|no|private"][public_transport!~"platform"][fee!~"yes"][service!~"drive-through|driveway|parking_aisle"][toll!~"yes"]'>
                     </div>
-                    <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
+                    <div id="routeFilterContainer" style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
                         <label for="routeFilter" style="flex: 1;">Route filter:</label>
                         <input type="text" id="routeFilter" style="width: 100%; margin-left: 10px;" value=''>
                     </div>
@@ -339,12 +339,16 @@ export class MapManager {
                 const exportFormatSelect = this.controlsDiv.querySelector('#exportFormatSelect');
                 const filterContainer = this.controlsDiv.querySelector('#filterMapillaryContainer');
                 const filterCheckbox = this.controlsDiv.querySelector('#filterMapillaryCoverage');
+                const routeFilterContainer = this.controlsDiv.querySelector('#routeFilterContainer');
+                const routeFilterInput = this.controlsDiv.querySelector('#routeFilter');
 
                 const updateFilterVisibility = () => {
                     const val = exportFormatSelect ? exportFormatSelect.value : '';
                     const isWindy = typeof val === 'string' && val.startsWith('windy_rural');
                     if (filterContainer) filterContainer.style.display = isWindy ? 'flex' : 'none';
                     if (filterCheckbox) filterCheckbox.disabled = !isWindy;
+                    if (routeFilterContainer) routeFilterContainer.style.display = isWindy ? 'flex' : 'none';
+                    if (routeFilterInput) routeFilterInput.disabled = !isWindy;
                 };
 
                 if (exportFormatSelect) {
