@@ -1,4 +1,4 @@
-# Route Crafter
+# 🛣️ Route Crafter
 
 Route Crafter is a web app to automatically generate the most efficient .gpx route covering every street in an area. Created by me to generate routes to collect my own street-view/360 imagery for [Google Street View, Mapillary, Panoramax etc.](https://wiki.openstreetmap.org/wiki/Street-level_imagery_services)
 
@@ -26,7 +26,7 @@ Are the OpenStreetMap areas unsuitable? There are some additional options you ca
 * 500m x 500m grid
 * 1km x 1km grid
 * 1.5km x 1.5km grid
-* Draw your own area!
+* Draw your own area! (additional buttons will appear under the zoom buttons)
 
 ## Fetch Roads
 Once you have picked your areas, click 'Fetch Roads', it will show the paths based on all of your filters (see below).
@@ -35,6 +35,9 @@ Once you have picked your areas, click 'Fetch Roads', it will show the paths bas
 If the fetched paths look ok, set the starting location by right clicking on the map. Press 'Generate Route' to run ArcRoutingLibrary solver to create the path solution.
 
 Sometimes, you may get a warning that not all of the paths were not able to be connected. This can be because the boundary or some filters have caused a split of paths into sections, or it could be a one-way path at the boundary making it impossible to reconnect to other paths. 'Allow navigation past boundary' with Windy Rural can help re-connect the paths which gives the option for the solver to use the these as optional paths. You can choose to continue anyways, where only the largest section of the split will be used to create the route.
+
+## Play Route
+Like a media player, you can play, pause, drag to seek, change the speed of a preview of the route.
 
 ## Route Solvers
 To be able to find the most efficient route, we use the [Chinese Postman Problem](https://en.wikipedia.org/wiki/Chinese_postman_problem) theory and its variants. There are different solvers to choose from, depending on your needs where some will create a shorter route than others.
