@@ -4,8 +4,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Route Crafter</title>
+    <meta name="description" content="Generate efficient GPX routes covering every street in residential areas using OpenStreetMap. Perfect for street-view collection and complete area coverage.">
+    <meta name="keywords" content="GPX route, street mapping, OpenStreetMap, route planning, Mapillary, street view collection">
+    <meta name="author" content="Route Crafter">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#007bff">
+    
+    <!-- Open Graph for social sharing -->
+    <meta property="og:title" content="Route Crafter - Generate Efficient Street Coverage Routes">
+    <meta property="og:description" content="Create GPX routes that cover every street in your area for navigation, street-view collection, or complete coverage mapping.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://route.crafter.seen.one">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Route Crafter">
+    <meta name="twitter:description" content="Generate efficient GPX routes covering every street">
+    
+    <title>Route Crafter - GPX Route Generator for Street Coverage</title>
     <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'><rect width='100%25' height='100%25' fill='transparent'/><text x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='64'>🛣️</text></svg>">
+    
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Route Crafter",
+      "description": "Generate efficient GPX routes covering every street within OpenStreetMap areas",
+      "url": "https://route.crafter.seen.one",
+      "applicationCategory": "MapsApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "Route Crafter"
+      }
+    }
+    </script>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" integrity="sha512-Zcn6bjR/8RZbLEpLIeOwNtzREBAJnUKESxces60Mpoj+2okopSAcSUIUOseddDm0cxnGQzxIR7vJgsLZbdLE3w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js" integrity="sha512-BwHfrr4c9kmRkLw6iXFdzcdWV/PGkVgiIyIWLLlTSXzWQzxuSg4DiQUCpauz/EWjgk5TYQqX/kvn9pG1NpYfqg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://unpkg.com/osmtogeojson@3.0.0-beta.5/osmtogeojson.js"></script>
