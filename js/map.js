@@ -394,12 +394,41 @@ export class MapManager {
         this.statsContainer = L.control({ position: 'topright' });
         this.statsContainer.onAdd = () => {
             const div = L.DomUtil.create('div', 'leaflet-bar stats-panel');
-            div.innerHTML = `
-                <div id="statsPanelInner" style="padding:8px; min-width:220px;">
-                    <p id="routeLength"></p>
-                </div>
-            `;
+            // Keep the inner HTML compact (avoid stray whitespace text nodes)
+            div.innerHTML = `<div id="statsPanelInner" style="padding:8px; min-width:220px;"><p id="routeLength"></p></div>`;
             L.DomEvent.disableClickPropagation(div);
+
+            // Hide the stats panel inner when it's empty. Use a MutationObserver so any
+            // code that updates #routeLength (via innerHTML/textContent) will trigger
+            // the visibility update without changing other files.
+            try {
+                const statsInner = div.querySelector('#statsPanelInner');
+                const routeLengthEl = div.querySelector('#routeLength');
+
+                const updateStatsVisibility = () => {
+                    if (!statsInner || !routeLengthEl) return;
+
+                    // Consider there to be content if routeLength has trimmed text or any
+                    // descendant elements with non-empty text content.
+                    const hasText = routeLengthEl.textContent && routeLengthEl.textContent.trim().length > 0;
+                    const hasChildContent = Array.from(routeLengthEl.querySelectorAll('*')).some(el => el.textContent && el.textContent.trim().length > 0);
+                    const visible = hasText || hasChildContent;
+
+                    statsInner.style.display = visible ? '' : 'none';
+                };
+
+                updateStatsVisibility();
+
+                const mo = new MutationObserver(updateStatsVisibility);
+                mo.observe(routeLengthEl, { childList: true, subtree: true, characterData: true });
+
+                // Also ensure visibility is correct after full page load in case other
+                // scripts modify content later.
+                window.addEventListener('load', updateStatsVisibility);
+            } catch (e) {
+                console.error('Error setting up stats panel visibility observer', e);
+            }
+
             return div;
         };
         this.statsContainer.addTo(this.map);
