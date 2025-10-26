@@ -1,3 +1,0 @@
--r everystreet/requirements.txt
-flask
-flask_cors

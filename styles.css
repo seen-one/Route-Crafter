@@ -1,0 +1,562 @@
+/* Route Crafter Styles */
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+#map {
+    height: 100%;
+    /* Make the map fill the entire viewport */
+}
+
+#controls {
+    height: 15vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f4f4f4;
+    border-top: 1px solid #ddd;
+}
+
+button,
+input,
+select,
+label,
+p {
+    margin: 5px 5px;
+    padding: 10px 10px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+/* Ensure statistics use the same font size as labels on desktop */
+#routeLength {
+    font-size: 15px;
+}
+
+/* Hide statistics when empty */
+#routeLength:empty {
+    display: none;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Add this to your CSS section */
+.button-loading {
+    position: relative;
+    pointer-events: none;
+    /* Disable clicking while loading */
+    opacity: 0.7;
+}
+
+.button-loading .spinner {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    width: 16px;
+    height: 16px;
+    margin-top: -8px;
+    /* Half of spinner height to center vertically */
+    border: 2px solid transparent;
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Styles for the filter control from combined.html */
+.leaflet-control-filters {
+    background: #f0f0f0;
+    padding: 8px 12px;
+    font-size: 14px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    max-width: 300px;
+    display: none; /* Hidden by default */
+}
+
+.leaflet-control-filters label {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.leaflet-control-filters input[type="date"],
+.leaflet-control-filters input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.leaflet-control-filters button,
+#toggleFilterBtn {
+    margin-top: 6px;
+    width: 100%;
+    cursor: pointer;
+}
+
+.image-type-btn {
+    display: inline-block;
+    margin: 0;
+    padding: 4px 8px;
+    font-size: 12px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    color: #333;
+    cursor: pointer;
+    border-radius: 3px;
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.image-type-btn:hover {
+    background-color: #e9e9e9;
+    color: #333;
+}
+
+.image-type-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+/* Date preset buttons */
+.date-preset-btn {
+    display: inline-block;
+    margin: 0;
+    padding: 4px 8px;
+    font-size: 12px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    color: #333;
+    cursor: pointer;
+    border-radius: 3px;
+    flex: 1;
+    text-align: center;
+}
+
+.date-preset-btn:hover {
+    background-color: #e9e9e9;
+    color: #333;
+}
+
+/* Style for the zoom tip */
+.leaflet-control-filters .zoom-tip {
+    font-size: 12px;
+    color: #555;
+    margin: 12px;
+    font-style: italic;
+}
+
+/* Debug Menu Styles */
+.debug-menu-container {
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.debug-menu-container button {
+    font-size: 13px;
+    padding: 6px 10px;
+    margin: 2px 0;
+}
+
+#debugMenuToggle {
+    background-color: #6c757d;
+    transition: background-color 0.2s;
+}
+
+#debugMenuToggle:hover {
+    background-color: #545b62;
+}
+
+#debugMenuContent {
+    min-width: 200px;
+}
+
+/* Context Menu Styles */
+.context-menu {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    z-index: 1000;
+    min-width: 200px;
+    display: none;
+}
+
+.context-menu-item {
+    margin: 5px 5px;
+    padding: 10px 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    font-size: 15px;
+    font-family: Arial, sans-serif;
+    color: #333;
+}
+
+.context-menu-item:last-child {
+    border-bottom: none;
+}
+
+.context-menu-item:hover {
+    background-color: #f5f5f5;
+}
+
+.context-menu-item:active {
+    background-color: #e0e0e0;
+}
+
+.context-menu-divider {
+    height: 1px;
+    background-color: #ccc;
+    margin: 5px 0;
+}
+
+/* Media Player Controls Styles */
+.media-controls {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    display: none;
+    z-index: 1000;
+    min-width: 300px;
+    font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+    font-size: 12px;
+}
+
+.media-controls.visible {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.media-controls-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.media-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    min-width: 40px;
+}
+
+.media-btn:hover {
+    background: #0056b3;
+}
+
+.media-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.media-btn.active {
+    background: #28a745;
+}
+
+.speed-control {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.speed-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.speed-btn:hover {
+    background: #545b62;
+}
+
+.speed-btn.active {
+    background: #007bff;
+}
+
+.progress-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+}
+
+.progress-bar:hover {
+    height: 10px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #007bff;
+    width: 0%;
+    transition: width 0.1s ease;
+}
+
+.progress-bar.dragging {
+    cursor: grabbing;
+}
+
+.progress-text {
+    font-size: 12px;
+    color: #666;
+    min-width: 80px;
+    text-align: center;
+}
+
+/* Mobile controls styles */
+.leaflet-bar {
+    max-width: 90vw;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.leaflet-bar div {
+    padding: 5px;
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+/* Right-side statistics panel */
+.stats-panel {
+    z-index: 1000;
+    margin-top: 8px;
+    margin-right: 8px;
+    background: rgba(255,255,255,0.95);
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+}
+
+.stats-panel #statsPanelInner {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    color: #222;
+}
+
+#routeLength {
+    margin: 0;
+    padding: 0;
+    font-size: 13px;
+    line-height: 1.3;
+    max-width: 260px;
+}
+
+/* Make details smaller when routeLength contains verbose HTML */
+#routeLength small, .stats-panel .small-text {
+    font-size: 11px;
+    color: #666;
+}
+
+.cpp-summary {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.cpp-summary .small-text {
+    margin-top: 4px;
+}
+
+.cpp-length {
+    margin-top: 0;
+    font-size: 13px;
+    color: #222;
+    line-height: 1.1;
+}
+
+.cpp-length strong {
+    margin-right: 6px;
+}
+
+.cpp-efficiency {
+    font-size: 13px; /* match .cpp-length */
+    color: #222; /* match .cpp-length color */
+    display: inline-block;
+    margin-top: 0;
+    margin-left: 0;
+}
+
+/* Combined Media query for smaller screens (portrait and landscape mobile) */
+@media (max-width: 600px), /* For portrait phones and small tablets */
+       (max-height: 450px) and (orientation: landscape) { /* For landscape phones where height is constrained */
+    .leaflet-control-filters {
+        max-width: 95%; /* Adjust max-width to a percentage of the screen */
+        max-height: 70vh; /* Limit height to prevent overflow on very short screens */
+        overflow-y: auto; /* Allow scrolling if content overflows max-height */
+        padding: 5px; /* Reduce padding */
+        font-size: 12px; /* Smaller font size */
+        top: 5px !important; /* Adjust top position for closer to edge */
+        right: 5px !important; /* Adjust right position for closer to edge */
+    }
+
+    .leaflet-control-filters label {
+        margin-bottom: 3px; /* Further reduce margin between labels */
+        font-size: 11px; /* Even smaller label font size */
+    }
+
+    .leaflet-control-filters input[type="date"],
+    .leaflet-control-filters input[type="text"] {
+        padding: 3px; /* Further reduce input padding */
+        font-size: 11px; /* Even smaller input font size */
+    }
+
+    .leaflet-control-filters button {
+        padding: 4px 6px; /* Further reduce button padding */
+        font-size: 11px; /* Even smaller button font size */
+    }
+
+    .leaflet-control-filters .zoom-tip {
+        font-size: 10px; /* Smaller tip font size */
+    }
+
+    /* Adjust the toggle button styles for better appearance on mobile */
+    #toggleFilterBtn {
+        padding: 5px 8px; /* Slightly larger padding for better touch target */
+        font-size: 12px; /* Keep it readable */
+        margin-top: 5px; /* Add margin to separate from other controls */
+        margin-right: 5px; /* Keep it consistent with filter menu right margin */
+        /* Do NOT set top/right !important here, let Leaflet handle stacking */
+    }
+
+     /* Ensure all controls in the top-right have some padding/margin to not stick to the corner */
+     .leaflet-top.leaflet-right .leaflet-control {
+         margin-top: 5px;
+         margin-right: 5px;
+     }
+
+     /* Position the toggle filter button at the top of top-right controls */
+     .leaflet-top.leaflet-right .leaflet-control:first-child {
+         margin-top: 5px;
+         margin-right: 5px;
+     }
+
+     /* Hide bottom controls when filter menu is open on mobile */
+     .leaflet-bottom.hidden-on-mobile {
+         display: none !important;
+     }
+
+     /* Set max height of leaflet-right controls to 80% from top */
+     .leaflet-top.leaflet-right {
+         max-height: 80vh;
+         overflow-y: auto;
+     }
+
+     /* Media controls mobile styles */
+     .media-controls {
+         min-width: 280px;
+         padding: 8px 12px;
+         bottom: 10px;
+     }
+
+     .media-controls-row {
+         gap: 8px;
+     }
+
+     .media-btn {
+         padding: 6px 10px;
+         font-size: 12px;
+         min-width: 35px;
+     }
+
+     .speed-btn {
+         padding: 3px 6px;
+         font-size: 11px;
+     }
+
+     /* Hide leaflet-bottom when media controls are visible on mobile */
+     .media-controls.visible ~ .leaflet-bottom,
+     .media-controls.visible + * .leaflet-bottom {
+         display: none !important;
+     }
+
+     .progress-text {
+         font-size: 11px;
+         min-width: 70px;
+     }
+
+     /* Mobile controls styles */
+     .leaflet-bar {
+         max-width: 95vw;
+         max-height: 60vh;
+         font-size: 12px;
+     }
+
+     .leaflet-bar div {
+         padding: 3px;
+         font-size: 12px;
+     }
+
+     .leaflet-bar input,
+     .leaflet-bar select,
+     .leaflet-bar button {
+         font-size: 12px;
+         padding: 6px 8px;
+         margin: 2px;
+     }
+
+    .leaflet-bar label {
+        font-size: 11px;
+        margin: 2px 0;
+    }
+
+    /* Ensure statistics use the same font size as labels */
+    #routeLength {
+        font-size: 11px;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    /* Hide statistics when empty */
+    #routeLength:empty {
+        display: none;
+    }
+
+}
