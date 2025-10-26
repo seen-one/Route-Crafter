@@ -57,7 +57,7 @@ Hover on the layers menu (or tap on touch screen) to see the option to show Mapi
 Due to limitation with the KartaView API, filtering or skip route sections is not available for KartaView.
 
 ### Coverage Filter
-You can apply date, image type and User ID filters which will reflect in the map. Note that the User ID/Account ID is the unique ID of the user, not the username. For Mapillary and Mapilio, this is a set of numbers. For Panoramax, this is a GUID.
+You can apply date, image type and User ID filters which will reflect in the map. Note that the User ID/Account ID is the unique ID of the user, not the username. For Mapillary and Mapilio, this is a set of numbers. For Panoramax, this is a UUID.
 
 ### Skip route sections with street-level coverage
 With Windy Rural, enabling this means you can exclude sections that have already been covered based on your coverage filter, so it is not required to go through the section again. Traversing through this section is still possible to reach to an uncovered path.
