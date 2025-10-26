@@ -115,22 +115,37 @@ export class MapManager {
 
         // Add long-press event listener for touch devices
         let touchStartTime = 0;
+        let touchStartPointCount = 0;
         
         this.map.on('touchstart', (e) => {
-            touchStartTime = Date.now();
-            // Store the touch location
-            this.lastClickLatLng = e.latlng;
-        });
-
-        this.map.on('touchend', (e) => {
-            const duration = Date.now() - touchStartTime;
-            if (duration >= 1000) { // 1 second hold
-                this.displayContextMenu(e);
+            // Only start timer if it's a single touch (not multi-touch)
+            const touchCount = e.originalEvent.touches.length;
+            if (touchCount === 1) {
+                touchStartTime = Date.now();
+                touchStartPointCount = 1;
+                // Store the touch location
+                this.lastClickLatLng = e.latlng;
+            } else {
+                // Multi-touch detected, cancel any long-press
+                touchStartTime = 0;
+                touchStartPointCount = touchCount;
             }
         });
 
+        this.map.on('touchend', (e) => {
+            // Only trigger context menu if it was a single-touch long-press
+            if (touchStartPointCount === 1) {
+                const duration = Date.now() - touchStartTime;
+                if (duration >= 1000) { // 1 second hold
+                    this.displayContextMenu(e);
+                }
+            }
+            touchStartTime = 0;
+            touchStartPointCount = 0;
+        });
+
         this.map.on('touchmove', (e) => {
-            // Cancel long press if finger moves
+            // Cancel long press if finger moves (regardless of touch count)
             touchStartTime = 0;
         });
 
