@@ -347,142 +347,172 @@ export class RouteCrafterApp {
             this.playRouteAnimation();
         });
 
-        // Download button
-        document.getElementById('downloadButton').addEventListener('click', () => {
-            this.downloadRoadDataAsCustomFormat();
-        });
+        // Download button (debug menu only)
+        const downloadButton = document.getElementById('downloadButton');
+        if (downloadButton) {
+            downloadButton.addEventListener('click', () => {
+                this.downloadRoadDataAsCustomFormat();
+            });
+        }
 
-        // Upload Overpass Response button
-        document.getElementById('uploadOverpassButton').addEventListener('click', () => {
-            document.getElementById('overpassUploadInput').click();
-        });
+        // Upload Overpass Response button (debug menu only)
+        const uploadOverpassButton = document.getElementById('uploadOverpassButton');
+        if (uploadOverpassButton) {
+            uploadOverpassButton.addEventListener('click', () => {
+                const fileInput = document.getElementById('overpassUploadInput');
+                if (fileInput) {
+                    fileInput.click();
+                }
+            });
+        }
 
-        // Export CPP: require depot
-        document.getElementById('exportCPPButton').addEventListener('click', () => {
-            const selectedDepot = this.mapManager.getSelectedDepotId && this.mapManager.getSelectedDepotId();
-            if (!selectedDepot) {
-                alert('Please set the starting location by right-clicking on the map (or press and hold for touch screens)');
-                return;
-            }
+        // Export CPP: require depot (debug menu only)
+        const exportCPPButton = document.getElementById('exportCPPButton');
+        if (exportCPPButton) {
+            exportCPPButton.addEventListener('click', () => {
+                const selectedDepot = this.mapManager.getSelectedDepotId && this.mapManager.getSelectedDepotId();
+                if (!selectedDepot) {
+                    alert('Please set the starting location by right-clicking on the map (or press and hold for touch screens)');
+                    return;
+                }
 
-            this.graphBuilder.exportForChinesePostman(
-                this.roadProcessor.getGeoJsonLayer(),
-                this.coordinateToNodeIdMap,
-                this.nodeIdToCoordinateMap
-            );
-        });
+                this.graphBuilder.exportForChinesePostman(
+                    this.roadProcessor.getGeoJsonLayer(),
+                    this.coordinateToNodeIdMap,
+                    this.nodeIdToCoordinateMap
+                );
+            });
+        }
 
-        // Export largest component: require depot
-        document.getElementById('exportLargestComponentButton').addEventListener('click', () => {
-            const selectedDepot = this.mapManager.getSelectedDepotId && this.mapManager.getSelectedDepotId();
-            if (!selectedDepot) {
-                alert('Please set the starting location by right-clicking on the map (or press and hold for touch screens)');
-                return;
-            }
+        // Export largest component: require depot (debug menu only)
+        const exportLargestComponentButton = document.getElementById('exportLargestComponentButton');
+        if (exportLargestComponentButton) {
+            exportLargestComponentButton.addEventListener('click', () => {
+                const selectedDepot = this.mapManager.getSelectedDepotId && this.mapManager.getSelectedDepotId();
+                if (!selectedDepot) {
+                    alert('Please set the starting location by right-clicking on the map (or press and hold for touch screens)');
+                    return;
+                }
 
-            const mappings = this.graphBuilder.exportLargestComponentForChinesePostman(
-                this.roadProcessor.getGeoJsonLayer(),
-                this.coordinateToNodeIdMap,
-                this.nodeIdToCoordinateMap
-            );
-            
-            // Store the renumbered coordinate mappings for use with "Apply Solution (Largest Component)"
-            if (mappings) {
-                this.largestComponentCoordinateToNodeIdMap = mappings.coordinateToNodeIdMap;
-                this.largestComponentNodeIdToCoordinateMap = mappings.nodeIdToCoordinateMap;
-                console.log('Stored largest component coordinate mappings for solution application');
-                // Remap the currently selected depot into the renumbered node IDs, if possible
-                try {
-                    const oldDepotId = this.mapManager.getSelectedDepotId && this.mapManager.getSelectedDepotId();
-                    if (oldDepotId) {
-                        const oldCoord = this.nodeIdToCoordinateMap.get(oldDepotId);
-                        if (oldCoord) {
-                            const coordKey = `${oldCoord[0].toFixed(8)},${oldCoord[1].toFixed(8)}`;
-                            const newDepotId = this.largestComponentCoordinateToNodeIdMap.get(coordKey);
-                            if (newDepotId) {
-                                this.largestComponentDepotId = newDepotId;
-                                console.log('Remapped depot', oldDepotId, '->', newDepotId);
-                            } else {
-                                // Depot not in largest component
-                                this.largestComponentDepotId = null;
-                                alert('Selected starting location is not part of the exported largest component.');
+                const mappings = this.graphBuilder.exportLargestComponentForChinesePostman(
+                    this.roadProcessor.getGeoJsonLayer(),
+                    this.coordinateToNodeIdMap,
+                    this.nodeIdToCoordinateMap
+                );
+
+                // Store the renumbered coordinate mappings for use with "Apply Solution (Largest Component)"
+                if (mappings) {
+                    this.largestComponentCoordinateToNodeIdMap = mappings.coordinateToNodeIdMap;
+                    this.largestComponentNodeIdToCoordinateMap = mappings.nodeIdToCoordinateMap;
+                    console.log('Stored largest component coordinate mappings for solution application');
+                    // Remap the currently selected depot into the renumbered node IDs, if possible
+                    try {
+                        const oldDepotId = this.mapManager.getSelectedDepotId && this.mapManager.getSelectedDepotId();
+                        if (oldDepotId) {
+                            const oldCoord = this.nodeIdToCoordinateMap.get(oldDepotId);
+                            if (oldCoord) {
+                                const coordKey = `${oldCoord[0].toFixed(8)},${oldCoord[1].toFixed(8)}`;
+                                const newDepotId = this.largestComponentCoordinateToNodeIdMap.get(coordKey);
+                                if (newDepotId) {
+                                    this.largestComponentDepotId = newDepotId;
+                                    console.log('Remapped depot', oldDepotId, '->', newDepotId);
+                                } else {
+                                    // Depot not in largest component
+                                    this.largestComponentDepotId = null;
+                                    alert('Selected starting location is not part of the exported largest component.');
+                                }
                             }
                         }
+                    } catch (err) {
+                        console.warn('Failed to remap selected depot for largest component:', err);
                     }
-                } catch (err) {
-                    console.warn('Failed to remap selected depot for largest component:', err);
                 }
-            }
-        });
+            });
+        }
 
-        // Show Vertex Markers checkbox
-        document.getElementById('showVertexMarkersCheckbox').addEventListener('change', (event) => {
-            console.log('Checkbox changed:', event.target.checked, 'Vertices:', this.nodeIdToCoordinateMap.size);
-            if (event.target.checked) {
-                this.mapManager.showVertexMarkers(this.nodeIdToCoordinateMap);
-            } else {
-                this.mapManager.hideVertexMarkers();
-            }
-        });
+        // Show Vertex Markers checkbox (debug menu only)
+        const showVertexMarkersCheckbox = document.getElementById('showVertexMarkersCheckbox');
+        if (showVertexMarkersCheckbox) {
+            showVertexMarkersCheckbox.addEventListener('change', (event) => {
+                console.log('Checkbox changed:', event.target.checked, 'Vertices:', this.nodeIdToCoordinateMap.size);
+                if (event.target.checked) {
+                    this.mapManager.showVertexMarkers(this.nodeIdToCoordinateMap);
+                } else {
+                    this.mapManager.hideVertexMarkers();
+                }
+            });
+        }
 
         // Clear button
         document.getElementById('clearButton').addEventListener('click', () => {
             this.clearAllSelections();
         });
 
-        // Apply CPP Solution button
-        document.getElementById('applyCPPSolutionButton').addEventListener('click', () => {
-            // Stop any running animation by clicking the close button
-            document.getElementById('closeBtn').click();
-            
-            const solutionText = document.getElementById('oarlibSolutionTextarea').value.trim();
-            
-            if (!solutionText) {
-                alert('Please paste an OARLib solution into the text box.');
-                return;
-            }
-            
-            if (this.nodeIdToCoordinateMap.size === 0) {
-                const proceed = confirm(
-                    'No roads have been fetched yet. The solution will be shown as a demonstration path.\n\n' +
-                    'For accurate mapping:\n' +
-                    '1. First select an area and click "Fetch Roads"\n' +
-                    '2. Then click "Export OARLib Format" to get the file\n' +
-                    '3. Finally paste your solution here\n\n' +
-                    'Do you want to proceed with a demonstration path?'
-                );
-                if (!proceed) return;
-            }
-            
-            this.solutionVisualizer.handleCPPSolutionText(solutionText, this.nodeIdToCoordinateMap);
-        });
+        // Apply CPP Solution button (debug menu only)
+        const applyCPPSolutionButton = document.getElementById('applyCPPSolutionButton');
+        if (applyCPPSolutionButton) {
+            applyCPPSolutionButton.addEventListener('click', () => {
+                const closeBtn = document.getElementById('closeBtn');
+                if (closeBtn) {
+                    closeBtn.click();
+                }
 
-        // Apply Largest Component Solution button
-        document.getElementById('applyLargestComponentSolutionButton').addEventListener('click', () => {
-            // Stop any running animation by clicking the close button
-            document.getElementById('closeBtn').click();
-            
-            const solutionText = document.getElementById('oarlibSolutionTextarea').value.trim();
-            
-            if (!solutionText) {
-                alert('Please paste an OARLib solution into the text box.');
-                return;
-            }
-            
-            if (this.largestComponentNodeIdToCoordinateMap.size === 0) {
-                alert(
-                    'No largest component has been exported yet.\n\n' +
-                    'Please:\n' +
-                    '1. First select an area and click "Fetch Roads"\n' +
-                    '2. Then click "Export Largest Component OARLib" to get the file\n' +
-                    '3. Solve the problem with OARLib\n' +
-                    '4. Finally paste your solution here and click this button'
-                );
-                return;
-            }
-            
-            this.solutionVisualizer.handleCPPSolutionText(solutionText, this.largestComponentNodeIdToCoordinateMap);
-        });
+                const solutionTextarea = document.getElementById('oarlibSolutionTextarea');
+                const solutionText = solutionTextarea ? solutionTextarea.value.trim() : '';
+
+                if (!solutionText) {
+                    alert('Please paste an OARLib solution into the text box.');
+                    return;
+                }
+
+                if (this.nodeIdToCoordinateMap.size === 0) {
+                    const proceed = confirm(
+                        'No roads have been fetched yet. The solution will be shown as a demonstration path.\n\n' +
+                        'For accurate mapping:\n' +
+                        '1. First select an area and click "Fetch Roads"\n' +
+                        '2. Then click "Export OARLib Format" to get the file\n' +
+                        '3. Finally paste your solution here\n\n' +
+                        'Do you want to proceed with a demonstration path?'
+                    );
+                    if (!proceed) return;
+                }
+
+                this.solutionVisualizer.handleCPPSolutionText(solutionText, this.nodeIdToCoordinateMap);
+            });
+        }
+
+        // Apply Largest Component Solution button (debug menu only)
+        const applyLargestComponentSolutionButton = document.getElementById('applyLargestComponentSolutionButton');
+        if (applyLargestComponentSolutionButton) {
+            applyLargestComponentSolutionButton.addEventListener('click', () => {
+                const closeBtn = document.getElementById('closeBtn');
+                if (closeBtn) {
+                    closeBtn.click();
+                }
+
+                const solutionTextarea = document.getElementById('oarlibSolutionTextarea');
+                const solutionText = solutionTextarea ? solutionTextarea.value.trim() : '';
+
+                if (!solutionText) {
+                    alert('Please paste an OARLib solution into the text box.');
+                    return;
+                }
+
+                if (this.largestComponentNodeIdToCoordinateMap.size === 0) {
+                    alert(
+                        'No largest component has been exported yet.\n\n' +
+                        'Please:\n' +
+                        '1. First select an area and click "Fetch Roads"\n' +
+                        '2. Then click "Export Largest Component OARLib" to get the file\n' +
+                        '3. Solve the problem with OARLib\n' +
+                        '4. Finally paste your solution here and click this button'
+                    );
+                    return;
+                }
+
+                this.solutionVisualizer.handleCPPSolutionText(solutionText, this.largestComponentNodeIdToCoordinateMap);
+            });
+        }
 
         document.getElementById('overpassUploadInput').addEventListener('change', (event) => {
             this.roadProcessor.handleOverpassResponseUpload(
