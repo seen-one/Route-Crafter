@@ -838,6 +838,47 @@ Line Format: x,y
             
             console.log(`Exported largest component: ${filteredGraph.nodes.length}/${totalNodes} nodes (${nodePercentage}%), ${filteredGraph.edges.length}/${totalEdges} edges (${edgePercentage}%)`);
             
+            // Calculate required road length for the largest component
+            let largestComponentRequiredLengthKm = 0;
+            try {
+                // Sum up lengths of edges in the largest component that are required
+                roadFeatures.forEach(feature => {
+                    if (feature.geometry.type === 'LineString') {
+                        // Get the feature's endpoints to match with nodes
+                        const coords = feature.geometry.coordinates;
+                        if (coords.length >= 2) {
+                            const startCoord = coords[0];
+                            const endCoord = coords[coords.length - 1];
+                            const startKey = `${startCoord[0].toFixed(8)},${startCoord[1].toFixed(8)}`;
+                            const endKey = `${endCoord[0].toFixed(8)},${endCoord[1].toFixed(8)}`;
+                            
+                            // Check if both endpoints are in the largest component
+                            const startNodeId = coordinateToNodeIdMap.get(startKey);
+                            const endNodeId = coordinateToNodeIdMap.get(endKey);
+                            
+                            if (startNodeId && endNodeId && largestComponent.has(startNodeId) && largestComponent.has(endNodeId)) {
+                                // Only count if this edge is required (not outside boundary or optional)
+                                const isOutsideBoundary = feature.properties.isOutsideBoundary;
+                                const isRouteRequired = feature.properties.isRouteRequired !== undefined ? feature.properties.isRouteRequired : true;
+                                
+                                if (!isOutsideBoundary && isRouteRequired) {
+                                    const line = turf.lineString(feature.geometry.coordinates);
+                                    const length = turf.length(line, { units: 'kilometers' });
+                                    largestComponentRequiredLengthKm += length;
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Expose required road length for largest component globally so other modules can compute efficiency
+                try { window.largestComponentRequiredRoadLengthKm = largestComponentRequiredLengthKm; } catch (e) { /* ignore */ }
+                
+                console.log(`Largest component required road length: ${largestComponentRequiredLengthKm.toFixed(2)} km`);
+            } catch (err) {
+                console.warn('Error calculating largest component required road length:', err);
+            }
+            
             // Return the new coordinate mappings so they can be used for applying solutions
             return {
                 coordinateToNodeIdMap: newCoordinateToNodeIdMap,
@@ -850,7 +891,8 @@ Line Format: x,y
                     filteredEdges: filteredGraph.edges.length,
                     nodePercentage: parseFloat(nodePercentage),
                     edgePercentage: parseFloat(edgePercentage),
-                    nodesRemoved
+                    nodesRemoved,
+                    largestComponentRequiredLengthKm
                 }
             };
         } catch (error) {

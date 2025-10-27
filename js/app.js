@@ -60,7 +60,7 @@ export class RouteCrafterApp {
         
         // Setup attribution
         this.mapManager.getMap().attributionControl.setPrefix(
-            `Route Crafter <a href="https://github.com/seen-one/Route-Crafter" target="_blank">GitHub</a> | ${this.mapManager.getMap().attributionControl.options.prefix}`
+            `Route Crafter v0.2.1 <a href="https://github.com/seen-one/Route-Crafter" target="_blank">GitHub</a> | ${this.mapManager.getMap().attributionControl.options.prefix}`
         );
     }
 
@@ -648,6 +648,9 @@ export class RouteCrafterApp {
             this.largestComponentCoordinateToNodeIdMap = exportResult.coordinateToNodeIdMap;
             this.largestComponentNodeIdToCoordinateMap = exportResult.nodeIdToCoordinateMap;
 
+            // Update stats display to show the largest component required road length
+            this.updateStatsDisplay();
+
             // Remap selected depot to the renumbered IDs used for the largest component
             try {
                 const oldDepotId = this.mapManager.getSelectedDepotId && this.mapManager.getSelectedDepotId();
@@ -933,6 +936,9 @@ export class RouteCrafterApp {
         this.largestComponentCoordinateToNodeIdMap.clear();
         this.largestComponentNodeIdToCoordinateMap.clear();
         
+        // Clear largest component global variables
+        try { window.largestComponentRequiredRoadLengthKm = null; } catch (e) { /* ignore */ }
+        
         // Reset routing manager
         this.routingManager.stopAnimation();
         this.routingManager.setRoutePoints([]);
@@ -957,6 +963,34 @@ export class RouteCrafterApp {
         searchRules.selectedIndex = 0;
         // Manually trigger change event to update UI
         searchRules.dispatchEvent(new Event('change'));
+    }
+
+    updateStatsDisplay() {
+        // Update the stats display to include the largest component required road length
+        try {
+            const routeLengthEl = document.getElementById('routeLength');
+            if (!routeLengthEl) return;
+
+            // Get current stats HTML
+            let statsHtml = routeLengthEl.innerHTML;
+
+            // Check if largest component required length is already displayed
+            if (statsHtml.includes('(Largest Component)')) {
+                return; // Already displayed
+            }
+
+            // Add largest component required road length if available
+            const largestComponentRequiredLengthKm = (typeof window !== 'undefined' && window.largestComponentRequiredRoadLengthKm != null) ? window.largestComponentRequiredRoadLengthKm : null;
+            if (largestComponentRequiredLengthKm != null && largestComponentRequiredLengthKm > 0) {
+                const largestComponentRequiredLengthMi = largestComponentRequiredLengthKm * 0.621371;
+                statsHtml += `<br>
+                    <strong>(Largest Component):</strong> ${largestComponentRequiredLengthKm.toFixed(2)} km (${largestComponentRequiredLengthMi.toFixed(2)} mi)
+                    `;
+                routeLengthEl.innerHTML = statsHtml;
+            }
+        } catch (err) {
+            console.warn('Error updating stats display:', err);
+        }
     }
         // Export route points (array of [lat, lng]) to a GPX file and trigger download
         exportRouteToGPX(routePoints, filename = 'route.gpx') {

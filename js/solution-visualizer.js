@@ -174,10 +174,11 @@ export class SolutionVisualizer {
                     // Efficiency: total road length / route length
                     let efficiencyHtml = '';
                     try {
-                        // Prefer required road length for efficiency calculation. Fall back to total length if required not available.
+                        // Prefer largest component required road length first. Fall back to required road length, then total length.
+                        const largestComponentRequiredRoadKm = (typeof window !== 'undefined' && window.largestComponentRequiredRoadLengthKm != null) ? window.largestComponentRequiredRoadLengthKm : null;
                         const requiredRoadKm = (typeof window !== 'undefined' && window.requiredRoadLengthKm != null) ? window.requiredRoadLengthKm : null;
                         const totalRoadKm = (typeof window !== 'undefined' && window.totalRoadLengthKm != null) ? window.totalRoadLengthKm : null;
-                        const baseLengthKm = (requiredRoadKm != null) ? requiredRoadKm : totalRoadKm;
+                        const baseLengthKm = (largestComponentRequiredRoadKm != null) ? largestComponentRequiredRoadKm : (requiredRoadKm != null) ? requiredRoadKm : totalRoadKm;
 
                         if (baseLengthKm && totalKm > 0) {
                             const efficiency = (baseLengthKm / totalKm) * 100;

@@ -918,6 +918,15 @@ export class RoadProcessor {
                     <strong>Required Road Length:</strong> ${requiredLengthKm.toFixed(2)} km (${requiredLengthMi.toFixed(2)} mi)
                 `;
                 
+                // Add largest component required road length if available
+                const largestComponentRequiredLengthKm = (typeof window !== 'undefined' && window.largestComponentRequiredRoadLengthKm != null) ? window.largestComponentRequiredRoadLengthKm : null;
+                if (largestComponentRequiredLengthKm != null && largestComponentRequiredLengthKm > 0) {
+                    const largestComponentRequiredLengthMi = largestComponentRequiredLengthKm * 0.621371;
+                    statsHtml += `<br>
+                    <strong>(Largest Component):</strong> ${largestComponentRequiredLengthKm.toFixed(2)} km (${largestComponentRequiredLengthMi.toFixed(2)} mi)
+                    `;
+                }
+                
                 // Add outside boundary statistics if navigation past boundary is enabled
                 if (outsideBoundaryCount > 0) {
                     statsHtml += `<br>
