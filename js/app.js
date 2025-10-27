@@ -983,9 +983,28 @@ export class RouteCrafterApp {
             const largestComponentRequiredLengthKm = (typeof window !== 'undefined' && window.largestComponentRequiredRoadLengthKm != null) ? window.largestComponentRequiredRoadLengthKm : null;
             if (largestComponentRequiredLengthKm != null && largestComponentRequiredLengthKm > 0) {
                 const largestComponentRequiredLengthMi = largestComponentRequiredLengthKm * 0.621371;
-                statsHtml += `<br>
+                const componentStats = `<br>
                     <strong>(Largest Component):</strong> ${largestComponentRequiredLengthKm.toFixed(2)} km (${largestComponentRequiredLengthMi.toFixed(2)} mi)
                     `;
+                
+                // Insert after "Required Road Length:" line
+                const requiredLengthIndex = statsHtml.indexOf('</strong>: ');
+                if (requiredLengthIndex !== -1) {
+                    // Find the end of the Required Road Length line (next <br> or end of string)
+                    const searchStart = requiredLengthIndex + '</strong>: '.length;
+                    const nextBrIndex = statsHtml.indexOf('<br>', searchStart);
+                    if (nextBrIndex !== -1) {
+                        // Insert after the <br> that ends the Required Road Length line
+                        statsHtml = statsHtml.substring(0, nextBrIndex + 4) + componentStats + statsHtml.substring(nextBrIndex + 4);
+                    } else {
+                        // No <br> found, just append
+                        statsHtml += componentStats;
+                    }
+                } else {
+                    // Fallback: just append
+                    statsHtml += componentStats;
+                }
+                
                 routeLengthEl.innerHTML = statsHtml;
             }
         } catch (err) {
