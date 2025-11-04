@@ -20,6 +20,7 @@ There are different types of areas you can choose. Firstly, you can use OpenStre
 * Place: Postal code
 * Place: District
 * Place: Subdistrict
+
 Click on multiple areas to generate a single route for a larger area. If the areas selected don't quite connect, you can expand the surrounding area by increasing the buffer.
 
 Are the OpenStreetMap areas unsuitable? There are some additional options you can choose:
@@ -54,7 +55,7 @@ To be able to find the most efficient route, we use the [Chinese Postman Problem
 ## Coverage Overlays and Filter
 Hover on the layers menu (or tap on touch screen) to see the option to show Mapillary, Panoramax, KartaView and Mapilio coverage (or change the map layer!). You need to zoom in the map enough to be able to select and view the overlay. If an overlay is enabled and you zoom too far out, the map will turn slightly grey.
 
-Due to limitation with the KartaView API, filtering or skip route sections is not available for KartaView.
+Due to limitations with the KartaView API, filtering or skip route sections is not available for KartaView.
 
 ### Coverage Filter
 You can apply date, image type and User ID filters which will reflect in the map. Note that the User ID/Account ID is the unique ID of the user, not the username. For Mapillary and Mapilio, this is a set of numbers. For Panoramax, this is a UUID.
@@ -93,7 +94,7 @@ The [previous version](https://github.com/seen-one/Route-Crafter/tree/everystree
 Vibe coded using everything. ChatGPT. Perplexity. Cursor. GitHub Copilot.
 
 ## Debug Menu
-Append [?debug](https://route.crafter.seen.one/?debug) to end of the URL to show the debug menu. After a roads have been fetched, clicking 'Export Largest Component OARLib' will create an .oarlib file suitable for the unmodified ArcRoutingLibrary .jar file. Download [here](https://github.com/Olibear/ArcRoutingLibrary/releases/tag/1.0.1) and use the commands as shown [here](https://github.com/Olibear/ArcRoutingLibrary/blob/master/HOW_TO_USE.txt) to generate the solution. Paste the solution and click 'Apply Solution (Largest Component)' and it will be applied as the solution which can be used to play or download the .gpx route.
+Append [?debug](https://route.crafter.seen.one/?debug) to end of the URL to show the debug menu. After the roads have been fetched, clicking 'Export Largest Component OARLib' will create an .oarlib file suitable for the unmodified ArcRoutingLibrary .jar file. Download [here](https://github.com/Olibear/ArcRoutingLibrary/releases/tag/1.0.1) and use the commands as shown [here](https://github.com/Olibear/ArcRoutingLibrary/blob/master/HOW_TO_USE.txt) to generate the solution. Paste the solution and click 'Apply Solution (Largest Component)' and it will be applied as the solution which can be used to play or download the .gpx route.
 
 ## Related
 * [Every Street Challenge](http://www.everystreetchallenge.com/) - The original inspiration
