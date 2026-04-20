@@ -568,10 +568,6 @@ button:hover {
     width: 100%;
 }
 
-.main-controls-custom-endpoint button {
-    flex: 0 0 auto;
-}
-
 /* Right-side statistics panel */
 .stats-panel {
     z-index: 1000;

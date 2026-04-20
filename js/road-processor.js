@@ -1,6 +1,6 @@
 // Road fetching and processing module
 
-import { getSelectedOverpassEndpoint, stopSpinner } from './utils.js';
+import { getSelectedOverpassEndpoint, reportInvalidOverpassEndpoint, stopSpinner } from './utils.js';
 
 export class RoadProcessor {
     constructor(mapManager, areaManager, coverageManager) {
@@ -596,6 +596,12 @@ export class RoadProcessor {
             const minifiedQuery = this.minifyOverpassQuery(overpassQuery);
 
             const overpassEndpoint = getSelectedOverpassEndpoint();
+
+            if (!overpassEndpoint) {
+                reportInvalidOverpassEndpoint();
+                stopSpinner(previewGPXButton, 'Fetch Roads');
+                return;
+            }
 
             fetch(overpassEndpoint, {
                 method: 'POST',

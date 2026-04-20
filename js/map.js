@@ -9,6 +9,7 @@ import {
     getStoredOverpassEndpoint,
     isValidOverpassEndpoint,
     normalizeOverpassEndpoint,
+    OVERPASS_ENDPOINT_VALIDATION_MESSAGE,
     saveOverpassEndpoint
 } from './utils.js';
 
@@ -325,8 +326,7 @@ export class MapManager {
                             </select>
                         </div>
                         <div id="customOverpassEndpointContainer" class="main-controls-row main-controls-custom-endpoint" style="display: none;">
-                            <input type="url" id="customOverpassEndpoint" class="main-controls-input-wide" placeholder="https://example.com/api/interpreter">
-                            <button id="useCustomOverpassEndpointButton" type="button">Use endpoint</button>
+                            <input type="text" id="customOverpassEndpoint" class="main-controls-input-wide" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://example.com/api/interpreter">
                         </div>
                         <div class="main-controls-row">
                             <label for="exportFormatSelect">Route Solver:</label>
@@ -594,9 +594,8 @@ export class MapManager {
         const endpointSelect = document.getElementById('overpassEndpointSelect');
         const customEndpointContainer = document.getElementById('customOverpassEndpointContainer');
         const customEndpointInput = document.getElementById('customOverpassEndpoint');
-        const customEndpointButton = document.getElementById('useCustomOverpassEndpointButton');
 
-        if (!endpointSelect || !customEndpointContainer || !customEndpointInput || !customEndpointButton) {
+        if (!endpointSelect || !customEndpointContainer || !customEndpointInput) {
             return;
         }
 
@@ -613,33 +612,56 @@ export class MapManager {
         }
 
         const updateCustomEndpointVisibility = () => {
-            customEndpointContainer.style.display = endpointSelect.value === CUSTOM_OVERPASS_ENDPOINT_VALUE ? 'flex' : 'none';
+            const isCustomEndpoint = endpointSelect.value === CUSTOM_OVERPASS_ENDPOINT_VALUE;
+            customEndpointContainer.style.display = isCustomEndpoint ? 'flex' : 'none';
+        };
+
+        const saveCustomEndpoint = (shouldReportValidity = false) => {
+            const customEndpoint = customEndpointInput.value.trim();
+
+            if (!customEndpoint || !isValidOverpassEndpoint(customEndpoint)) {
+                if (shouldReportValidity) {
+                    customEndpointInput.setCustomValidity(OVERPASS_ENDPOINT_VALIDATION_MESSAGE);
+
+                    if (typeof customEndpointInput.reportValidity === 'function') {
+                        customEndpointInput.reportValidity();
+                    }
+                } else {
+                    customEndpointInput.setCustomValidity('');
+                }
+
+                return null;
+            }
+
+            customEndpointInput.setCustomValidity('');
+            customEndpointInput.value = saveOverpassEndpoint(customEndpoint);
+            return customEndpointInput.value;
         };
 
         endpointSelect.addEventListener('change', () => {
             updateCustomEndpointVisibility();
+            customEndpointInput.setCustomValidity('');
 
             if (endpointSelect.value !== CUSTOM_OVERPASS_ENDPOINT_VALUE) {
                 saveOverpassEndpoint(endpointSelect.value);
             }
         });
 
-        customEndpointButton.addEventListener('click', () => {
-            const customEndpoint = customEndpointInput.value.trim();
-
-            if (!isValidOverpassEndpoint(customEndpoint)) {
-                alert('Please enter a valid Overpass endpoint URL that starts with http:// or https://.');
-                return;
+        customEndpointInput.addEventListener('blur', () => {
+            if (customEndpointInput.value.trim()) {
+                saveCustomEndpoint(false);
             }
-
-            customEndpointInput.value = saveOverpassEndpoint(customEndpoint);
         });
 
-        customEndpointInput.addEventListener('keypress', (event) => {
+        customEndpointInput.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
                 event.preventDefault();
-                customEndpointButton.click();
+                saveCustomEndpoint(true);
             }
+        });
+
+        customEndpointInput.addEventListener('input', () => {
+            customEndpointInput.setCustomValidity('');
         });
 
         updateCustomEndpointVisibility();

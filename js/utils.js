@@ -3,6 +3,7 @@
 export const DEFAULT_OVERPASS_ENDPOINT = 'https://overpass-api.de/api/interpreter';
 export const CUSTOM_OVERPASS_ENDPOINT_VALUE = '__custom_overpass_endpoint__';
 export const OVERPASS_ENDPOINT_STORAGE_KEY = 'routeCrafter.overpassEndpoint';
+export const OVERPASS_ENDPOINT_VALIDATION_MESSAGE = 'Please enter a valid Overpass endpoint URL that starts with http:// or https://.';
 
 export const OVERPASS_ENDPOINT_GROUPS = [
     {
@@ -123,10 +124,38 @@ export function getSelectedOverpassEndpoint() {
     }
 
     if (endpointSelect.value === CUSTOM_OVERPASS_ENDPOINT_VALUE) {
-        return normalizeOverpassEndpoint(customEndpointInput ? customEndpointInput.value : '');
+        const customEndpoint = customEndpointInput ? customEndpointInput.value.trim() : '';
+
+        if (!isValidOverpassEndpoint(customEndpoint)) {
+            if (customEndpointInput) {
+                customEndpointInput.setCustomValidity(OVERPASS_ENDPOINT_VALIDATION_MESSAGE);
+            }
+
+            return null;
+        }
+
+        const normalizedEndpoint = saveOverpassEndpoint(customEndpoint);
+
+        if (customEndpointInput) {
+            customEndpointInput.value = normalizedEndpoint;
+            customEndpointInput.setCustomValidity('');
+        }
+
+        return normalizedEndpoint;
     }
 
     return normalizeOverpassEndpoint(endpointSelect.value);
+}
+
+export function reportInvalidOverpassEndpoint() {
+    const customEndpointInput = document.getElementById('customOverpassEndpoint');
+
+    if (customEndpointInput && typeof customEndpointInput.reportValidity === 'function') {
+        customEndpointInput.reportValidity();
+        return;
+    }
+
+    alert(OVERPASS_ENDPOINT_VALIDATION_MESSAGE);
 }
 
 /**
