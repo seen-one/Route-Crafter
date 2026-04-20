@@ -256,22 +256,21 @@ export class MapManager {
             }, 100);
         }
 
-        // Custom controls container for Route Crafter features
-        this.controlsContainer = L.control({ position: 'bottomleft' });
-
-        this.controlsContainer.onAdd = () => {
-            const div = L.DomUtil.create('div', 'leaflet-bar');
-            const overpassEndpointOptions = this.getOverpassEndpointOptionsHtml();
-            div.innerHTML = `
-                <div id="mainControlsDiv" style="padding: 5px; background: white;">
-                    <div style="display:flex; align-items:center; gap:6px;">
-                        <input type="text" id="searchBox" placeholder="Search Map" style="flex:1; min-width:120px;">
+        // Custom controls sidebar for Route Crafter features
+        const controlsSidebar = document.getElementById('controlsSidebar');
+        const div = document.createElement('div');
+        div.className = 'main-controls-shell';
+        const overpassEndpointOptions = this.getOverpassEndpointOptionsHtml();
+        div.innerHTML = `
+                <div id="mainControlsDiv" class="main-controls-panel">
+                    <div class="main-controls-header">
+                        <input type="text" id="searchBox" class="main-controls-search" placeholder="Search Map">
                         <button id="searchButton">Search</button>
-                        <button id="toggleMainMenuButton" aria-controls="mainMenuContent" aria-expanded="true" style="margin-left:auto; padding:4px 6px; font-size:14px;">▾</button>
+                        <button id="toggleMainMenuButton" class="main-controls-toggle" aria-controls="mainMenuContent" aria-expanded="true">▾</button>
                     </div>
-                    <div id="mainMenuContent" style="margin-top:6px;">
-                        <br>
-                        <select id="searchRules">
+                    <div id="mainMenuContent" class="main-controls-content">
+                        <div class="main-controls-select-action">
+                            <select id="searchRules">
                         <option value="landuse=residential|landuse=retail|landuse=commercial|landuse=industrial">Landuse: Residential/Retail/Commercial/Industrial</option>
                         <option value="admin_level=10">Admin Level 10</option>
                         <option value="admin_level=9">Admin Level 9</option>
@@ -290,35 +289,36 @@ export class MapManager {
                         <option value="grid_1km">Grid: 1km × 1km</option>
                         <option value="grid_1500m">Grid: 1.5km × 1.5km</option>
                         <option value="draw_area">Draw Area</option>
-                    </select>
-                    <button id="fetchButton">Find Areas</button>
-                    <br>
+                            </select>
+                            <button id="fetchButton">Find Areas</button>
+                        </div>
+                        <div class="main-controls-actions">
                         <button id="previewGPXButton">Fetch Roads</button>
                         <button id="generateRouteButton">Generate Route</button>
                         <button id="playRouteButton">Play Route</button>
                         <button id="exportGPXButton">Export GPX</button>
                         <button id="clearButton">Reset</button>
-                        <br>
-                        <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                            <label for="bufferSize" style="flex: 1;">Add buffer to selected areas (meters):</label>
-                            <input type="number" id="bufferSize" min="1" max="100" value="1" style="width: 80px;">
                         </div>
-                        <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                            <label for="truncateByEdge" style="flex: 1;">Trim roads to polygon boundary</label>
+                        <div class="main-controls-row">
+                            <label for="bufferSize">Add buffer to selected areas (meters):</label>
+                            <input type="number" id="bufferSize" class="main-controls-number" min="1" max="100" value="1">
+                        </div>
+                        <div class="main-controls-row">
+                            <label for="truncateByEdge">Trim roads to polygon boundary</label>
                             <input type="checkbox" id="truncateByEdge" checked>
                         </div>
-                        <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                            <label for="overpassEndpointSelect" style="flex: 1;">Overpass endpoint:</label>
-                            <select id="overpassEndpointSelect" style="width: 100%; margin-left: 10px;">
+                        <div class="main-controls-row">
+                            <label for="overpassEndpointSelect">Overpass endpoint:</label>
+                            <select id="overpassEndpointSelect" class="main-controls-input-wide">
                                 ${overpassEndpointOptions}
                             </select>
                         </div>
-                        <div id="customOverpassEndpointContainer" style="display: none; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                            <input type="url" id="customOverpassEndpoint" placeholder="https://example.com/api/interpreter" style="width: 100%;">
+                        <div id="customOverpassEndpointContainer" class="main-controls-row main-controls-custom-endpoint" style="display: none;">
+                            <input type="url" id="customOverpassEndpoint" class="main-controls-input-wide" placeholder="https://example.com/api/interpreter">
                             <button id="useCustomOverpassEndpointButton" type="button">Use endpoint</button>
                         </div>
-                        <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                            <label for="exportFormatSelect" style="flex: 1;">Route Solver:</label>
+                        <div class="main-controls-row">
+                            <label for="exportFormatSelect">Route Solver:</label>
                             <select id="exportFormatSelect">
                                 <option value="windy_rural_benavent">Windy Rural (Benavent)</option>
                                 <option value="windy_rural_win">Windy Rural (Win)</option>
@@ -328,54 +328,55 @@ export class MapManager {
                                 <option value="directed">Directed</option>
                             </select>
                         </div>
-                        <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                            <label for="allowNavigationPastBoundary" style="flex: 1;">Allow navigation past boundary</label>
+                        <div class="main-controls-row">
+                            <label for="allowNavigationPastBoundary">Allow navigation past boundary</label>
                             <input type="checkbox" id="allowNavigationPastBoundary">
                         </div>
-                        <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                            <label for="boundaryBuffer" style="flex: 1;">Boundary buffer (meters):</label>
-                            <input type="number" id="boundaryBuffer" min="1" max="2000" value="500" style="width: 80px;">
+                        <div class="main-controls-row">
+                            <label for="boundaryBuffer">Boundary buffer (meters):</label>
+                            <input type="number" id="boundaryBuffer" class="main-controls-number" min="1" max="2000" value="500">
                         </div>
-                        <div id="filterMapillaryContainer" style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                            <label for="filterMapillaryCoverage" style="flex: 1;">Skip route sections with street-level coverage*</label>
+                        <div id="filterMapillaryContainer" class="main-controls-row">
+                            <label for="filterMapillaryCoverage">Skip route sections with street-level coverage*</label>
                             <input type="checkbox" id="filterMapillaryCoverage">
                         </div>
-                        <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                            <label for="coverageThreshold" style="flex: 1;">Coverage threshold (%):</label>
-                            <input type="number" id="coverageThreshold" min="0" max="100" value="80" style="width: 80px;">
+                        <div class="main-controls-row">
+                            <label for="coverageThreshold">Coverage threshold (%):</label>
+                            <input type="number" id="coverageThreshold" class="main-controls-number" min="0" max="100" value="80">
                         </div>
-                        <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                            <label for="proximityThreshold" style="flex: 1;">Proximity threshold (meters):</label>
-                            <input type="number" id="proximityThreshold" min="1" max="100" value="20" style="width: 80px;">
+                        <div class="main-controls-row">
+                            <label for="proximityThreshold">Proximity threshold (meters):</label>
+                            <input type="number" id="proximityThreshold" class="main-controls-number" min="1" max="100" value="20">
                         </div>
-                        <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                            <label for="navigationFilter" style="flex: 1;">Navigation filter:</label>
-                            <input type="text" id="navigationFilter" style="width: 100%; margin-left: 10px;" value='[highway][area!~"yes"][highway!~"bridleway|bus_guideway|construction|corridor|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path|steps"][access!~"customers|no|private"][public_transport!~"platform"][fee!~"yes"][service!~"drive-through|driveway|parking_aisle"][toll!~"yes"]'>
+                        <div class="main-controls-row main-controls-long-field">
+                            <label for="navigationFilter">Navigation filter:</label>
+                            <input type="text" id="navigationFilter" class="main-controls-input-wide" value='[highway][area!~"yes"][highway!~"bridleway|bus_guideway|construction|corridor|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path|steps"][access!~"customers|no|private"][public_transport!~"platform"][fee!~"yes"][service!~"drive-through|driveway|parking_aisle"][toll!~"yes"]'>
                         </div>
-                        <div id="routeFilterContainer" style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
-                            <label for="routeFilter" style="flex: 1;">Route filter:</label>
-                            <input type="text" id="routeFilter" style="width: 100%; margin-left: 10px;" value=''>
+                        <div id="routeFilterContainer" class="main-controls-row main-controls-long-field">
+                            <label for="routeFilter">Route filter:</label>
+                            <input type="text" id="routeFilter" class="main-controls-input-wide" value=''>
                         </div>
                         <!-- routeLength moved to a right-side stats panel for less clutter -->
                     </div>
                 </div>
             `;
-            L.DomEvent.disableClickPropagation(div); // Prevent map interactions when interacting with the controls
-            
-            // Store references to the controls and toggle button
-            this.toggleMainMenuButton = div.querySelector('#toggleMainMenuButton');
-            const menuContent = div.querySelector('#mainMenuContent');
-            if (this.toggleMainMenuButton) {
-                this.toggleMainMenuButton.setAttribute('aria-controls', 'mainMenuContent');
-                this.toggleMainMenuButton.setAttribute('aria-expanded', 'true');
-                this.toggleMainMenuButton.addEventListener('click', () => this.toggleMainMenu());
-            }
-            this.controlsDiv = menuContent;
-            
-            return div;
-        };
 
-        this.controlsContainer.addTo(this.map);
+        // Store references to the controls and toggle button
+        this.toggleMainMenuButton = div.querySelector('#toggleMainMenuButton');
+        const menuContent = div.querySelector('#mainMenuContent');
+        if (this.toggleMainMenuButton) {
+            this.toggleMainMenuButton.setAttribute('aria-controls', 'mainMenuContent');
+            this.toggleMainMenuButton.setAttribute('aria-expanded', 'true');
+            this.toggleMainMenuButton.addEventListener('click', () => this.toggleMainMenu());
+        }
+        this.controlsDiv = menuContent;
+        this.controlsContainer = div;
+
+        if (controlsSidebar) {
+            controlsSidebar.replaceChildren(div);
+        }
+
+        setTimeout(() => this.map.invalidateSize(), 0);
         this.setupOverpassEndpointControl();
 
         // Show/enable the Mapillary coverage filter only for Windy Rural export formats
@@ -534,7 +535,7 @@ export class MapManager {
         }
 
         if (this.mainMenuHidden) {
-            this.controlsDiv.style.display = 'block';
+            this.controlsDiv.style.display = '';
             this.toggleMainMenuButton.textContent = '▾';
             this.toggleMainMenuButton.setAttribute('aria-expanded', 'true');
         } else {

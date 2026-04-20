@@ -58,7 +58,12 @@
 </head>
 
 <body>
-    <div id="map"></div>
+    <div id="appLayout">
+        <aside id="controlsSidebar" class="controls-sidebar" aria-label="Route controls"></aside>
+        <main id="mapShell" class="map-shell">
+            <div id="map"></div>
+        </main>
+    </div>
     
     <!-- File Upload Input (hidden) -->
     <input type="file" id="overpassUploadInput" accept=".json" style="display: none;">

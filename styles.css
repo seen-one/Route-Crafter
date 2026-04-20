@@ -5,10 +5,38 @@ body {
     margin: 0;
     padding: 0;
     height: 100%;
+    overflow: hidden;
+}
+
+#appLayout {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    width: 100%;
+}
+
+.controls-sidebar {
+    flex: 0 0 360px;
+    width: 360px;
+    max-width: 42vw;
+    min-height: 0;
+    overflow: hidden;
+    background: #fff;
+    border-right: 1px solid #d8d8d8;
+    box-shadow: 2px 0 12px rgba(0,0,0,0.12);
+    z-index: 500;
+}
+
+.map-shell {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    position: relative;
 }
 
 #map {
     height: 100%;
+    width: 100%;
     /* Make the map fill the entire viewport */
 }
 
@@ -365,6 +393,142 @@ button:hover {
     box-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
 
+/* Main controls sidebar */
+.main-controls-shell {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+}
+
+.main-controls-panel,
+.main-controls-panel div {
+    box-sizing: border-box;
+}
+
+#mainControlsDiv.main-controls-panel {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 12px;
+    color: #222;
+    background: #fff;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+}
+
+.main-controls-panel button,
+.main-controls-panel input,
+.main-controls-panel select,
+.main-controls-panel label {
+    box-sizing: border-box;
+    margin: 0;
+    font-size: 13px;
+}
+
+.main-controls-panel button {
+    padding: 7px 9px;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.main-controls-panel input,
+.main-controls-panel select {
+    min-width: 0;
+    padding: 7px 8px;
+}
+
+.main-controls-panel input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+}
+
+.main-controls-panel .main-controls-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 0 8px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.main-controls-search {
+    flex: 1 1 auto;
+    width: 100%;
+}
+
+.main-controls-toggle {
+    flex: 0 0 32px;
+    width: 32px;
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.main-controls-panel .main-controls-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+    margin-top: 8px;
+    padding: 0 4px 0 0;
+    overflow-y: auto;
+}
+
+.main-controls-panel .main-controls-select-action,
+.main-controls-panel .main-controls-actions,
+.main-controls-panel .main-controls-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+}
+
+.main-controls-select-action select,
+.main-controls-input-wide {
+    flex: 1 1 auto;
+    width: 100%;
+}
+
+.main-controls-actions {
+    flex-wrap: wrap;
+}
+
+.main-controls-actions button {
+    flex: 1 1 100px;
+}
+
+.main-controls-row label {
+    flex: 1 1 48%;
+    line-height: 1.25;
+}
+
+.main-controls-row select,
+.main-controls-row input[type="text"],
+.main-controls-row input[type="url"] {
+    flex: 1 1 52%;
+}
+
+.main-controls-number {
+    flex: 0 0 84px;
+    width: 84px;
+}
+
+.main-controls-long-field {
+    align-items: stretch;
+    flex-direction: column;
+}
+
+.main-controls-long-field label,
+.main-controls-long-field input {
+    width: 100%;
+}
+
+.main-controls-custom-endpoint button {
+    flex: 0 0 auto;
+}
+
 /* Right-side statistics panel */
 .stats-panel {
     z-index: 1000;
@@ -557,6 +721,127 @@ button:hover {
     /* Hide statistics when empty */
     #routeLength:empty {
         display: none;
+    }
+
+    #appLayout {
+        display: block;
+    }
+
+    .map-shell,
+    #map {
+        height: 100%;
+        width: 100%;
+    }
+
+    .controls-sidebar {
+        position: fixed;
+        right: 8px;
+        bottom: 8px;
+        left: 8px;
+        width: auto;
+        max-width: none;
+        height: auto;
+        min-height: 0;
+        margin: 0;
+        overflow: visible;
+        z-index: 1001;
+        background: transparent;
+        border-right: 0;
+        box-shadow: none;
+    }
+
+    .main-controls-panel,
+    .main-controls-panel div {
+        font-size: 12px;
+        background: transparent;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    #mainControlsDiv.main-controls-panel {
+        width: 100%;
+        height: auto;
+        max-width: none;
+        max-height: 62vh;
+        padding: 8px;
+        background: rgba(255, 255, 255, 0.98);
+        border: 1px solid #d8d8d8;
+        border-radius: 8px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    }
+
+    .main-controls-panel .main-controls-content {
+        max-height: calc(62vh - 56px);
+        gap: 6px;
+        margin-top: 6px;
+        padding: 0 3px 0 0;
+    }
+
+    .main-controls-panel .main-controls-header {
+        gap: 5px;
+        padding-bottom: 6px;
+    }
+
+    .main-controls-panel button,
+    .main-controls-panel input,
+    .main-controls-panel select {
+        margin: 0;
+        font-size: 12px;
+        padding: 6px 8px;
+    }
+
+    .main-controls-panel label {
+        margin: 0;
+        font-size: 11px;
+    }
+
+    .main-controls-panel input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        padding: 0;
+    }
+
+    .main-controls-panel .main-controls-select-action,
+    .main-controls-panel .main-controls-row {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .main-controls-row label {
+        flex: 1 1 150px;
+    }
+
+    .main-controls-row select,
+    .main-controls-row input[type="text"],
+    .main-controls-row input[type="url"] {
+        flex: 1 1 150px;
+    }
+
+    .main-controls-long-field {
+        align-items: center;
+        flex-direction: row;
+        flex-wrap: nowrap;
+    }
+
+    .main-controls-long-field label {
+        flex: 0 0 92px;
+        width: auto;
+    }
+
+    .main-controls-long-field input {
+        flex: 1 1 auto;
+        width: auto;
+        min-width: 0;
+        height: 30px;
+    }
+
+    .main-controls-number {
+        flex-basis: 78px;
+        width: 78px;
+    }
+
+    .main-controls-actions button {
+        flex-basis: 92px;
     }
 
 }
