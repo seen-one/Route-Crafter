@@ -267,7 +267,7 @@ export class MapManager {
                     <div class="main-controls-header">
                         <input type="text" id="searchBox" class="main-controls-search" placeholder="Search Map">
                         <button id="searchButton">Search</button>
-                        <button id="toggleMainMenuButton" class="main-controls-toggle" aria-controls="mainMenuContent" aria-expanded="true">▾</button>
+                        <button id="toggleMainMenuButton" class="main-controls-toggle" aria-controls="mainMenuContent" aria-expanded="true">Hide Menu</button>
                     </div>
                     <div id="mainMenuContent" class="main-controls-content">
                         <div class="main-controls-select-action">
@@ -362,7 +362,7 @@ export class MapManager {
                 </div>
             `;
 
-        // Store references to the controls and toggle button
+        // Store references to the main controls content and mobile collapse button.
         this.toggleMainMenuButton = div.querySelector('#toggleMainMenuButton');
         const menuContent = div.querySelector('#mainMenuContent');
         if (this.toggleMainMenuButton) {
@@ -462,6 +462,25 @@ export class MapManager {
             return div;
         };
         this.statsContainer.addTo(this.map);
+    }
+
+    toggleMainMenu() {
+        if (!this.controlsDiv || !this.toggleMainMenuButton) {
+            return;
+        }
+
+        if (this.mainMenuHidden) {
+            this.controlsDiv.style.display = '';
+            this.toggleMainMenuButton.textContent = 'Hide Menu';
+            this.toggleMainMenuButton.setAttribute('aria-expanded', 'true');
+        } else {
+            this.controlsDiv.style.display = 'none';
+            this.toggleMainMenuButton.textContent = 'Show Menu';
+            this.toggleMainMenuButton.setAttribute('aria-expanded', 'false');
+        }
+
+        this.mainMenuHidden = !this.mainMenuHidden;
+        this.map.invalidateSize();
     }
 
     setupSidebarResize(sidebar, resizeHandle) {
@@ -608,24 +627,6 @@ export class MapManager {
         });
 
         updateCustomEndpointVisibility();
-    }
-
-    toggleMainMenu() {
-        if (!this.controlsDiv || !this.toggleMainMenuButton) {
-            return;
-        }
-
-        if (this.mainMenuHidden) {
-            this.controlsDiv.style.display = '';
-            this.toggleMainMenuButton.textContent = '▾';
-            this.toggleMainMenuButton.setAttribute('aria-expanded', 'true');
-        } else {
-            this.controlsDiv.style.display = 'none';
-            this.toggleMainMenuButton.textContent = '▴';
-            this.toggleMainMenuButton.setAttribute('aria-expanded', 'false');
-        }
-
-        this.mainMenuHidden = !this.mainMenuHidden;
     }
 
     setupDrawing() {

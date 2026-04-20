@@ -497,10 +497,7 @@ button:hover {
 }
 
 .main-controls-toggle {
-    flex: 0 0 32px;
-    width: 32px;
-    padding-right: 0;
-    padding-left: 0;
+    display: none;
 }
 
 .main-controls-panel .main-controls-content {
@@ -822,6 +819,11 @@ button:hover {
     .main-controls-panel .main-controls-header {
         gap: 5px;
         padding-bottom: 6px;
+    }
+
+    .main-controls-toggle {
+        display: inline-block;
+        flex: 0 0 auto;
     }
 
     .main-controls-panel button,
