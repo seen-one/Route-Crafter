@@ -25,6 +25,16 @@ export class RoadProcessor {
             return true; // Empty filter matches everything
         }
         
+        // Split by OR to support union logic
+        // Handle " OR ", " or ", " || " as delimiters
+        const filterGroups = filterString.split(/\s+(?:OR|or|\|\|)\s+/);
+        
+        // If any group matches, the feature matches (OR logic)
+        return filterGroups.some(group => this.checkFeatureMatchesFilterGroup(feature, group));
+    }
+
+    // Helper to check a single AND group of conditions
+    checkFeatureMatchesFilterGroup(feature, filterString) {
         const props = feature.properties || {};
         
         // Parse the Overpass filter string
@@ -538,22 +548,46 @@ export class RoadProcessor {
             }
             
             // Use the navigation filter directly as Overpass QL format
-            let filterConditions = navigationFilter.trim();
-            if (!filterConditions) {
-                console.warn('No navigation filter provided, using default highway filter');
-                filterConditions = '[highway]';
-            }
+            // Support union logic by splitting on " OR "
+            const navigationFilterRaw = navigationFilter.trim();
+            const filterParts = navigationFilterRaw ? navigationFilterRaw.split(/\s+(?:OR|or|\|\|)\s+/) : [];
             
             // Convert polygon to Overpass poly format (use queryPolygon for fetching)
             const polyString = this.polygonToOverpassPoly(queryPolygon);
             
-            // Create Overpass query using poly filter for precise polygon filtering
-            const overpassQuery = `
-                [out:json][timeout:30];
+            let queryBody = '';
+            
+            if (filterParts.length > 1) {
+                // Union query: (way[...](poly); way[...](poly);)
+                const unionBody = filterParts.map(part => {
+                    const condition = part.trim();
+                    if (!condition) return '';
+                    return `way${condition}(poly:"${polyString}");`;
+                }).join('\n                    ');
+                
+                queryBody = `
+                (
+                    ${unionBody}
+                );`;
+            } else {
+                // Standard single query
+                let filterConditions = navigationFilterRaw;
+                if (!filterConditions) {
+                    console.warn('No navigation filter provided, using default highway filter');
+                    filterConditions = '[highway]';
+                }
+                
+                queryBody = `
                 (
                     way${filterConditions}
                     (poly:"${polyString}");
-                );
+                );`;
+            }
+            
+            // Create Overpass query using poly filter for precise polygon filtering
+            const overpassQuery = `
+                [out:json][timeout:30];
+                ${queryBody}
                 (._;>;);
                 out body;
             `;
