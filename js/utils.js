@@ -9,15 +9,15 @@ export const OVERPASS_ENDPOINT_GROUPS = [
         label: 'Global',
         endpoints: [
             {
-                label: 'Main Overpass API instance',
+                label: 'Main Overpass API instance (DE)',
                 url: DEFAULT_OVERPASS_ENDPOINT
             },
             {
-                label: 'Private.coffee Overpass Instance',
+                label: 'Private.coffee Overpass Instance (AT)',
                 url: 'https://overpass.private.coffee/api/interpreter'
             },
             {
-                label: 'VK Maps Overpass API instance (Russia, temporarily suspended)',
+                label: 'VK Maps Overpass API instance (RU)',
                 url: 'https://maps.mail.ru/osm/tools/overpass/api/interpreter'
             }
         ]
@@ -30,7 +30,7 @@ export const OVERPASS_ENDPOINT_GROUPS = [
                 url: 'https://overpass.osm.ch/api/interpreter'
             },
             {
-                label: 'Britain and Ireland Overpass Instance',
+                label: 'Britain and Ireland Overpass Instance (IPv6 only)',
                 url: 'https://overpass.atownsend.org.uk/api/'
             },
             {
