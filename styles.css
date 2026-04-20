@@ -483,6 +483,53 @@ button:hover {
     padding: 0;
 }
 
+.main-controls-panel .sidebar-brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 0 10px;
+    margin: 0 0 8px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.sidebar-brand-main {
+    min-width: 0;
+}
+
+.sidebar-brand-title {
+    color: #111;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.sidebar-brand-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 3px;
+    font-size: 12px;
+    line-height: 1.2;
+}
+
+.sidebar-brand-version {
+    color: #666;
+    font-weight: 600;
+}
+
+.sidebar-brand-link {
+    color: #007bff;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.sidebar-brand-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
 .main-controls-panel .main-controls-header {
     display: flex;
     align-items: center;
@@ -814,6 +861,10 @@ button:hover {
         gap: 6px;
         margin-top: 6px;
         padding: 0 3px 0 0;
+    }
+
+    .main-controls-panel .sidebar-brand {
+        display: none;
     }
 
     .main-controls-panel .main-controls-header {

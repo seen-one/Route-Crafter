@@ -264,6 +264,15 @@ export class MapManager {
         const overpassEndpointOptions = this.getOverpassEndpointOptionsHtml();
         div.innerHTML = `
                 <div id="mainControlsDiv" class="main-controls-panel">
+                    <div class="sidebar-brand" aria-label="Route Crafter application information">
+                        <div class="sidebar-brand-main">
+                            <div class="sidebar-brand-title">Route Crafter</div>
+                            <div class="sidebar-brand-meta">
+                                <span class="sidebar-brand-version">v0.3.0</span>
+                                <a class="sidebar-brand-link" href="https://github.com/seen-one/Route-Crafter" target="_blank" rel="noopener">GitHub</a>
+                            </div>
+                        </div>
+                    </div>
                     <div class="main-controls-header">
                         <input type="text" id="searchBox" class="main-controls-search" placeholder="Search Map">
                         <button id="searchButton">Search</button>
@@ -555,6 +564,24 @@ export class MapManager {
                 }
             }
         });
+
+        const showMenuWhenReturningToSidebar = () => {
+            if (mobileQuery.matches || !this.mainMenuHidden || !this.controlsDiv || !this.toggleMainMenuButton) {
+                return;
+            }
+
+            this.controlsDiv.style.display = '';
+            this.toggleMainMenuButton.textContent = 'Hide Menu';
+            this.toggleMainMenuButton.setAttribute('aria-expanded', 'true');
+            this.mainMenuHidden = false;
+            this.map.invalidateSize();
+        };
+
+        if (typeof mobileQuery.addEventListener === 'function') {
+            mobileQuery.addEventListener('change', showMenuWhenReturningToSidebar);
+        } else if (typeof mobileQuery.addListener === 'function') {
+            mobileQuery.addListener(showMenuWhenReturningToSidebar);
+        }
     }
 
     getOverpassEndpointOptionsHtml() {

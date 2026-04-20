@@ -9,6 +9,9 @@ import { GraphBuilder } from './graph-builder.js';
 import { SolutionVisualizer } from './solution-visualizer.js';
 import { stopSpinner } from './utils.js';
 
+const APP_ATTRIBUTION_PREFIX = 'Route Crafter v0.3.0 <a href="https://github.com/seen-one/Route-Crafter" target="_blank">GitHub</a>';
+const MOBILE_FLOATING_CONTROLS_QUERY = '(max-width: 600px), (max-height: 450px) and (orientation: landscape)';
+
 export class RouteCrafterApp {
     constructor() {
         this.mapManager = null;
@@ -18,6 +21,7 @@ export class RouteCrafterApp {
         this.roadProcessor = null;
         this.graphBuilder = null;
         this.solutionVisualizer = null;
+        this.defaultAttributionPrefix = null;
         
         // Coordinate mappings (shared state across modules)
         this.coordinateToNodeIdMap = new Map();
@@ -57,11 +61,31 @@ export class RouteCrafterApp {
         
         // Initialize coverage layers
         this.coverageManager.initializeLayers();
-        
-        // Setup attribution
-        this.mapManager.getMap().attributionControl.setPrefix(
-            `Route Crafter v0.3.0 <a href="https://github.com/seen-one/Route-Crafter" target="_blank">GitHub</a> | ${this.mapManager.getMap().attributionControl.options.prefix}`
-        );
+
+        // Keep app identity in the map attribution only when the sidebar becomes mobile floating controls.
+        this.setupResponsiveAttribution();
+    }
+
+    setupResponsiveAttribution() {
+        const attributionControl = this.mapManager.getMap().attributionControl;
+        this.defaultAttributionPrefix = attributionControl.options.prefix;
+        const mobileControlsQuery = window.matchMedia(MOBILE_FLOATING_CONTROLS_QUERY);
+
+        const updateAttributionPrefix = () => {
+            const prefix = mobileControlsQuery.matches
+                ? `${APP_ATTRIBUTION_PREFIX} | ${this.defaultAttributionPrefix}`
+                : this.defaultAttributionPrefix;
+
+            attributionControl.setPrefix(prefix);
+        };
+
+        updateAttributionPrefix();
+
+        if (typeof mobileControlsQuery.addEventListener === 'function') {
+            mobileControlsQuery.addEventListener('change', updateAttributionPrefix);
+        } else if (typeof mobileControlsQuery.addListener === 'function') {
+            mobileControlsQuery.addListener(updateAttributionPrefix);
+        }
     }
 
     setupEventListeners() {
