@@ -27,8 +27,9 @@ export class MapManager {
         this.depotMarker = null;
         this.selectedDepotId = null;
         this.vertexMarkers = [];
-    this.toggleMainMenuButton = null;
-    this.mainMenuHidden = false;
+        this.toggleMainMenuButton = null;
+        this.mainMenuHidden = false;
+        this.sidebarResizeFrame = null;
         
         this.init();
     }
@@ -373,7 +374,13 @@ export class MapManager {
         this.controlsContainer = div;
 
         if (controlsSidebar) {
-            controlsSidebar.replaceChildren(div);
+            const resizeHandle = document.createElement('div');
+            resizeHandle.className = 'controls-sidebar-resize-handle';
+            resizeHandle.setAttribute('role', 'separator');
+            resizeHandle.setAttribute('aria-orientation', 'vertical');
+            resizeHandle.setAttribute('aria-label', 'Resize controls sidebar');
+            controlsSidebar.replaceChildren(div, resizeHandle);
+            this.setupSidebarResize(controlsSidebar, resizeHandle);
         }
 
         setTimeout(() => this.map.invalidateSize(), 0);
@@ -455,6 +462,80 @@ export class MapManager {
             return div;
         };
         this.statsContainer.addTo(this.map);
+    }
+
+    setupSidebarResize(sidebar, resizeHandle) {
+        const storageKey = 'routeCrafterSidebarWidth';
+        const minWidth = 280;
+        const maxWidth = 560;
+        const mobileQuery = window.matchMedia('(max-width: 600px), (max-height: 450px) and (orientation: landscape)');
+
+        const clampWidth = (width) => {
+            const viewportMax = Math.max(minWidth, Math.min(maxWidth, Math.round(window.innerWidth * 0.55)));
+            return Math.min(Math.max(width, minWidth), viewportMax);
+        };
+
+        const applyWidth = (width, persist = true) => {
+            const nextWidth = clampWidth(width);
+            document.documentElement.style.setProperty('--controls-sidebar-width', `${nextWidth}px`);
+
+            if (persist) {
+                localStorage.setItem(storageKey, String(nextWidth));
+            }
+
+            if (this.sidebarResizeFrame) {
+                cancelAnimationFrame(this.sidebarResizeFrame);
+            }
+
+            this.sidebarResizeFrame = requestAnimationFrame(() => {
+                this.map.invalidateSize();
+                this.sidebarResizeFrame = null;
+            });
+        };
+
+        const storedWidth = Number(localStorage.getItem(storageKey));
+        if (Number.isFinite(storedWidth) && storedWidth > 0) {
+            applyWidth(storedWidth, false);
+        }
+
+        const startResize = (event) => {
+            if (mobileQuery.matches) {
+                return;
+            }
+
+            event.preventDefault();
+            document.body.classList.add('resizing-controls-sidebar');
+
+            const onPointerMove = (moveEvent) => {
+                applyWidth(moveEvent.clientX);
+            };
+
+            const stopResize = () => {
+                document.body.classList.remove('resizing-controls-sidebar');
+                window.removeEventListener('pointermove', onPointerMove);
+                window.removeEventListener('pointerup', stopResize);
+                window.removeEventListener('pointercancel', stopResize);
+            };
+
+            window.addEventListener('pointermove', onPointerMove);
+            window.addEventListener('pointerup', stopResize);
+            window.addEventListener('pointercancel', stopResize);
+        };
+
+        resizeHandle.addEventListener('pointerdown', startResize);
+        resizeHandle.addEventListener('dblclick', () => {
+            localStorage.removeItem(storageKey);
+            applyWidth(360, false);
+        });
+
+        window.addEventListener('resize', () => {
+            if (!mobileQuery.matches) {
+                const currentWidth = parseInt(getComputedStyle(sidebar).width, 10);
+                if (Number.isFinite(currentWidth)) {
+                    applyWidth(currentWidth, false);
+                }
+            }
+        });
     }
 
     getOverpassEndpointOptionsHtml() {
