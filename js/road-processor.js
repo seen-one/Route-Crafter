@@ -1,6 +1,6 @@
 // Road fetching and processing module
 
-import { stopSpinner } from './utils.js';
+import { getSelectedOverpassEndpoint, stopSpinner } from './utils.js';
 
 export class RoadProcessor {
     constructor(mapManager, areaManager, coverageManager) {
@@ -595,8 +595,7 @@ export class RoadProcessor {
             // Minify query to reduce URL length
             const minifiedQuery = this.minifyOverpassQuery(overpassQuery);
 
-            
-            const overpassEndpoint = 'https://overpass-api.de/api/interpreter';
+            const overpassEndpoint = getSelectedOverpassEndpoint();
 
             fetch(overpassEndpoint, {
                 method: 'POST',

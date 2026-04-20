@@ -1,6 +1,16 @@
 // Map initialization and controls module
 
-import { generateServiceUrl, debounce } from './utils.js';
+import {
+    CUSTOM_OVERPASS_ENDPOINT_VALUE,
+    OVERPASS_ENDPOINT_GROUPS,
+    debounce,
+    generateServiceUrl,
+    getOverpassEndpointPresets,
+    getStoredOverpassEndpoint,
+    isValidOverpassEndpoint,
+    normalizeOverpassEndpoint,
+    saveOverpassEndpoint
+} from './utils.js';
 
 export class MapManager {
     constructor() {
@@ -251,6 +261,7 @@ export class MapManager {
 
         this.controlsContainer.onAdd = () => {
             const div = L.DomUtil.create('div', 'leaflet-bar');
+            const overpassEndpointOptions = this.getOverpassEndpointOptionsHtml();
             div.innerHTML = `
                 <div id="mainControlsDiv" style="padding: 5px; background: white;">
                     <div style="display:flex; align-items:center; gap:6px;">
@@ -295,6 +306,16 @@ export class MapManager {
                         <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
                             <label for="truncateByEdge" style="flex: 1;">Trim roads to polygon boundary</label>
                             <input type="checkbox" id="truncateByEdge" checked>
+                        </div>
+                        <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
+                            <label for="overpassEndpointSelect" style="flex: 1;">Overpass endpoint:</label>
+                            <select id="overpassEndpointSelect" style="width: 100%; margin-left: 10px;">
+                                ${overpassEndpointOptions}
+                            </select>
+                        </div>
+                        <div id="customOverpassEndpointContainer" style="display: none; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
+                            <input type="url" id="customOverpassEndpoint" placeholder="https://example.com/api/interpreter" style="width: 100%;">
+                            <button id="useCustomOverpassEndpointButton" type="button">Use endpoint</button>
                         </div>
                         <div style="display: flex; align-items: center; margin: 0; padding: 0; box-shadow: none; border: none; background: none;">
                             <label for="exportFormatSelect" style="flex: 1;">Route Solver:</label>
@@ -355,6 +376,7 @@ export class MapManager {
         };
 
         this.controlsContainer.addTo(this.map);
+        this.setupOverpassEndpointControl();
 
         // Show/enable the Mapillary coverage filter only for Windy Rural export formats
         setTimeout(() => {
@@ -432,6 +454,78 @@ export class MapManager {
             return div;
         };
         this.statsContainer.addTo(this.map);
+    }
+
+    getOverpassEndpointOptionsHtml() {
+        const endpointOptions = OVERPASS_ENDPOINT_GROUPS.map(group => {
+            const options = group.endpoints.map(endpoint => {
+                return `<option value="${endpoint.url}">${endpoint.label}</option>`;
+            }).join('');
+
+            return `<optgroup label="${group.label}">${options}</optgroup>`;
+        }).join('');
+
+        return `
+            ${endpointOptions}
+            <optgroup label="Custom">
+                <option value="${CUSTOM_OVERPASS_ENDPOINT_VALUE}">Custom endpoint...</option>
+            </optgroup>
+        `;
+    }
+
+    setupOverpassEndpointControl() {
+        const endpointSelect = document.getElementById('overpassEndpointSelect');
+        const customEndpointContainer = document.getElementById('customOverpassEndpointContainer');
+        const customEndpointInput = document.getElementById('customOverpassEndpoint');
+        const customEndpointButton = document.getElementById('useCustomOverpassEndpointButton');
+
+        if (!endpointSelect || !customEndpointContainer || !customEndpointInput || !customEndpointButton) {
+            return;
+        }
+
+        const storedEndpoint = getStoredOverpassEndpoint();
+        const matchingPreset = getOverpassEndpointPresets().find(endpoint => {
+            return normalizeOverpassEndpoint(endpoint.url) === storedEndpoint;
+        });
+
+        if (matchingPreset) {
+            endpointSelect.value = matchingPreset.url;
+        } else {
+            endpointSelect.value = CUSTOM_OVERPASS_ENDPOINT_VALUE;
+            customEndpointInput.value = storedEndpoint;
+        }
+
+        const updateCustomEndpointVisibility = () => {
+            customEndpointContainer.style.display = endpointSelect.value === CUSTOM_OVERPASS_ENDPOINT_VALUE ? 'flex' : 'none';
+        };
+
+        endpointSelect.addEventListener('change', () => {
+            updateCustomEndpointVisibility();
+
+            if (endpointSelect.value !== CUSTOM_OVERPASS_ENDPOINT_VALUE) {
+                saveOverpassEndpoint(endpointSelect.value);
+            }
+        });
+
+        customEndpointButton.addEventListener('click', () => {
+            const customEndpoint = customEndpointInput.value.trim();
+
+            if (!isValidOverpassEndpoint(customEndpoint)) {
+                alert('Please enter a valid Overpass endpoint URL that starts with http:// or https://.');
+                return;
+            }
+
+            customEndpointInput.value = saveOverpassEndpoint(customEndpoint);
+        });
+
+        customEndpointInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                customEndpointButton.click();
+            }
+        });
+
+        updateCustomEndpointVisibility();
     }
 
     toggleMainMenu() {

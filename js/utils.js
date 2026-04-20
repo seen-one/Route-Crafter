@@ -1,5 +1,134 @@
 // Utility functions for Route Crafter
 
+export const DEFAULT_OVERPASS_ENDPOINT = 'https://overpass-api.de/api/interpreter';
+export const CUSTOM_OVERPASS_ENDPOINT_VALUE = '__custom_overpass_endpoint__';
+export const OVERPASS_ENDPOINT_STORAGE_KEY = 'routeCrafter.overpassEndpoint';
+
+export const OVERPASS_ENDPOINT_GROUPS = [
+    {
+        label: 'Global',
+        endpoints: [
+            {
+                label: 'Main Overpass API instance',
+                url: DEFAULT_OVERPASS_ENDPOINT
+            },
+            {
+                label: 'Private.coffee Overpass Instance',
+                url: 'https://overpass.private.coffee/api/interpreter'
+            },
+            {
+                label: 'VK Maps Overpass API instance (Russia, temporarily suspended)',
+                url: 'https://maps.mail.ru/osm/tools/overpass/api/interpreter'
+            }
+        ]
+    },
+    {
+        label: 'Regional',
+        endpoints: [
+            {
+                label: 'Swiss Overpass API instance (Switzerland only)',
+                url: 'https://overpass.osm.ch/api/interpreter'
+            },
+            {
+                label: 'Britain and Ireland Overpass Instance',
+                url: 'https://overpass.atownsend.org.uk/api/'
+            },
+            {
+                label: 'MapRVA Overpass server (Virginia only)',
+                url: 'https://overpass.maprva.org/api/interpreter'
+            },
+            {
+                label: 'Ethiopia Overpass Server (Ethiopia only)',
+                url: 'https://ethiopia.overpass.openplaceguide.org/api/interpreter'
+            }
+        ]
+    }
+];
+
+export function normalizeOverpassEndpoint(endpoint) {
+    const rawEndpoint = (endpoint || '').trim();
+
+    if (!rawEndpoint) {
+        return DEFAULT_OVERPASS_ENDPOINT;
+    }
+
+    try {
+        const url = new URL(rawEndpoint);
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+            return DEFAULT_OVERPASS_ENDPOINT;
+        }
+
+        while (url.pathname.length > 1 && url.pathname.endsWith('/')) {
+            url.pathname = url.pathname.slice(0, -1);
+        }
+
+        if (url.pathname === '/api') {
+            url.pathname = '/api/interpreter';
+        }
+
+        url.search = '';
+        url.hash = '';
+
+        return url.toString();
+    } catch (error) {
+        return DEFAULT_OVERPASS_ENDPOINT;
+    }
+}
+
+export function isValidOverpassEndpoint(endpoint) {
+    const rawEndpoint = (endpoint || '').trim();
+
+    if (!rawEndpoint) {
+        return false;
+    }
+
+    try {
+        const url = new URL(rawEndpoint);
+        return (url.protocol === 'http:' || url.protocol === 'https:') && Boolean(url.host);
+    } catch (error) {
+        return false;
+    }
+}
+
+export function getStoredOverpassEndpoint() {
+    try {
+        return normalizeOverpassEndpoint(localStorage.getItem(OVERPASS_ENDPOINT_STORAGE_KEY));
+    } catch (error) {
+        return DEFAULT_OVERPASS_ENDPOINT;
+    }
+}
+
+export function saveOverpassEndpoint(endpoint) {
+    const normalizedEndpoint = normalizeOverpassEndpoint(endpoint);
+
+    try {
+        localStorage.setItem(OVERPASS_ENDPOINT_STORAGE_KEY, normalizedEndpoint);
+    } catch (error) {
+        console.warn('Unable to save Overpass endpoint:', error);
+    }
+
+    return normalizedEndpoint;
+}
+
+export function getOverpassEndpointPresets() {
+    return OVERPASS_ENDPOINT_GROUPS.flatMap(group => group.endpoints);
+}
+
+export function getSelectedOverpassEndpoint() {
+    const endpointSelect = document.getElementById('overpassEndpointSelect');
+    const customEndpointInput = document.getElementById('customOverpassEndpoint');
+
+    if (!endpointSelect) {
+        return getStoredOverpassEndpoint();
+    }
+
+    if (endpointSelect.value === CUSTOM_OVERPASS_ENDPOINT_VALUE) {
+        return normalizeOverpassEndpoint(customEndpointInput ? customEndpointInput.value : '');
+    }
+
+    return normalizeOverpassEndpoint(endpointSelect.value);
+}
+
 /**
  * Calculate distance between two points using Haversine formula
  * @param {Array} point1 - [lat, lng]

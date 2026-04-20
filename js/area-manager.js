@@ -1,6 +1,6 @@
 // Area selection and management module
 
-import { stopSpinner } from './utils.js';
+import { getSelectedOverpassEndpoint, stopSpinner } from './utils.js';
 
 export class AreaManager {
     constructor(mapManager) {
@@ -179,9 +179,15 @@ export class AreaManager {
         
         // Minify query to reduce URL length
         const minifiedQuery = this.minifyOverpassQuery(overpassQuery);
-        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(minifiedQuery)}`;
+        const overpassEndpoint = getSelectedOverpassEndpoint();
         
-        fetch(url).then(response => {
+        fetch(overpassEndpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+            },
+            body: 'data=' + encodeURIComponent(minifiedQuery)
+        }).then(response => {
             if (!response.ok) {
                 let errorMessage = '';
                 switch (response.status) {
