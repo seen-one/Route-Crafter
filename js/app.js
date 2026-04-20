@@ -60,7 +60,7 @@ export class RouteCrafterApp {
         
         // Setup attribution
         this.mapManager.getMap().attributionControl.setPrefix(
-            `Route Crafter v0.2.1 <a href="https://github.com/seen-one/Route-Crafter" target="_blank">GitHub</a> | ${this.mapManager.getMap().attributionControl.options.prefix}`
+            `Route Crafter v0.3.0 <a href="https://github.com/seen-one/Route-Crafter" target="_blank">GitHub</a> | ${this.mapManager.getMap().attributionControl.options.prefix}`
         );
     }
 
