@@ -1,9 +1,5 @@
 /* Route Crafter Styles */
 
-:root {
-    --controls-sidebar-width: 460px;
-}
-
 html,
 body {
     margin: 0;
@@ -20,49 +16,14 @@ body {
 }
 
 .controls-sidebar {
-    flex: 0 0 var(--controls-sidebar-width);
-    width: var(--controls-sidebar-width);
-    min-width: 280px;
-    max-width: min(560px, 55vw);
+    flex: 0 0 460px;
+    width: 460px;
     min-height: 0;
     overflow: hidden;
     background: #fff;
     border-right: 1px solid #d8d8d8;
     box-shadow: 2px 0 12px rgba(0,0,0,0.12);
-    position: relative;
     z-index: 500;
-}
-
-.controls-sidebar-resize-handle {
-    position: absolute;
-    top: 0;
-    right: -5px;
-    bottom: 0;
-    width: 10px;
-    cursor: col-resize;
-    touch-action: none;
-    z-index: 2;
-}
-
-.controls-sidebar-resize-handle::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 4px;
-    bottom: 0;
-    width: 2px;
-    background: transparent;
-    transition: background-color 0.15s ease;
-}
-
-.controls-sidebar-resize-handle:hover::after,
-.resizing-controls-sidebar .controls-sidebar-resize-handle::after {
-    background: #007bff;
-}
-
-.resizing-controls-sidebar {
-    cursor: col-resize;
-    user-select: none;
 }
 
 .map-shell {
@@ -830,10 +791,6 @@ button:hover {
         background: transparent;
         border-right: 0;
         box-shadow: none;
-    }
-
-    .controls-sidebar-resize-handle {
-        display: none;
     }
 
     .main-controls-panel,
