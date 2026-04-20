@@ -696,32 +696,34 @@ export class MapManager {
             this.lastClickLatLng = e.latlng;
         }
         
-        const mapContainer = this.map.getContainer();
-        const rect = mapContainer.getBoundingClientRect();
-        
-        // Calculate position relative to the map container
+        // Calculate position in viewport coordinates. The menu is fixed-positioned
+        // outside the map so it stays correct when the map is shifted by the sidebar.
         let x, y;
         if (e.originalEvent) {
             if (e.originalEvent.touches && e.originalEvent.touches.length > 0) {
-                // For touch events
-                x = e.originalEvent.touches[0].clientX - rect.left;
-                y = e.originalEvent.touches[0].clientY - rect.top;
+                x = e.originalEvent.touches[0].clientX;
+                y = e.originalEvent.touches[0].clientY;
             } else {
-                // For mouse events
-                x = e.originalEvent.clientX - rect.left;
-                y = e.originalEvent.clientY - rect.top;
+                x = e.originalEvent.clientX;
+                y = e.originalEvent.clientY;
             }
         } else {
             // Fallback: convert latlng to screen coordinates
             const point = this.map.latLngToContainerPoint(e.latlng);
-            x = point.x;
-            y = point.y;
+            const rect = this.map.getContainer().getBoundingClientRect();
+            x = rect.left + point.x;
+            y = rect.top + point.y;
         }
         
-        // Position the context menu
+        this.contextMenu.style.display = 'block';
+        const menuRect = this.contextMenu.getBoundingClientRect();
+        x = Math.min(x, window.innerWidth - menuRect.width - 8);
+        y = Math.min(y, window.innerHeight - menuRect.height - 8);
+        x = Math.max(8, x);
+        y = Math.max(8, y);
+
         this.contextMenu.style.left = x + 'px';
         this.contextMenu.style.top = y + 'px';
-        this.contextMenu.style.display = 'block';
         this.contextMenuVisible = true;
     }
 
