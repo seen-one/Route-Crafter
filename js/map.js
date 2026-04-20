@@ -29,6 +29,8 @@ export class MapManager {
         this.vertexMarkers = [];
         this.toggleMainMenuButton = null;
         this.mainMenuHidden = false;
+        this.mobileControlsQuery = null;
+        this.controlsPanelResizeObserver = null;
         
         this.init();
     }
@@ -386,7 +388,11 @@ export class MapManager {
         }
 
         this.setupResponsiveMenuState();
-        setTimeout(() => this.map.invalidateSize(), 0);
+        this.setupMobileControlsOffset();
+        setTimeout(() => {
+            this.updateMobileControlsOffset();
+            this.map.invalidateSize();
+        }, 0);
         this.setupOverpassEndpointControl();
 
         // Show/enable the Mapillary coverage filter only for Windy Rural export formats
@@ -483,14 +489,22 @@ export class MapManager {
         }
 
         this.mainMenuHidden = !this.mainMenuHidden;
+        this.updateMobileControlsOffset();
+        requestAnimationFrame(() => this.updateMobileControlsOffset());
         this.map.invalidateSize();
     }
 
     setupResponsiveMenuState() {
-        const mobileQuery = window.matchMedia('(max-width: 600px), (max-height: 450px) and (orientation: landscape)');
+        const mobileQuery = this.getMobileControlsQuery();
 
         const showMenuWhenReturningToSidebar = () => {
             if (mobileQuery.matches || !this.mainMenuHidden || !this.controlsDiv || !this.toggleMainMenuButton) {
+                this.updateMobileControlsOffset();
+                this.map.invalidateSize();
+                requestAnimationFrame(() => {
+                    this.updateMobileControlsOffset();
+                    this.map.invalidateSize();
+                });
                 return;
             }
 
@@ -498,13 +512,60 @@ export class MapManager {
             this.toggleMainMenuButton.textContent = 'Hide Menu';
             this.toggleMainMenuButton.setAttribute('aria-expanded', 'true');
             this.mainMenuHidden = false;
+            this.updateMobileControlsOffset();
             this.map.invalidateSize();
+            requestAnimationFrame(() => {
+                this.updateMobileControlsOffset();
+                this.map.invalidateSize();
+            });
         };
 
         if (typeof mobileQuery.addEventListener === 'function') {
             mobileQuery.addEventListener('change', showMenuWhenReturningToSidebar);
         } else if (typeof mobileQuery.addListener === 'function') {
             mobileQuery.addListener(showMenuWhenReturningToSidebar);
+        }
+    }
+
+    setupMobileControlsOffset() {
+        const panel = document.getElementById('mainControlsDiv');
+
+        if (typeof ResizeObserver === 'function' && panel) {
+            this.controlsPanelResizeObserver = new ResizeObserver(() => {
+                this.updateMobileControlsOffset();
+            });
+            this.controlsPanelResizeObserver.observe(panel);
+        }
+
+        window.addEventListener('resize', () => {
+            this.updateMobileControlsOffset();
+            requestAnimationFrame(() => this.updateMobileControlsOffset());
+        });
+
+        this.updateMobileControlsOffset();
+    }
+
+    getMobileControlsQuery() {
+        if (!this.mobileControlsQuery) {
+            this.mobileControlsQuery = window.matchMedia('(max-width: 600px), (max-height: 450px) and (orientation: landscape)');
+        }
+
+        return this.mobileControlsQuery;
+    }
+
+    updateMobileControlsOffset() {
+        const root = document.documentElement;
+        const panel = document.getElementById('mainControlsDiv');
+        const mobileQuery = this.getMobileControlsQuery();
+
+        if (!panel || !mobileQuery.matches) {
+            root.style.removeProperty('--mobile-controls-menu-height');
+            return;
+        }
+
+        const height = Math.ceil(panel.getBoundingClientRect().height);
+        if (height > 0) {
+            root.style.setProperty('--mobile-controls-menu-height', `${height}px`);
         }
     }
 
