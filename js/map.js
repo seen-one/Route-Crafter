@@ -555,17 +555,21 @@ export class MapManager {
 
     updateMobileControlsOffset() {
         const root = document.documentElement;
-        const panel = document.getElementById('mainControlsDiv');
         const mobileQuery = this.getMobileControlsQuery();
 
-        if (!panel || !mobileQuery.matches) {
-            root.style.removeProperty('--mobile-controls-menu-height');
+        if (!mobileQuery.matches) {
+            root.style.removeProperty('--mobile-leaflet-footer-height');
             return;
         }
 
-        const height = Math.ceil(panel.getBoundingClientRect().height);
+        const bottomCorners = Array.from(document.querySelectorAll('.leaflet-bottom'));
+        const height = Math.ceil(bottomCorners.reduce((maxHeight, corner) => {
+            const rect = corner.getBoundingClientRect();
+            return Math.max(maxHeight, rect.height);
+        }, 0));
+
         if (height > 0) {
-            root.style.setProperty('--mobile-controls-menu-height', `${height}px`);
+            root.style.setProperty('--mobile-leaflet-footer-height', `${height}px`);
         }
     }
 

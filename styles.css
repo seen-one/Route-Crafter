@@ -635,8 +635,8 @@ button:hover {
 @media (max-width: 600px), /* For portrait phones and small tablets */
        (max-height: 450px) and (orientation: landscape) { /* For landscape phones where height is constrained */
     :root {
-        --mobile-controls-menu-height: 52px;
         --mobile-controls-menu-gap: 8px;
+        --mobile-leaflet-footer-height: 26px;
     }
 
     .leaflet-control-filters {
@@ -693,10 +693,6 @@ button:hover {
      /* Hide bottom controls when filter menu is open on mobile */
      .leaflet-bottom.hidden-on-mobile {
          display: none !important;
-     }
-
-     .leaflet-bottom {
-         bottom: calc(var(--mobile-controls-menu-height, 52px) + var(--mobile-controls-menu-gap, 8px) + env(safe-area-inset-bottom, 0px));
      }
 
      /* Set max height of leaflet-right controls to 80% from top */
@@ -788,7 +784,7 @@ button:hover {
     .controls-sidebar {
         position: fixed;
         right: 8px;
-        bottom: calc(var(--mobile-controls-menu-gap, 8px) + env(safe-area-inset-bottom, 0px));
+        bottom: calc(var(--mobile-leaflet-footer-height, 26px) + var(--mobile-controls-menu-gap, 8px) + env(safe-area-inset-bottom, 0px));
         left: 8px;
         width: auto;
         max-width: none;
