@@ -9,7 +9,7 @@ import { GraphBuilder } from './graph-builder.js';
 import { SolutionVisualizer } from './solution-visualizer.js';
 import { stopSpinner } from './utils.js';
 
-const APP_ATTRIBUTION_PREFIX = 'Route Crafter v0.3.0 <a href="https://github.com/seen-one/Route-Crafter" target="_blank">GitHub</a>';
+const APP_ATTRIBUTION_PREFIX = 'Route Crafter v0.2.2 <a href="https://github.com/seen-one/Route-Crafter" target="_blank">GitHub</a>';
 const MOBILE_FLOATING_CONTROLS_QUERY = '(max-width: 600px), (max-height: 450px) and (orientation: landscape)';
 
 export class RouteCrafterApp {
