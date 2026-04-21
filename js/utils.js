@@ -10,15 +10,19 @@ export const OVERPASS_ENDPOINT_GROUPS = [
         label: 'Global',
         endpoints: [
             {
-                label: 'Main Overpass API instance (DE)',
+                label: 'Main Instance (DE)',
                 url: DEFAULT_OVERPASS_ENDPOINT
             },
             {
-                label: 'Private.coffee Overpass Instance (AT)',
+                label: 'OpenStreetMap France Instance (FR)',
+                url: 'https://overpass.openstreetmap.fr/api/interpreter'
+            },
+            {
+                label: 'Private.coffee Instance (AT)',
                 url: 'https://overpass.private.coffee/api/interpreter'
             },
             {
-                label: 'VK Maps Overpass API instance (RU)',
+                label: 'VK Maps Instance (RU)',
                 url: 'https://maps.mail.ru/osm/tools/overpass/api/interpreter'
             }
         ]
@@ -27,19 +31,19 @@ export const OVERPASS_ENDPOINT_GROUPS = [
         label: 'Regional',
         endpoints: [
             {
-                label: 'Swiss Overpass API instance (Switzerland only)',
+                label: 'Swiss Instance (Switzerland only)',
                 url: 'https://overpass.osm.ch/api/interpreter'
             },
             {
-                label: 'Britain and Ireland Overpass Instance (IPv6 only)',
+                label: 'Britain and Ireland Instance (IPv6 only)',
                 url: 'https://overpass.atownsend.org.uk/api/'
             },
             {
-                label: 'MapRVA Overpass server (Virginia only)',
+                label: 'MapRVA Instance (Virginia only)',
                 url: 'https://overpass.maprva.org/api/interpreter'
             },
             {
-                label: 'Ethiopia Overpass Server (Ethiopia only)',
+                label: 'Ethiopia Instance (Ethiopia only)',
                 url: 'https://ethiopia.overpass.openplaceguide.org/api/interpreter'
             }
         ]
