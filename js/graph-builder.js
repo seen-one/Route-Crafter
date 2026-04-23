@@ -68,7 +68,7 @@ export class GraphBuilder {
             'mixed_frederickson': 'Mixed Chinese Postman (Frederickson)',
             'mixed_yaoyuenyong': 'Mixed Chinese Postman (Yaoyuenyong)',
             'windy_rural_win': 'Windy Rural Postman (Win)',
-            'windy_rural_benavent': 'Windy Rural Postman (Benavent)'
+            'windy_rural_benavent': 'Windy Rural Postman (Benavent) (Default)'
         };
 
         const formatName = formatNames[exportFormat];

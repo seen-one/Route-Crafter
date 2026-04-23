@@ -331,7 +331,7 @@ export class MapManager {
                         <div class="main-controls-row">
                             <label for="exportFormatSelect">Route Solver:</label>
                             <select id="exportFormatSelect">
-                                <option value="windy_rural_benavent">Windy Rural (Benavent)</option>
+                                <option value="windy_rural_benavent">Windy Rural (Benavent) (Default)</option>
                                 <option value="windy_rural_win">Windy Rural (Win)</option>
                                 <option value="mixed_yaoyuenyong">Mixed (Yaoyuenyong)</option>
                                 <option value="mixed_frederickson">Mixed (Frederickson)</option>
