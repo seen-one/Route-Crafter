@@ -229,7 +229,7 @@ export class MapManager {
                             <textarea id="oarlibSolutionTextarea" placeholder="Paste OARLib solution here..." style="width: 100%; min-height: 80px; margin: 2px 0; padding: 5px; font-size: 11px; font-family: monospace; resize: vertical; box-sizing: border-box;"></textarea>
                             <button id="applyCPPSolutionButton" style="width: 100%; margin: 2px 0;">Apply Solution</button>
                             <button id="applyLargestComponentSolutionButton" style="width: 100%; margin: 2px 0;">Apply Solution (Largest Component)</button>
-                            <label style="display: block; margin-top: 5px; font-size: 12px;"><input type="checkbox" id="showVertexMarkersCheckbox" style="margin-right: 5px;">Show Vertex Markers</label>
+                            <label style="display: block; margin-top: 5px; font-size: 12px;"><input type="checkbox" id="showVertexMarkersCheckbox" style="margin-right: 5px;"><span id="showVertexMarkersLabelText">Show Vertex Markers</span></label>
                         </div>
                     </div>
                 `;

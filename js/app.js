@@ -34,6 +34,43 @@ export class RouteCrafterApp {
         this.init();
     }
 
+    getVertexMarkerSourceMap() {
+        if (this.largestComponentNodeIdToCoordinateMap.size > 0) {
+            return this.largestComponentNodeIdToCoordinateMap;
+        }
+
+        return this.nodeIdToCoordinateMap;
+    }
+
+    updateVertexMarkerLabel() {
+        const labelText = document.getElementById('showVertexMarkersLabelText');
+        if (!labelText) {
+            return;
+        }
+
+        labelText.textContent = this.largestComponentNodeIdToCoordinateMap.size > 0
+            ? 'Show Vertex Markers (Largest Component)'
+            : 'Show Vertex Markers';
+    }
+
+    refreshVertexMarkers() {
+        this.updateVertexMarkerLabel();
+
+        const showVertexMarkersCheckbox = document.getElementById('showVertexMarkersCheckbox');
+        if (!showVertexMarkersCheckbox || !showVertexMarkersCheckbox.checked) {
+            this.mapManager.hideVertexMarkers();
+            return;
+        }
+
+        const vertexMap = this.getVertexMarkerSourceMap();
+        if (!vertexMap || vertexMap.size === 0) {
+            this.mapManager.hideVertexMarkers();
+            return;
+        }
+
+        this.mapManager.showVertexMarkers(vertexMap);
+    }
+
     init() {
         // Initialize map manager first
         this.mapManager = new MapManager();
@@ -429,6 +466,7 @@ export class RouteCrafterApp {
                     this.largestComponentCoordinateToNodeIdMap = mappings.coordinateToNodeIdMap;
                     this.largestComponentNodeIdToCoordinateMap = mappings.nodeIdToCoordinateMap;
                     console.log('Stored largest component coordinate mappings for solution application');
+                    this.refreshVertexMarkers();
                     // Remap the currently selected depot into the renumbered node IDs, if possible
                     try {
                         const oldDepotId = this.mapManager.getSelectedDepotId && this.mapManager.getSelectedDepotId();
@@ -458,12 +496,8 @@ export class RouteCrafterApp {
         const showVertexMarkersCheckbox = document.getElementById('showVertexMarkersCheckbox');
         if (showVertexMarkersCheckbox) {
             showVertexMarkersCheckbox.addEventListener('change', (event) => {
-                console.log('Checkbox changed:', event.target.checked, 'Vertices:', this.nodeIdToCoordinateMap.size);
-                if (event.target.checked) {
-                    this.mapManager.showVertexMarkers(this.nodeIdToCoordinateMap);
-                } else {
-                    this.mapManager.hideVertexMarkers();
-                }
+                console.log('Checkbox changed:', event.target.checked, 'Vertices:', this.getVertexMarkerSourceMap().size);
+                this.refreshVertexMarkers();
             });
         }
 
@@ -547,11 +581,16 @@ export class RouteCrafterApp {
     }
 
     createCoordinateMappings(roadFeatures) {
+        this.largestComponentCoordinateToNodeIdMap.clear();
+        this.largestComponentNodeIdToCoordinateMap.clear();
+
         this.graphBuilder.createCoordinateMappings(
             roadFeatures,
             this.coordinateToNodeIdMap,
             this.nodeIdToCoordinateMap
         );
+
+        this.refreshVertexMarkers();
     }
 
     searchLocation() {
@@ -671,6 +710,7 @@ export class RouteCrafterApp {
 
             this.largestComponentCoordinateToNodeIdMap = exportResult.coordinateToNodeIdMap;
             this.largestComponentNodeIdToCoordinateMap = exportResult.nodeIdToCoordinateMap;
+            this.refreshVertexMarkers();
 
             // Update stats display to show the largest component required road length
             this.updateStatsDisplay();
@@ -959,6 +999,7 @@ export class RouteCrafterApp {
         // Clear largest component coordinate mappings
         this.largestComponentCoordinateToNodeIdMap.clear();
         this.largestComponentNodeIdToCoordinateMap.clear();
+        this.refreshVertexMarkers();
         
         // Clear largest component global variables
         try { window.largestComponentRequiredRoadLengthKm = null; } catch (e) { /* ignore */ }
