@@ -574,7 +574,11 @@ export class RouteCrafterApp {
         const setStartingLocationButton = document.getElementById('setStartingLocationButton');
         if (setStartingLocationButton) {
             setStartingLocationButton.addEventListener('click', () => {
-                this.mapManager.enableDepotSelectionMode();
+                if (this.mapManager.isDepotSelectionModeActive()) {
+                    this.mapManager.disableDepotSelectionMode();
+                } else {
+                    this.mapManager.enableDepotSelectionMode();
+                }
                 this.updateSetStartingLocationButtonState();
             });
         }
