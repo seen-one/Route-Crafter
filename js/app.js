@@ -150,6 +150,7 @@ export class RouteCrafterApp {
         [
             'searchRules',
             'bufferSize',
+            'consolidateTolerance',
             'truncateByEdge',
             'allowNavigationPastBoundary',
             'boundaryBuffer',
@@ -400,7 +401,23 @@ export class RouteCrafterApp {
             this.areaManager.previewCombinedPolygon();
         });
 
-        // (Consolidate tolerance control removed)
+        // Consolidate tolerance wheel
+        document.getElementById('consolidateTolerance').addEventListener('wheel', (event) => {
+            event.preventDefault();
+            let currentValue = parseInt(event.target.value, 10);
+            if (isNaN(currentValue)) currentValue = 0;
+            const step = 1;
+            if (event.deltaY < 0) {
+                event.target.value = Math.min(currentValue + step, 20);
+            } else if (event.deltaY > 0) {
+                event.target.value = Math.max(currentValue - step, 0);
+            }
+            this.markRoadSettingsChanged();
+        });
+
+        document.getElementById('consolidateTolerance').addEventListener('input', () => {
+            this.markRoadSettingsChanged();
+        });
 
         // Coverage threshold wheel
         document.getElementById('coverageThreshold').addEventListener('wheel', (event) => {
@@ -458,7 +475,14 @@ export class RouteCrafterApp {
             this.mapManager.getMap().scrollWheelZoom.enable();
         });
 
-        // (Consolidate tolerance control removed)
+        const consolidateInput = document.getElementById('consolidateTolerance');
+        consolidateInput.addEventListener('mouseover', () => {
+            this.mapManager.getMap().scrollWheelZoom.disable();
+        });
+
+        consolidateInput.addEventListener('mouseout', () => {
+            this.mapManager.getMap().scrollWheelZoom.enable();
+        });
 
         coverageThresholdInput.addEventListener('mouseover', () => {
             this.mapManager.getMap().scrollWheelZoom.disable();

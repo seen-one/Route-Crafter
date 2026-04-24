@@ -323,6 +323,10 @@ export class MapManager {
                             <input type="number" id="bufferSize" class="main-controls-number" min="1" max="100" value="1">
                         </div>
                         <div class="main-controls-row">
+                            <label for="consolidateTolerance">Consolidate intersections (meters):</label>
+                            <input type="number" id="consolidateTolerance" class="main-controls-number" min="0" max="20" value="0">
+                        </div>
+                        <div class="main-controls-row">
                             <label for="truncateByEdge">Trim roads to polygon boundary</label>
                             <input type="checkbox" id="truncateByEdge" checked>
                         </div>

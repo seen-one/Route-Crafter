@@ -822,6 +822,89 @@ export class RoadProcessor {
                     });
                 }
                 
+                // Consolidate intersections if tolerance > 0
+                const consolidateTolerance = parseInt(document.getElementById('consolidateTolerance').value, 10) || 0;
+                if (consolidateTolerance > 0) {
+                    console.log(`Consolidating intersections with tolerance ${consolidateTolerance}m...`);
+                    const coordsMap = new Map();
+                    roadFeatures.forEach(feature => {
+                        if (feature.geometry.type === 'LineString') {
+                            feature.geometry.coordinates.forEach(coord => {
+                                const key = `${coord[0].toFixed(8)},${coord[1].toFixed(8)}`;
+                                if (!coordsMap.has(key)) {
+                                    coordsMap.set(key, coord);
+                                }
+                            });
+                        }
+                    });
+
+                    const points = [];
+                    coordsMap.forEach((coord, key) => {
+                        points.push(turf.point(coord, { key: key }));
+                    });
+                    
+                    if (points.length > 0) {
+                        const featureCollection = turf.featureCollection(points);
+                        const clustered = turf.clustersDbscan(featureCollection, consolidateTolerance / 1000, { units: 'kilometers' });
+                        const coordReplacementMap = new Map();
+                        const clusters = new Map();
+                        
+                        turf.featureEach(clustered, (point) => {
+                            const clusterId = point.properties.cluster;
+                            if (clusterId !== undefined) {
+                                if (!clusters.has(clusterId)) {
+                                    clusters.set(clusterId, []);
+                                }
+                                clusters.get(clusterId).push(point);
+                            }
+                        });
+
+                        clusters.forEach((clusterPoints) => {
+                            if (clusterPoints.length > 1) {
+                                const clusterCollection = turf.featureCollection(clusterPoints);
+                                const centroid = turf.centroid(clusterCollection);
+                                const centroidCoord = centroid.geometry.coordinates;
+                                clusterPoints.forEach(point => {
+                                    coordReplacementMap.set(point.properties.key, centroidCoord);
+                                });
+                            }
+                        });
+
+                        if (coordReplacementMap.size > 0) {
+                            let consolidatedEdges = 0;
+                            roadFeatures.forEach(feature => {
+                                if (feature.geometry.type === 'LineString') {
+                                    const newCoords = feature.geometry.coordinates.map(coord => {
+                                        const key = `${coord[0].toFixed(8)},${coord[1].toFixed(8)}`;
+                                        return coordReplacementMap.has(key) ? coordReplacementMap.get(key) : coord;
+                                    });
+                                    
+                                    const filteredCoords = [];
+                                    newCoords.forEach(coord => {
+                                        if (filteredCoords.length === 0) {
+                                            filteredCoords.push(coord);
+                                        } else {
+                                            const last = filteredCoords[filteredCoords.length - 1];
+                                            if (last[0] !== coord[0] || last[1] !== coord[1]) {
+                                                filteredCoords.push(coord);
+                                            }
+                                        }
+                                    });
+                                    
+                                    if (filteredCoords.length >= 2) {
+                                        feature.geometry.coordinates = filteredCoords;
+                                        consolidatedEdges++;
+                                    } else {
+                                        feature.geometry.coordinates = [];
+                                    }
+                                }
+                            });
+                            roadFeatures = roadFeatures.filter(f => f.geometry.coordinates.length >= 2);
+                            console.log(`Consolidated ${coordReplacementMap.size} points. Affected ${consolidatedEdges} roads.`);
+                        }
+                    }
+                }
+                
                 // Remove existing road layer if it exists
                 if (this.geoJsonLayer) {
                     this.mapManager.getMap().removeLayer(this.geoJsonLayer);
