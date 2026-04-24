@@ -273,7 +273,7 @@ export class MapManager {
                         <div class="sidebar-brand-main">
                             <div class="sidebar-brand-title">Route Crafter</div>
                             <div class="sidebar-brand-meta">
-                                <span class="sidebar-brand-version">v0.2.3</span>
+                                <span class="sidebar-brand-version">v0.2.4</span>
                                 <a class="sidebar-brand-link" href="https://github.com/seen-one/Route-Crafter" target="_blank" rel="noopener">GitHub</a>
                             </div>
                         </div>
