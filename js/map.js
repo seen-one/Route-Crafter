@@ -30,8 +30,11 @@ export class MapManager {
         this.vertexMarkers = [];
         this.toggleMainMenuButton = null;
         this.mainMenuHidden = false;
+        this.mainMenuPanelHiddenByRoutePlayer = false;
         this.mobileControlsQuery = null;
         this.controlsPanelResizeObserver = null;
+        this.leafletFooterResizeObserver = null;
+        this.observedLeafletFooterElements = new Set();
         
         this.init();
     }
@@ -489,6 +492,26 @@ export class MapManager {
         }
 
         this.mainMenuHidden = !this.mainMenuHidden;
+        this.mainMenuPanelHiddenByRoutePlayer = false;
+        this.updateMobileControlsOffset();
+        requestAnimationFrame(() => this.updateMobileControlsOffset());
+        this.map.invalidateSize();
+    }
+
+    setRoutePlayerVisibility(isVisible) {
+        const panel = document.getElementById('mainControlsDiv');
+        if (!panel || !this.getMobileControlsQuery().matches) {
+            return;
+        }
+
+        if (isVisible) {
+            panel.style.display = 'none';
+            this.mainMenuPanelHiddenByRoutePlayer = true;
+        } else if (this.mainMenuPanelHiddenByRoutePlayer) {
+            panel.style.display = '';
+            this.mainMenuPanelHiddenByRoutePlayer = false;
+        }
+
         this.updateMobileControlsOffset();
         requestAnimationFrame(() => this.updateMobileControlsOffset());
         this.map.invalidateSize();
@@ -542,7 +565,35 @@ export class MapManager {
             requestAnimationFrame(() => this.updateMobileControlsOffset());
         });
 
+        window.addEventListener('route-player-visibility-change', () => {
+            this.updateMobileControlsOffset();
+            requestAnimationFrame(() => this.updateMobileControlsOffset());
+        });
+
+        if (typeof ResizeObserver === 'function') {
+            this.leafletFooterResizeObserver = new ResizeObserver(() => {
+                this.updateMobileControlsOffset();
+            });
+            this.observeLeafletFooterElements();
+        }
+
         this.updateMobileControlsOffset();
+    }
+
+    observeLeafletFooterElements() {
+        if (!this.leafletFooterResizeObserver) {
+            return;
+        }
+
+        document.querySelectorAll('.leaflet-bottom').forEach((corner) => {
+            if (!this.observedLeafletFooterElements.has(corner)) {
+                this.leafletFooterResizeObserver.observe(corner);
+                this.observedLeafletFooterElements.add(corner);
+            }
+        });
+
+        this.updateMobileControlsOffset();
+        requestAnimationFrame(() => this.updateMobileControlsOffset());
     }
 
     getMobileControlsQuery() {
@@ -564,8 +615,18 @@ export class MapManager {
 
         const bottomCorners = Array.from(document.querySelectorAll('.leaflet-bottom'));
         const height = Math.ceil(bottomCorners.reduce((maxHeight, corner) => {
-            const rect = corner.getBoundingClientRect();
-            return Math.max(maxHeight, rect.height);
+            const cornerRect = corner.getBoundingClientRect();
+            const cornerHeight = cornerRect.height > 0 ? window.innerHeight - cornerRect.top : 0;
+            const childHeight = Array.from(corner.children).reduce((maxChildHeight, child) => {
+                const rect = child.getBoundingClientRect();
+                if (rect.height <= 0) {
+                    return maxChildHeight;
+                }
+
+                return Math.max(maxChildHeight, window.innerHeight - rect.top);
+            }, 0);
+
+            return Math.max(maxHeight, cornerHeight, childHeight);
         }, 0));
 
         if (height > 0) {

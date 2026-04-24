@@ -701,7 +701,10 @@ button:hover {
      .media-controls {
          min-width: 280px;
          padding: 8px 12px;
-         bottom: 10px;
+         bottom: calc(var(--mobile-leaflet-footer-height, 26px) + var(--mobile-controls-menu-gap, 8px) + env(safe-area-inset-bottom, 0px));
+         width: calc(100vw - 16px);
+         max-width: 360px;
+         box-sizing: border-box;
      }
 
      .media-controls-row {
@@ -717,12 +720,6 @@ button:hover {
      .speed-btn {
          padding: 3px 6px;
          font-size: 11px;
-     }
-
-     /* Hide leaflet-bottom when media controls are visible on mobile */
-     .media-controls.visible ~ .leaflet-bottom,
-     .media-controls.visible + * .leaflet-bottom {
-         display: none !important;
      }
 
      .progress-text {
@@ -792,6 +789,10 @@ button:hover {
         background: transparent;
         border-right: 0;
         box-shadow: none;
+    }
+
+    body.route-player-visible #mainControlsDiv.main-controls-panel {
+        display: none;
     }
 
     .main-controls-panel,

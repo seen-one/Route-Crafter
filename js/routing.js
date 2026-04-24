@@ -4,6 +4,7 @@ import { calculateDistance, calculateRouteDistanceToIndex, interpolatePoint, sto
 
 export class RoutingManager {
     constructor(mapManager) {
+        this.mapManager = mapManager;
         this.map = mapManager.getMap();
         this.drawnItems = mapManager.getDrawnItems();
         
@@ -466,23 +467,29 @@ export class RoutingManager {
     }
 
     toggleMediaControls(show) {
-        const bottomControls = document.querySelector('.leaflet-bottom');
-        
         if (show) {
             this.mediaControls.classList.add('visible');
-            // Hide leaflet-bottom on mobile when media controls are visible
-            if (window.innerWidth <= 600 || (window.innerHeight <= 450 && window.innerWidth > window.innerHeight)) {
-                if (bottomControls) {
-                    bottomControls.style.display = 'none';
-                }
-            }
+            document.body.classList.add('route-player-visible');
         } else {
             this.mediaControls.classList.remove('visible');
-            // Show leaflet-bottom again when media controls are hidden
-            if (bottomControls) {
-                bottomControls.style.display = '';
-            }
+            document.body.classList.remove('route-player-visible');
         }
+
+        document.querySelectorAll('.leaflet-bottom').forEach((bottomControls) => {
+            bottomControls.style.display = '';
+        });
+
+        if (this.mapManager && typeof this.mapManager.updateMobileControlsOffset === 'function') {
+            if (typeof this.mapManager.setRoutePlayerVisibility === 'function') {
+                this.mapManager.setRoutePlayerVisibility(show);
+            }
+            this.mapManager.updateMobileControlsOffset();
+            requestAnimationFrame(() => this.mapManager.updateMobileControlsOffset());
+        }
+
+        window.dispatchEvent(new CustomEvent('route-player-visibility-change', {
+            detail: { visible: show }
+        }));
     }
 
 
