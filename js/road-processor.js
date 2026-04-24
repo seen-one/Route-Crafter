@@ -827,14 +827,26 @@ export class RoadProcessor {
                 if (consolidateTolerance > 0) {
                     console.log(`Consolidating intersections with tolerance ${consolidateTolerance}m...`);
                     const coordsMap = new Map();
+                    const adjacencyMap = new Map(); // Store adjacency for connectivity check
+                    
                     roadFeatures.forEach(feature => {
                         if (feature.geometry.type === 'LineString') {
-                            feature.geometry.coordinates.forEach(coord => {
+                            const coords = feature.geometry.coordinates;
+                            for (let i = 0; i < coords.length; i++) {
+                                const coord = coords[i];
                                 const key = `${coord[0].toFixed(8)},${coord[1].toFixed(8)}`;
                                 if (!coordsMap.has(key)) {
                                     coordsMap.set(key, coord);
+                                    adjacencyMap.set(key, new Set());
                                 }
-                            });
+                                
+                                // Add adjacency
+                                if (i > 0) {
+                                    const prevKey = `${coords[i-1][0].toFixed(8)},${coords[i-1][1].toFixed(8)}`;
+                                    adjacencyMap.get(key).add(prevKey);
+                                    adjacencyMap.get(prevKey).add(key);
+                                }
+                            }
                         }
                     });
 
@@ -859,15 +871,54 @@ export class RoadProcessor {
                             }
                         });
 
+                        // For each cluster, find connected components
                         clusters.forEach((clusterPoints) => {
-                            if (clusterPoints.length > 1) {
-                                const clusterCollection = turf.featureCollection(clusterPoints);
-                                const centroid = turf.centroid(clusterCollection);
-                                const centroidCoord = centroid.geometry.coordinates;
-                                clusterPoints.forEach(point => {
-                                    coordReplacementMap.set(point.properties.key, centroidCoord);
-                                });
+                            if (clusterPoints.length <= 1) return;
+                            
+                            const clusterKeys = new Set(clusterPoints.map(p => p.properties.key));
+                            const visited = new Set();
+                            const components = [];
+                            
+                            for (const point of clusterPoints) {
+                                const key = point.properties.key;
+                                if (!visited.has(key)) {
+                                    const comp = [];
+                                    const queue = [point];
+                                    visited.add(key);
+                                    
+                                    while (queue.length > 0) {
+                                        const current = queue.shift();
+                                        const currKey = current.properties.key;
+                                        comp.push(current);
+                                        
+                                        const neighbors = adjacencyMap.get(currKey);
+                                        if (neighbors) {
+                                            for (const neighborKey of neighbors) {
+                                                if (clusterKeys.has(neighborKey) && !visited.has(neighborKey)) {
+                                                    visited.add(neighborKey);
+                                                    const neighborPoint = clusterPoints.find(p => p.properties.key === neighborKey);
+                                                    if (neighborPoint) {
+                                                        queue.push(neighborPoint);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    components.push(comp);
+                                }
                             }
+                            
+                            // Process each connected component separately
+                            components.forEach(compPoints => {
+                                if (compPoints.length > 1) {
+                                    const clusterCollection = turf.featureCollection(compPoints);
+                                    const centroid = turf.centroid(clusterCollection);
+                                    const centroidCoord = centroid.geometry.coordinates;
+                                    compPoints.forEach(point => {
+                                        coordReplacementMap.set(point.properties.key, centroidCoord);
+                                    });
+                                }
+                            });
                         });
 
                         if (coordReplacementMap.size > 0) {
