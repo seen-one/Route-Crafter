@@ -38,6 +38,23 @@ export class AreaManager {
         this.previousSearchRule = rule;
     }
 
+    shouldIgnoreAreaClick(event) {
+        if (!this.mapManager || !this.mapManager.isDepotSelectionModeActive || !this.mapManager.isDepotSelectionModeActive()) {
+            return false;
+        }
+
+        if (event && event.originalEvent) {
+            if (typeof event.originalEvent.preventDefault === 'function') {
+                event.originalEvent.preventDefault();
+            }
+            if (typeof event.originalEvent.stopPropagation === 'function') {
+                event.originalEvent.stopPropagation();
+            }
+        }
+
+        return true;
+    }
+
     handleDrawCreated(event) {
         const layer = event.layer;
         const type = event.layerType;
@@ -56,6 +73,10 @@ export class AreaManager {
             
             // Add click handler to select the drawn area
             layer.on('click', (e) => {
+                if (this.shouldIgnoreAreaClick(e)) {
+                    return;
+                }
+
                 // Don't interfere if Leaflet Draw is in delete or edit mode
                 const drawControl = this.mapManager.getDrawControl();
                 if (drawControl._toolbars.edit._activeMode) {
@@ -252,7 +273,11 @@ export class AreaManager {
                         weight: 2
                     },
                     onEachFeature: (feature, layer) => {
-                        layer.on('click', () => {
+                        layer.on('click', (event) => {
+                            if (this.shouldIgnoreAreaClick(event)) {
+                                return;
+                            }
+
                             this.toggleAreaSelection(layer);
                         });
                     }
@@ -375,7 +400,11 @@ export class AreaManager {
                 fillOpacity: 0.1
             },
             onEachFeature: (feature, layer) => {
-                layer.on('click', () => {
+                layer.on('click', (event) => {
+                    if (this.shouldIgnoreAreaClick(event)) {
+                        return;
+                    }
+
                     this.toggleAreaSelection(layer);
                 });
             }

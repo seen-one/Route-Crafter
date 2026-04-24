@@ -882,6 +882,30 @@ export class RoadProcessor {
                             ${coverageInfo}
                         `;
                         layer.bindPopup(popupContent);
+                        layer.on('click', (event) => {
+                            if (!window.app || !window.app.mapManager || !window.app.mapManager.isDepotSelectionModeActive || !window.app.mapManager.isDepotSelectionModeActive()) {
+                                return;
+                            }
+
+                            layer.closePopup();
+                            
+                            // Forward the click to the depot selection logic since propagation is stopped
+                            if (event && event.latlng) {
+                                window.app.mapManager.handleSetDepot(event.latlng);
+                                if (typeof window.app.updateSetStartingLocationButtonState === 'function') {
+                                    window.app.updateSetStartingLocationButtonState();
+                                }
+                            }
+
+                            if (event && event.originalEvent) {
+                                if (typeof event.originalEvent.preventDefault === 'function') {
+                                    event.originalEvent.preventDefault();
+                                }
+                                if (typeof event.originalEvent.stopPropagation === 'function') {
+                                    event.originalEvent.stopPropagation();
+                                }
+                            }
+                        });
                     }
                 }).addTo(this.mapManager.getMap());
                 
@@ -1172,6 +1196,30 @@ export class RoadProcessor {
                         ${coverageInfo}
                     `;
                     layer.bindPopup(popupContent);
+                    layer.on('click', (event) => {
+                        if (!window.app || !window.app.mapManager || !window.app.mapManager.isDepotSelectionModeActive || !window.app.mapManager.isDepotSelectionModeActive()) {
+                            return;
+                        }
+
+                        layer.closePopup();
+
+                        // Forward the click to the depot selection logic since propagation is stopped
+                        if (event && event.latlng) {
+                            window.app.mapManager.handleSetDepot(event.latlng);
+                            if (typeof window.app.updateSetStartingLocationButtonState === 'function') {
+                                window.app.updateSetStartingLocationButtonState();
+                            }
+                        }
+
+                        if (event && event.originalEvent) {
+                            if (typeof event.originalEvent.preventDefault === 'function') {
+                                event.originalEvent.preventDefault();
+                            }
+                            if (typeof event.originalEvent.stopPropagation === 'function') {
+                                event.originalEvent.stopPropagation();
+                            }
+                        }
+                    });
                 }
             }).addTo(this.mapManager.getMap());
             
