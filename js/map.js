@@ -314,6 +314,7 @@ export class MapManager {
                         <button id="exportGPXButton">Export GPX</button>
                         <button id="clearButton">Reset</button>
                         </div>
+                        <div id="staleSettingsWarning" class="stale-settings-warning" role="status" aria-live="polite" hidden></div>
                         <div class="main-controls-row">
                             <label for="bufferSize">Add buffer to selected areas (meters):</label>
                             <input type="number" id="bufferSize" class="main-controls-number" min="1" max="100" value="1">

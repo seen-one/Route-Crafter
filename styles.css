@@ -542,6 +542,22 @@ button:hover {
     flex: 1 1 100px;
 }
 
+.stale-settings-warning {
+    padding: 8px 10px;
+    border: 1px solid #d99a20;
+    border-left-width: 4px;
+    border-radius: 4px;
+    background: #fff8e6;
+    color: #5f3b00;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.stale-settings-warning[hidden] {
+    display: none;
+}
+
 .main-controls-row label {
     flex: 1 1 48%;
     line-height: 1.25;

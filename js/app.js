@@ -11,6 +11,8 @@ import { stopSpinner } from './utils.js';
 
 const APP_ATTRIBUTION_PREFIX = 'Route Crafter v0.2.3 <a href="https://github.com/seen-one/Route-Crafter" target="_blank">GitHub</a>';
 const MOBILE_FLOATING_CONTROLS_QUERY = '(max-width: 600px), (max-height: 450px) and (orientation: landscape)';
+const ROAD_STALE_WARNING_TEXT = 'Settings changed. Click Fetch Roads, then Generate Route to apply them.';
+const ROUTE_STALE_WARNING_TEXT = 'Route solver changed. Click Generate Route to apply it.';
 
 export class RouteCrafterApp {
     constructor() {
@@ -22,6 +24,12 @@ export class RouteCrafterApp {
         this.graphBuilder = null;
         this.solutionVisualizer = null;
         this.defaultAttributionPrefix = null;
+        this.roadsFetched = false;
+        this.routeGenerated = false;
+        this.roadsStale = false;
+        this.routeStale = false;
+        this.programmaticResetInProgress = false;
+        this.lastRouteSolverFormat = null;
         
         // Coordinate mappings (shared state across modules)
         this.coordinateToNodeIdMap = new Map();
@@ -99,6 +107,8 @@ export class RouteCrafterApp {
         // Initialize coverage layers
         this.coverageManager.initializeLayers();
 
+        this.setupStaleSettingsTracking();
+
         // Keep app identity in the map attribution only when the sidebar becomes mobile floating controls.
         this.setupResponsiveAttribution();
     }
@@ -123,6 +133,173 @@ export class RouteCrafterApp {
         } else if (typeof mobileControlsQuery.addListener === 'function') {
             mobileControlsQuery.addListener(updateAttributionPrefix);
         }
+    }
+
+    setupStaleSettingsTracking() {
+        const addListener = (id, eventName, handler) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener(eventName, handler);
+            }
+        };
+
+        const markRoadSettingsChanged = () => this.markRoadSettingsChanged();
+        const markCoverageSettingsChanged = () => this.markCoverageSettingsChanged();
+
+        [
+            'searchRules',
+            'bufferSize',
+            'truncateByEdge',
+            'allowNavigationPastBoundary',
+            'boundaryBuffer',
+            'filterMapillaryCoverage',
+            'navigationFilter',
+            'routeFilter'
+        ].forEach((id) => {
+            addListener(id, 'change', markRoadSettingsChanged);
+            addListener(id, 'input', markRoadSettingsChanged);
+        });
+
+        [
+            'startDate',
+            'endDate',
+            'coverageThreshold',
+            'proximityThreshold',
+            'mapillaryUserId',
+            'panoramaxUsername',
+            'mapilioUserId'
+        ].forEach((id) => {
+            addListener(id, 'change', markCoverageSettingsChanged);
+            addListener(id, 'input', markCoverageSettingsChanged);
+        });
+
+        addListener('applyFiltersBtn', 'click', markCoverageSettingsChanged);
+
+        document.querySelectorAll('.image-type-btn, .date-preset-btn').forEach((button) => {
+            button.addEventListener('click', markCoverageSettingsChanged);
+        });
+
+        const map = this.mapManager && this.mapManager.getMap ? this.mapManager.getMap() : null;
+        if (map) {
+            const markCoverageLayerChanged = (event) => {
+                const layer = event && event.layer;
+                if (!layer || !this.coverageManager) {
+                    return;
+                }
+
+                if (
+                    layer === this.coverageManager.mapillaryLayer ||
+                    layer === this.coverageManager.panoramaxLayer ||
+                    layer === this.coverageManager.mapilioLayer
+                ) {
+                    this.markCoverageSettingsChanged();
+                }
+            };
+
+            map.on('overlayadd', markCoverageLayerChanged);
+            map.on('overlayremove', markCoverageLayerChanged);
+        }
+
+        const exportFormatSelect = document.getElementById('exportFormatSelect');
+        if (exportFormatSelect) {
+            this.lastRouteSolverFormat = exportFormatSelect.value;
+            exportFormatSelect.addEventListener('change', (event) => {
+                this.markRouteSolverChanged(event.target.value);
+            });
+        }
+    }
+
+    markRoadSettingsChanged() {
+        if (this.programmaticResetInProgress || !this.roadsFetched) {
+            return;
+        }
+
+        this.roadsStale = true;
+        if (this.routeGenerated) {
+            this.routeStale = true;
+        }
+        this.updateStaleSettingsWarning();
+    }
+
+    markCoverageSettingsChanged() {
+        const filterMapillaryCoverageCheckbox = document.getElementById('filterMapillaryCoverage');
+        if (!filterMapillaryCoverageCheckbox || !filterMapillaryCoverageCheckbox.checked) {
+            return;
+        }
+
+        this.markRoadSettingsChanged();
+    }
+
+    isWindyRuralFormat(format) {
+        return typeof format === 'string' && format.startsWith('windy_rural');
+    }
+
+    markRouteSolverChanged(nextFormat) {
+        const previousFormat = this.lastRouteSolverFormat;
+        this.lastRouteSolverFormat = nextFormat;
+
+        if (this.programmaticResetInProgress) {
+            return;
+        }
+
+        const changedWindyApplicability = previousFormat &&
+            this.isWindyRuralFormat(previousFormat) !== this.isWindyRuralFormat(nextFormat);
+
+        if (changedWindyApplicability && this.roadsFetched) {
+            this.markRoadSettingsChanged();
+            return;
+        }
+
+        if (!this.routeGenerated) {
+            return;
+        }
+
+        this.routeStale = true;
+        this.updateStaleSettingsWarning();
+    }
+
+    markRoadsFetched() {
+        const hadGeneratedRoute = this.routeGenerated;
+        this.roadsFetched = true;
+        this.roadsStale = false;
+        this.routeStale = hadGeneratedRoute;
+        this.updateStaleSettingsWarning();
+    }
+
+    markRouteGenerated() {
+        this.routeGenerated = true;
+        this.routeStale = false;
+        this.updateStaleSettingsWarning();
+    }
+
+    resetStaleSettingsState() {
+        this.roadsFetched = false;
+        this.routeGenerated = false;
+        this.roadsStale = false;
+        this.routeStale = false;
+        this.updateStaleSettingsWarning();
+    }
+
+    updateStaleSettingsWarning() {
+        const warning = document.getElementById('staleSettingsWarning');
+        if (!warning) {
+            return;
+        }
+
+        if (this.roadsStale) {
+            warning.textContent = ROAD_STALE_WARNING_TEXT;
+            warning.hidden = false;
+            return;
+        }
+
+        if (this.routeStale) {
+            warning.textContent = ROUTE_STALE_WARNING_TEXT;
+            warning.hidden = false;
+            return;
+        }
+
+        warning.textContent = '';
+        warning.hidden = true;
     }
 
     setupEventListeners() {
@@ -204,6 +381,7 @@ export class RouteCrafterApp {
 
         // Buffer size changes
         document.getElementById('bufferSize').addEventListener('input', () => {
+            this.markRoadSettingsChanged();
             this.areaManager.previewCombinedPolygon();
         });
 
@@ -217,6 +395,7 @@ export class RouteCrafterApp {
             } else if (event.deltaY > 0) {
                 event.target.value = Math.max(currentValue - step, 1);
             }
+            this.markRoadSettingsChanged();
             this.areaManager.previewCombinedPolygon();
         });
 
@@ -233,6 +412,7 @@ export class RouteCrafterApp {
             } else if (event.deltaY > 0) {
                 event.target.value = Math.max(currentValue - step, 0);
             }
+            this.markCoverageSettingsChanged();
         });
 
         // Proximity threshold wheel
@@ -246,6 +426,7 @@ export class RouteCrafterApp {
             } else if (event.deltaY > 0) {
                 event.target.value = Math.max(currentValue - step, 1);
             }
+            this.markCoverageSettingsChanged();
         });
 
         // Boundary buffer wheel
@@ -259,6 +440,7 @@ export class RouteCrafterApp {
             } else if (event.deltaY > 0) {
                 event.target.value = Math.max(currentValue - step, 1);
             }
+            this.markRoadSettingsChanged();
         });
 
         // Disable zooming when hovering over inputs
@@ -380,7 +562,10 @@ export class RouteCrafterApp {
         // Preview GPX button
         document.getElementById('previewGPXButton').addEventListener('click', () => {
             this.roadProcessor.fetchRoadsInArea(
-                (roadFeatures) => this.createCoordinateMappings(roadFeatures)
+                (roadFeatures) => {
+                    this.createCoordinateMappings(roadFeatures);
+                    this.markRoadsFetched();
+                }
             );
         });
 
@@ -536,6 +721,7 @@ export class RouteCrafterApp {
                 }
 
                 this.solutionVisualizer.handleCPPSolutionText(solutionText, this.nodeIdToCoordinateMap);
+                this.markRouteGenerated();
             });
         }
 
@@ -569,13 +755,17 @@ export class RouteCrafterApp {
                 }
 
                 this.solutionVisualizer.handleCPPSolutionText(solutionText, this.largestComponentNodeIdToCoordinateMap);
+                this.markRouteGenerated();
             });
         }
 
         document.getElementById('overpassUploadInput').addEventListener('change', (event) => {
             this.roadProcessor.handleOverpassResponseUpload(
                 event,
-                (roadFeatures) => this.createCoordinateMappings(roadFeatures)
+                (roadFeatures) => {
+                    this.createCoordinateMappings(roadFeatures);
+                    this.markRoadsFetched();
+                }
             );
         });
     }
@@ -762,6 +952,7 @@ export class RouteCrafterApp {
             }
 
             this.solutionVisualizer.handleCPPSolutionText(solutionText, this.largestComponentNodeIdToCoordinateMap);
+            this.markRouteGenerated();
             console.info('Route generated successfully with TeaVM and applied to the map.');
         } catch (error) {
             console.error('Error generating route via TeaVM:', error);
@@ -977,46 +1168,53 @@ export class RouteCrafterApp {
     }
 
     clearAllSelectionsWithoutResettingDropdown() {
-        // Clear area manager layers
-        this.areaManager.clearLayers();
-        
-        // Clear drawn items
-        this.mapManager.getDrawnItems().clearLayers();
-        
-        // Clear road processor layers
-        this.roadProcessor.clearLayers();
-        
-        // Clear solution visualizer layers
-        this.solutionVisualizer.clearLayers();
-        
-        // Clear depot marker
-        this.mapManager.clearDepotMarker();
-        
-        // Clear coordinate mappings
-        this.coordinateToNodeIdMap.clear();
-        this.nodeIdToCoordinateMap.clear();
-        
-        // Clear largest component coordinate mappings
-        this.largestComponentCoordinateToNodeIdMap.clear();
-        this.largestComponentNodeIdToCoordinateMap.clear();
-        this.refreshVertexMarkers();
-        
-        // Clear largest component global variables
-        try { window.largestComponentRequiredRoadLengthKm = null; } catch (e) { /* ignore */ }
-        
-        // Reset routing manager
-        this.routingManager.stopAnimation();
-        this.routingManager.setRoutePoints([]);
-        
-        // Reset UI elements (but not the dropdown)
-        document.getElementById('routeLength').innerHTML = '';
-        document.getElementById('searchBox').value = '';
-    document.getElementById('bufferSize').value = '1';
-    document.getElementById('truncateByEdge').checked = true;
-    document.getElementById('allowNavigationPastBoundary').checked = false;
-    document.getElementById('boundaryBuffer').value = '500';
-    document.getElementById('navigationFilter').value = '[highway][area!~"yes"][highway!~"bridleway|bus_guideway|construction|corridor|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path|steps"][access!~"customers|no|private"][public_transport!~"platform"][fee!~"yes"][service!~"drive-through|driveway|parking_aisle"][toll!~"yes"]';
-        document.getElementById('routeFilter').value = '';
+        this.programmaticResetInProgress = true;
+
+        try {
+            // Clear area manager layers
+            this.areaManager.clearLayers();
+
+            // Clear drawn items
+            this.mapManager.getDrawnItems().clearLayers();
+
+            // Clear road processor layers
+            this.roadProcessor.clearLayers();
+
+            // Clear solution visualizer layers
+            this.solutionVisualizer.clearLayers();
+
+            // Clear depot marker
+            this.mapManager.clearDepotMarker();
+
+            // Clear coordinate mappings
+            this.coordinateToNodeIdMap.clear();
+            this.nodeIdToCoordinateMap.clear();
+
+            // Clear largest component coordinate mappings
+            this.largestComponentCoordinateToNodeIdMap.clear();
+            this.largestComponentNodeIdToCoordinateMap.clear();
+            this.refreshVertexMarkers();
+
+            // Clear largest component global variables
+            try { window.largestComponentRequiredRoadLengthKm = null; } catch (e) { /* ignore */ }
+
+            // Reset routing manager
+            this.routingManager.stopAnimation();
+            this.routingManager.setRoutePoints([]);
+
+            // Reset UI elements (but not the dropdown)
+            document.getElementById('routeLength').innerHTML = '';
+            document.getElementById('searchBox').value = '';
+            document.getElementById('bufferSize').value = '1';
+            document.getElementById('truncateByEdge').checked = true;
+            document.getElementById('allowNavigationPastBoundary').checked = false;
+            document.getElementById('boundaryBuffer').value = '500';
+            document.getElementById('navigationFilter').value = '[highway][area!~"yes"][highway!~"bridleway|bus_guideway|construction|corridor|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path|steps"][access!~"customers|no|private"][public_transport!~"platform"][fee!~"yes"][service!~"drive-through|driveway|parking_aisle"][toll!~"yes"]';
+            document.getElementById('routeFilter').value = '';
+            this.resetStaleSettingsState();
+        } finally {
+            this.programmaticResetInProgress = false;
+        }
     }
 
     clearAllSelections() {
