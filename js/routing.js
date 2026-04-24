@@ -2,6 +2,12 @@
 
 import { calculateDistance, calculateRouteDistanceToIndex, interpolatePoint, stopSpinner } from './utils.js';
 
+const TRAVERSED_ROUTE_STYLE = {
+    color: 'cyan',
+    weight: 4,
+    opacity: 1
+};
+
 export class RoutingManager {
     constructor(mapManager) {
         this.mapManager = mapManager;
@@ -348,17 +354,13 @@ export class RoutingManager {
             routeUntilCurrent = this.routePoints.slice(0, this.routeIndex + 1);
         }
         
-        // Remove the old red polyline if it exists
+        // Remove the old traversed route polyline if it exists
         if (this.currentRoutePolyline) {
             this.map.removeLayer(this.currentRoutePolyline);
         }
         
-        // Create a new red polyline for the current route
-        this.currentRoutePolyline = L.polyline(routeUntilCurrent, {
-            color: 'red',
-            weight: 4,
-            opacity: 0.7
-        }).addTo(this.map);
+        // Create a new traversed route polyline for the current route
+        this.currentRoutePolyline = L.polyline(routeUntilCurrent, TRAVERSED_ROUTE_STYLE).addTo(this.map);
         
         // Add/update current position marker
         if (this.currentPositionMarker) {
@@ -441,12 +443,8 @@ export class RoutingManager {
                     this.map.removeLayer(this.currentRoutePolyline);
                 }
                 
-                // Create new polylines
-                this.currentRoutePolyline = L.polyline(routeUntilCurrent, {
-                    color: 'red',
-                    weight: 4,
-                    opacity: 0.7
-                }).addTo(this.map);
+                // Create new traversed route polyline
+                this.currentRoutePolyline = L.polyline(routeUntilCurrent, TRAVERSED_ROUTE_STYLE).addTo(this.map);
                 
                 // Add/update current position marker
                 if (this.currentPositionMarker) {
