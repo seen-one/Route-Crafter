@@ -27,6 +27,8 @@ export class MapManager {
         this.hashUpdateTimeout = null;
         this.depotMarker = null;
         this.selectedDepotId = null;
+        this.selectedDepotLatLng = null;
+        this.isSelectingDepot = false;
         this.vertexMarkers = [];
         this.toggleMainMenuButton = null;
         this.mainMenuHidden = false;
@@ -308,6 +310,7 @@ export class MapManager {
                             <button id="fetchButton">Find Areas</button>
                         </div>
                         <div class="main-controls-actions">
+                        <button id="setStartingLocationButton">Set Starting Location</button>
                         <button id="previewGPXButton">Fetch Roads</button>
                         <button id="generateRouteButton">Generate Route</button>
                         <button id="playRouteButton">Play Route</button>
@@ -834,12 +837,51 @@ export class MapManager {
         // Don't clear lastClickLatLng here - it needs to persist for the menu item click handler
     }
 
+    enableDepotSelectionMode() {
+        this.isSelectingDepot = true;
+        return true;
+    }
+
+    disableDepotSelectionMode() {
+        this.isSelectingDepot = false;
+    }
+
+    isDepotSelectionModeActive() {
+        return this.isSelectingDepot;
+    }
+
+    renderDepotMarker(latlng, isPending = false) {
+        const markerLatLng = Array.isArray(latlng) ? latlng : [latlng.lat, latlng.lng];
+
+        if (this.depotMarker) {
+            this.map.removeLayer(this.depotMarker);
+        }
+
+        const backgroundColor = isPending ? '#f59e0b' : '#00ff00';
+        const glyph = '&#9654;';
+
+        this.depotMarker = L.marker(markerLatLng, {
+            icon: L.divIcon({
+                className: 'depot-marker',
+                html: `<div style="background-color: ${backgroundColor}; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"><div style="color: white; font-weight: bold; font-size: 14px; text-align: center; line-height: 24px;">${glyph}</div></div>`,
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            })
+        }).addTo(this.map);
+    }
+
     handleSetDepot(latlng) {
         console.log('Setting depot at location:', latlng);
+        this.selectedDepotLatLng = latlng;
         
         // Get the coordinate mappings from the global app instance
         if (!window.app || !window.app.nodeIdToCoordinateMap || window.app.nodeIdToCoordinateMap.size === 0) {
-            alert('Please fetch roads first before setting a starting location. The starting location must be at a road intersection.');
+            this.selectedDepotId = null;
+            this.renderDepotMarker(latlng, true);
+            this.disableDepotSelectionMode();
+            if (window.app && typeof window.app.updateSetStartingLocationButtonState === 'function') {
+                window.app.updateSetStartingLocationButtonState();
+            }
             return;
         }
 
@@ -870,7 +912,6 @@ export class MapManager {
         const nearestCoord = nodeIdToCoordinateMap.get(nearestNodeId);
         const nearestLatLng = [nearestCoord[1], nearestCoord[0]]; // Convert [lng, lat] to [lat, lng]
 
-        // Remove existing depot marker if any
         if (this.depotMarker) {
             this.map.removeLayer(this.depotMarker);
         }
@@ -890,6 +931,10 @@ export class MapManager {
 
         // Store the selected depot ID
         this.selectedDepotId = nearestNodeId;
+        this.disableDepotSelectionMode();
+        if (window.app && typeof window.app.updateSetStartingLocationButtonState === 'function') {
+            window.app.updateSetStartingLocationButtonState();
+        }
 
         console.log(`Depot set to node ${nearestNodeId} at coordinates [${nearestCoord[1]}, ${nearestCoord[0]}]`);
     }
@@ -900,12 +945,29 @@ export class MapManager {
         return this.selectedDepotId;
     }
 
+    getSelectedDepotLatLng() {
+        return this.selectedDepotLatLng;
+    }
+
+    resolvePendingDepotSelection() {
+        if (!this.selectedDepotLatLng) {
+            return;
+        }
+
+        this.handleSetDepot(this.selectedDepotLatLng);
+    }
+
     clearDepotMarker() {
         if (this.depotMarker) {
             this.map.removeLayer(this.depotMarker);
             this.depotMarker = null;
         }
         this.selectedDepotId = null;
+        this.selectedDepotLatLng = null;
+        this.disableDepotSelectionMode();
+        if (window.app && typeof window.app.updateSetStartingLocationButtonState === 'function') {
+            window.app.updateSetStartingLocationButtonState();
+        }
     }
 
     showVertexMarkers(nodeIdToCoordinateMap) {

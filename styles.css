@@ -542,6 +542,14 @@ button:hover {
     flex: 1 1 100px;
 }
 
+#setStartingLocationButton.active {
+    background-color: #198754;
+}
+
+#setStartingLocationButton.active:hover {
+    background-color: #157347;
+}
+
 .stale-settings-warning {
     padding: 8px 10px;
     border: 1px solid #d99a20;

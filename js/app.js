@@ -13,6 +13,7 @@ const APP_ATTRIBUTION_PREFIX = 'Route Crafter v0.2.4 <a href="https://github.com
 const MOBILE_FLOATING_CONTROLS_QUERY = '(max-width: 600px), (max-height: 450px) and (orientation: landscape)';
 const ROAD_STALE_WARNING_TEXT = 'Settings changed. Click Fetch Roads, then Generate Route to apply them.';
 const ROUTE_STALE_WARNING_TEXT = 'Route solver changed. Click Generate Route to apply it.';
+const START_LOCATION_PROMPT = 'Click "Set Starting Location", then click the map where you want to start. If roads are already loaded, it will snap to the nearest road intersection.';
 
 export class RouteCrafterApp {
     constructor() {
@@ -565,9 +566,18 @@ export class RouteCrafterApp {
                 (roadFeatures) => {
                     this.createCoordinateMappings(roadFeatures);
                     this.markRoadsFetched();
+                    this.updateSetStartingLocationButtonState();
                 }
             );
         });
+
+        const setStartingLocationButton = document.getElementById('setStartingLocationButton');
+        if (setStartingLocationButton) {
+            setStartingLocationButton.addEventListener('click', () => {
+                this.mapManager.enableDepotSelectionMode();
+                this.updateSetStartingLocationButtonState();
+            });
+        }
 
         document.getElementById('generateRouteButton').addEventListener('click', () => {
             this.handleGenerateRoute();
@@ -618,7 +628,7 @@ export class RouteCrafterApp {
             exportCPPButton.addEventListener('click', () => {
                 const selectedDepot = this.mapManager.getSelectedDepotId && this.mapManager.getSelectedDepotId();
                 if (!selectedDepot) {
-                    alert('Please set the starting location by right-clicking on the map (or press and hold for touch screens)');
+                    alert(START_LOCATION_PROMPT);
                     return;
                 }
 
@@ -636,7 +646,7 @@ export class RouteCrafterApp {
             exportLargestComponentButton.addEventListener('click', () => {
                 const selectedDepot = this.mapManager.getSelectedDepotId && this.mapManager.getSelectedDepotId();
                 if (!selectedDepot) {
-                    alert('Please set the starting location by right-clicking on the map (or press and hold for touch screens)');
+                    alert(START_LOCATION_PROMPT);
                     return;
                 }
 
@@ -689,6 +699,15 @@ export class RouteCrafterApp {
         // Clear button
         document.getElementById('clearButton').addEventListener('click', () => {
             this.clearAllSelections();
+        });
+
+        this.mapManager.getMap().on('click', (event) => {
+            if (!this.mapManager.isDepotSelectionModeActive()) {
+                return;
+            }
+
+            this.mapManager.handleSetDepot(event.latlng);
+            this.updateSetStartingLocationButtonState();
         });
 
         // Apply CPP Solution button (debug menu only)
@@ -780,6 +799,10 @@ export class RouteCrafterApp {
             this.nodeIdToCoordinateMap
         );
 
+        if (this.mapManager && typeof this.mapManager.resolvePendingDepotSelection === 'function') {
+            this.mapManager.resolvePendingDepotSelection();
+        }
+
         this.refreshVertexMarkers();
     }
 
@@ -862,7 +885,7 @@ export class RouteCrafterApp {
 
         const selectedDepot = this.mapManager && this.mapManager.getSelectedDepotId ? this.mapManager.getSelectedDepotId() : null;
         if (!selectedDepot) {
-            alert('Please set the starting location by right-clicking on the map (or press and hold for touch screens)');
+            alert(START_LOCATION_PROMPT);
             return;
         }
 
@@ -1212,8 +1235,24 @@ export class RouteCrafterApp {
             document.getElementById('navigationFilter').value = '[highway][area!~"yes"][highway!~"bridleway|bus_guideway|construction|corridor|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path|steps"][access!~"customers|no|private"][public_transport!~"platform"][fee!~"yes"][service!~"drive-through|driveway|parking_aisle"][toll!~"yes"]';
             document.getElementById('routeFilter').value = '';
             this.resetStaleSettingsState();
+            this.updateSetStartingLocationButtonState();
         } finally {
             this.programmaticResetInProgress = false;
+        }
+    }
+
+    updateSetStartingLocationButtonState() {
+        const button = document.getElementById('setStartingLocationButton');
+        if (!button || !this.mapManager) {
+            return;
+        }
+
+        const isSelecting = this.mapManager.isDepotSelectionModeActive();
+        button.classList.toggle('active', isSelecting);
+        if (isSelecting) {
+            button.textContent = 'Click Map To Set Start';
+        } else {
+            button.textContent = 'Set Starting Location';
         }
     }
 
