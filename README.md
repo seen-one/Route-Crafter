@@ -113,4 +113,8 @@ Append [?debug](https://route.crafter.seen.one/?debug) to end of the URL to show
 	*  [clementh44/RunEveryStreet](https://github.com/clementh44/RunEveryStreet) (fork)
 	* [lejun/RunEveryStreet](https://codeberg.org/lejun/RunEveryStreet) (fork)
 * [rkistner/chinese-postman](https://github.com/rkistner/chinese-postman)
+* [Wandrer](https://news.wandrer.earth/2026/04/02/chinese-postman-routing.html)
+* [Antwerp Postman Optimizer](https://rvanbruggen.github.io/ChinesePostman/)
+* [Missing Mapillary GraphHopper Routing](https://github.com/vizsim/missing_mapillary_gh-routing)
+	* [Street-level Photo Coverage Routing](https://github.com/atchisson/street_view_routing) (fork)
 * Creating a route manually with [BRouter](https://brouter.de/brouter-web/)
