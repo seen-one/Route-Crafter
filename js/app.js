@@ -1260,8 +1260,10 @@ export class RouteCrafterApp {
             document.getElementById('truncateByEdge').checked = true;
             document.getElementById('allowNavigationPastBoundary').checked = false;
             document.getElementById('boundaryBuffer').value = '500';
-            document.getElementById('navigationFilter').value = '[highway][area!~"yes"][highway!~"bridleway|bus_guideway|construction|corridor|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path|steps"][access!~"customers|no|private"][public_transport!~"platform"][fee!~"yes"][service!~"drive-through|driveway|parking_aisle"][toll!~"yes"]';
-            document.getElementById('routeFilter').value = '';
+            document.getElementById('navigationFilter').value = '[highway][area!~"yes"][highway!~"construction|corridor|elevator|escalator|motorway|motorway_junction|motorway_link|proposed|raceway|rest_area|steps"][access!~"customers|no|private"][public_transport!~"platform"]';
+            document.getElementById('routeFilter').value = '[name][highway~"residential|living_street|unclassified|tertiary|tertiary_link|secondary|secondary_link|primary|primary_link|service"][service!~"drive-through|parking_aisle"]';
+            //document.getElementById('navigationFilter').value = '[highway][area!~"yes"][highway!~"bridleway|bus_guideway|construction|corridor|cycleway|elevator|footway|motorway|motorway_junction|motorway_link|escalator|proposed|platform|raceway|rest_area|path|steps"][access!~"customers|no|private"][public_transport!~"platform"][fee!~"yes"][service!~"drive-through|driveway|parking_aisle"][toll!~"yes"]';
+            //document.getElementById('routeFilter').value = '';
             this.resetStaleSettingsState();
             this.updateSetStartingLocationButtonState();
         } finally {
